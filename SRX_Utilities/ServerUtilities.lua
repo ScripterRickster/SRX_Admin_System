@@ -51,6 +51,58 @@ module.CheckCommandRequirements = function(required_parameters,given_parameters:
 end
 
 
+module.GetHighestRank = function()
+	local rankName,rankId,rankColour = nil,-math.huge,nil
+	for n,r in pairs(SETTINGS.Ranks) do
+		if r.RankId > rankId then
+			rankName = n
+			rankId = r.RankId
+			rankColour = r.RankColour
+		end
+	end
+	return rankName,rankId,rankColour
+end
+
+module.GetLowestRank = function()
+	local rankName,rankId,rankColour = nil,math.huge,nil
+	for n,r in pairs(SETTINGS.Ranks) do
+		if r.RankId < rankId then
+			rankName = n
+			rankId = r.RankId
+			rankColour = r.RankColour
+		end
+	end
+	return rankName,rankId,rankColour
+end
+
+module.FindRank = function(rank_id,rank_name)
+	local rankName,rankId,rankColour = nil,nil,nil
+	if rank_id then
+		
+		for n,r in pairs(SETTINGS.Ranks) do
+			if rank_id == r.RankId then
+				rankId = r.RankId
+				rankName = n
+				rankColour = r.RankColour
+				break
+			end
+		end
+		
+	elseif rank_name then
+		
+		for n,r in pairs(SETTINGS.Ranks) do
+			if string.lower(n) == string.lower(tostring(rank_name)) then
+				rankId = r.RankId
+				rankName = n
+				rankColour = r.RankColour
+				break
+			end
+		end
+		
+		
+	end
+	return rankName,rankId,rankColour
+end
 -----------------------------------------------------------------------------------
 
 
