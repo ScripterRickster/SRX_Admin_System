@@ -28,15 +28,6 @@ module.Parameters = {
 	}
 	
 	]]
-	["TARGET"] = {
-		Description = ""; 
-		Required = true;
-		
-	};
-	["REASON"] = {
-		Description = "";
-		Required = true;
-	}
 }
 
 
@@ -50,6 +41,13 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
+		local e_rID = executor:GetAttribute("SRX_RANKID")
+		
+		if e_rID >= module.ExecutionLevel then
+			
+			-- do whatever here
+			
+		end
 	end
 	
 end
