@@ -1,7 +1,6 @@
 # SRX ADMIN SYSTEM
 
-Developed By: Scripter_Rickster
-Affiliated With: SR Studios
+Developed By: Scripter_Rickster | Affiliated With: SR Studios
 
 Modular, configurable, and clean admin system for ROBLOX
 
