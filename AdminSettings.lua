@@ -80,6 +80,7 @@ module.DatastoreName = "SRX_DEFAULT_DS" -- !! CHANGE THIS TO WHATEVER YOU NEED I
 
 module.SaveRanks = true; -- whether or not if ranks transfer from server to server (permanent rank changes)
 
+module.IncludeChatSlashCommands = true; -- whether or not if you want to include the "/" commands in the chat instead of relying just on the prefix (these slash commands also don't appear in the chat)
 
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
