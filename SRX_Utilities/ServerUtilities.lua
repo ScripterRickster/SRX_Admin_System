@@ -24,16 +24,52 @@ for _,a in pairs(COMMANDS:GetChildren()) do
 	allCMDS[string.lower(a.Name)] = a
 end
 
-local customTCCFolder = Instance.new("Folder")
-customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
-customTCCFolder.Parent = TCS
 ----------------------------------------------------------------
 
-module.RegisterTextChatCommands = function(plr:Player)
+local customTCCRegistered = false
+module.RegisterTextChatCommands = function()
+	if SETTINGS.IncludeChatSlashCommands then
+		if customTCCRegistered then return end
+		customTCCRegistered = true
+		local customTCCFolder = Instance.new("Folder")
+		customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
+		customTCCFolder.Parent = TCS
+		local function createTextChatCommand(cmd:ModuleScript)
+			local cmdInfo = require(cmd)
+
+			if cmdInfo.ExecutableCommand == (true or nil) then
+				local newTCC = Instance.new("TextChatCommand")
+				newTCC.AutocompleteVisible = false
+				newTCC.Name = cmd.Name
+				newTCC.PrimaryAlias = "/"..cmd.Name
+
+				newTCC.Parent = customTCCFolder
+
+				newTCC.Triggered:Connect(function(textsource:TextSource,text:string)
+					local plr = game.Players:GetPlayerByUserId(textsource.UserId)
+					if plr then
+						local params = string.split(text," ")
+						module.HandleCommandExecution(plr,params)
+					end
+				end)
+			end
+
+
+
+		end
+
+		for _,v in pairs(allCMDS) do
+			task.defer(function()
+				createTextChatCommand(v)
+			end)
+		end
+	end
+end
+
+module.RegisterClientTextChatCommands = function(plr:Player)
 	if SETTINGS.IncludeChatSlashCommands then
 		CSC_Event:FireClient(plr,"ALLSLASHCMDS",module.GetAllPlayerUsableCommands(plr))
 	end
-
 end
 
 module.HandleCommandExecution = function(plr:Player,params:table)
