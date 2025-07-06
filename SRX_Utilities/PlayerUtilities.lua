@@ -61,6 +61,7 @@ module.SetupPlayer = function(plr:Player)
 							plr:SetAttribute("SRX_RANKCOLOUR",HRC)
 						end
 					end
+					
 				end
 			end
 			
@@ -151,6 +152,22 @@ module.SetupPlayer = function(plr:Player)
 			end
 			
 			-------------------------------
+			
+			-- PLAYER W/ NO RANK
+			
+			if not userRanked then
+				local DRN,DRID,DRC = serverUtil.GetLowestRank()
+				
+				if DRN and DRID then
+					userRanked = true
+					plr:SetAttribute("SRX_RANKNAME",DRN)
+					plr:SetAttribute("SRX_RANKID",DRID)
+
+					if DRC then
+						plr:SetAttribute("SRX_RANKCOLOUR",DRC)
+					end
+				end
+			end
 			
 			
 		end
