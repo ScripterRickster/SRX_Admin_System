@@ -1,7 +1,7 @@
 local module = {}
 ----------------------------------------------------------------
 repeat wait() until _G.SRX_ADMINSYS ~= nil
-local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("AdminSettings"))
+local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("SRXAdminSettings"))
 repeat wait() until _G.SRX_EVENTS ~= nil
 local EVENTS = _G.SRX_EVENTS
 repeat wait() until _G.SRX_COMMANDS ~= nil
@@ -45,10 +45,8 @@ module.Execute = function(parameters:table)
 		local executor = parameters.EXECUTOR
 		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
-		if e_rID >= module.ExecutionLevel then
-			
+		if serverUtil.PlayerCanUseCommand(executor,script) then
 			-- do whatever here
-			
 		end
 	end
 	
