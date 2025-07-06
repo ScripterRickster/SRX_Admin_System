@@ -1,5 +1,5 @@
 local module = {}
-
+----------------------------------------------------------------
 repeat wait() until _G.SRX_ADMINSYS ~= nil
 local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("AdminSettings"))
 repeat wait() until _G.SRX_EVENTS ~= nil
@@ -8,15 +8,13 @@ repeat wait() until _G.SRX_COMMANDS ~= nil
 local COMMANDS = _G.SRX_COMMANDS
 repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
-
-local allCMDS = {}
-
+----------------------------------------------------------------
 local allCMDS = {}
 
 for _,a in pairs(COMMANDS:GetChildren()) do
 	allCMDS[string.lower(a.Name)] = a
 end
-
+----------------------------------------------------------------
 
 
 module.FindCommand = function(cmd)
@@ -27,11 +25,16 @@ module.FindCommand = function(cmd)
 	if allCMDS[cmd] ~= nil then return allCMDS[cmd] end
 	
 	for n,c in pairs(allCMDS) do
+		local tempC = require(c)
 		if string.match(n,cmd,1) then
-			local tempC = require(c)
-			
 			if tempC.ExecutableCommand == (true or nil) then
 				return c
+			end
+		elseif tempC.Aliases ~= nil then
+			if table.find(tempC.Aliases,cmd) ~= nil then
+				if tempC.ExecutableCommand == (true or nil) then
+					return c
+				end
 			end
 		end
 	end
