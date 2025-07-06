@@ -24,24 +24,20 @@ local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
-		local userRanked = false
+		
 		local function setupPlayerRank()
+			local userRanked = false
+			local DRN,DRID,DRC = nil,nil,nil
+			-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
+			
 			if game.CreatorType ~= Enum.CreatorType.Group then
 				-- SERVER OWNER
 				-------------------------------
 				if game.PrivateServerId ~= "" then --private server
 					if plr.UserId == game.PrivateServerOwnerId and SETTINGS.VIPServerSettings.VIPCommands then
-						local DRN,DRID,DRC = serverUtil.FindRank(tonumber(SETTINGS.VIPServerSettings.ServerOwnerRankId))
-						-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
-						if DRN and DRID then
-							userRanked = true
-							plr:SetAttribute("SRX_RANKNAME",DRN)
-							plr:SetAttribute("SRX_RANKID",DRID)
-							
-							if DRC then
-								plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-							end
-						end
+						DRN,DRID,DRC = serverUtil.FindRank(tonumber(SETTINGS.VIPServerSettings.ServerOwnerRankId))
+						
+						userRanked = true
 						
 					end
 					
@@ -49,19 +45,8 @@ module.SetupPlayer = function(plr:Player)
 				-------------------------------
 				
 				if plr.UserId == game.CreatorId and not userRanked then
-					local HRN,HRID,HRC = serverUtil.GetHighestRank()
-					-- HRC = HighestRankName, HRID = HighestRankID, HRC = HighestRankColour
-					
-					if HRN and HRID then
-						userRanked = true
-						plr:SetAttribute("SRX_RANKNAME",HRN)
-						plr:SetAttribute("SRX_RANKID",HRID)
-
-						if HRC then
-							plr:SetAttribute("SRX_RANKCOLOUR",HRC)
-						end
-					end
-					
+					DRN,DRID,DRC = serverUtil.GetHighestRank()
+					userRanked = true
 				end
 			end
 			
@@ -70,16 +55,9 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for _,u in pairs(SETTINGS.RankBinds.Users) do
 					if string.lower(u[1]) == string.lower(plr.Name) or u[1] == plr.UserId then
-						local DRN,DRID,DRC = serverUtil.FindRank(tonumber(u[2]))
-						-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
+						DRN,DRID,DRC = serverUtil.FindRank(tonumber(u[2]))
 						if DRN and DRID then
 							userRanked = true
-							plr:SetAttribute("SRX_RANKNAME",DRN)
-							plr:SetAttribute("SRX_RANKID",DRID)
-
-							if DRC then
-								plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-							end
 							break
 						end
 					end
@@ -92,16 +70,9 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for gid,g in pairs(SETTINGS.RankBinds.Groups) do
 					if plr:GetRankInGroup(tonumber(gid)) >= g.Min_Group_Rank then
-						local DRN,DRID,DRC = serverUtil.FindRank(tonumber(g.RankId))
-						-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
+						DRN,DRID,DRC = serverUtil.FindRank(tonumber(g.RankId))
 						if DRN and DRID then
 							userRanked = true
-							plr:SetAttribute("SRX_RANKNAME",DRN)
-							plr:SetAttribute("SRX_RANKID",DRID)
-
-							if DRC then
-								plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-							end
 							break
 						end
 					end
@@ -113,18 +84,12 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for gpid,g in pairs(SETTINGS.RankBinds.Gamepasses) do
 					if MPS:UserOwnsGamePassAsync(plr.UserId,tonumber(gpid)) then
-						local DRN,DRID,DRC = serverUtil.FindRank(tonumber(gpid))
-						-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
+						DRN,DRID,DRC = serverUtil.FindRank(tonumber(gpid))
 						if DRN and DRID then
 							userRanked = true
-							plr:SetAttribute("SRX_RANKNAME",DRN)
-							plr:SetAttribute("SRX_RANKID",DRID)
-
-							if DRC then
-								plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-							end
 							break
 						end
+						
 					end
 				end
 			end
@@ -135,16 +100,9 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for aid,a in pairs(SETTINGS.RankBinds.OtherAssets) do
 					if MPS:PlayerOwnsAsset(plr,tonumber(aid)) then
-						local DRN,DRID,DRC = serverUtil.FindRank(tonumber(a))
-						-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
+						DRN,DRID,DRC = serverUtil.FindRank(tonumber(a))
 						if DRN and DRID then
 							userRanked = true
-							plr:SetAttribute("SRX_RANKNAME",DRN)
-							plr:SetAttribute("SRX_RANKID",DRID)
-
-							if DRC then
-								plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-							end
 							break
 						end
 					end
@@ -156,19 +114,21 @@ module.SetupPlayer = function(plr:Player)
 			-- PLAYER W/ NO RANK
 			
 			if not userRanked then
-				local DRN,DRID,DRC = serverUtil.GetLowestRank()
-				
-				if DRN and DRID then
-					userRanked = true
-					plr:SetAttribute("SRX_RANKNAME",DRN)
-					plr:SetAttribute("SRX_RANKID",DRID)
-
-					if DRC then
-						plr:SetAttribute("SRX_RANKCOLOUR",DRC)
-					end
-				end
+				DRN,DRID,DRC = serverUtil.GetLowestRank()
+				userRanked = true
 			end
 			
+			-------------------------------
+			-- RANKING THE PLAYER
+			if DRN and DRID then
+				userRanked = true
+				plr:SetAttribute("SRX_RANKNAME",DRN)
+				plr:SetAttribute("SRX_RANKID",DRID)
+
+				if DRC then
+					plr:SetAttribute("SRX_RANKCOLOUR",DRC)
+				end
+			end
 			
 		end
 
