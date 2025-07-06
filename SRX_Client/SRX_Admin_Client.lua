@@ -11,7 +11,23 @@ local TCS = game:GetService("TextChatService")
 
 ----------------------------------------------------------------
 local chatTagsEnabled = CS_Func:InvokeServer("ChatTagStatus")
+local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
 
+----------------------------------------------------------------
+
+local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
+
+----------------------------------------------------------------
+-- 
+function registerTextChatCommand(cmd)
+	local newTextCMD = Instance.new("TextChatCommand")
+	newTextCMD.PrimaryAlias = "/"..tostring(cmd)
+	newTextCMD.Name = cmd
+	newTextCMD.Parent = SRX_TextCMDS
+	newTextCMD.Triggered:Connect(function(textsource,params)
+		CS_Event:FireServer("TEXTCMDUSED",string.split(params," "))
+	end)
+end
 ----------------------------------------------------------------
 
 -- chat tags
@@ -33,6 +49,18 @@ TCS.OnIncomingMessage = function(msg:TextChatMessage)
 	end
 end
 
-
 ----------------------------------------------------------------
 
+
+CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
+	param1 = string.lower(tostring(param1))
+	if param1 == "allslashcmds" and param2 then
+		SRX_TextCMDS:ClearAllChildren()
+		for _,v in pairs(param2) do
+			task.defer(function()
+				registerTextChatCommand(v)
+			end)
+		end
+		
+	end
+end)
