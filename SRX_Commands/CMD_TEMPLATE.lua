@@ -31,7 +31,9 @@ module.Parameters = {
 }
 
 
-
+module.Aliases = { -- other names that tie it to this command
+	-- "alias_name1";
+}
 
 
 module.Execute = function(parameters:table)
