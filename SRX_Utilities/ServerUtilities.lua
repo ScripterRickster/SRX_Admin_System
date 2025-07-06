@@ -12,55 +12,58 @@ local UTILITIES = _G.SRX_UTILITIES
 local TCS = game:GetService("TextChatService")
 local DDS = game:GetService("DataStoreService")
 ----------------------------------------------------------------
+local CSC_Func = EVENTS.CSC_Func
+local CSC_Event = EVENTS.CSC_Event
+
+local SSC_Func = EVENTS.SSC_Func
+local SSC_Event = EVENTS.SSC_Event
+----------------------------------------------------------------
 local allCMDS = {}
 
 for _,a in pairs(COMMANDS:GetChildren()) do
 	allCMDS[string.lower(a.Name)] = a
 end
+
+local customTCCFolder = Instance.new("Folder")
+customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
+customTCCFolder.Parent = TCS
 ----------------------------------------------------------------
 
-local customTCCRegistered = false
-module.RegisterTextChatCommands = function()
+module.RegisterTextChatCommands = function(plr:Player)
 	if SETTINGS.IncludeChatSlashCommands then
-		if customTCCRegistered then return end
-		customTCCRegistered = true
-		local customTCCFolder = Instance.new("Folder")
-		customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
-		customTCCFolder.Parent = TCS
-		local function createTextChatCommand(cmd:ModuleScript)
-			local cmdInfo = require(cmd)
+		CSC_Event:FireClient(plr,"ALLSLASHCMDS",module.GetAllPlayerUsableCommands(plr))
+	end
 
-			if cmdInfo.ExecutableCommand == (true or nil) then
-				local newTCC = Instance.new("TextChatCommand")
-				newTCC.Name = cmd.Name
-				newTCC.PrimaryAlias = "/"..cmd.Name
+end
 
-				newTCC.Parent = customTCCFolder
+module.HandleCommandExecution = function(plr:Player,params:table)
+	if plr and params then
+		if #params == 0 then return end
+		local cmd = string.sub(params[1],2,string.len(params[1]))
+		
+		local cmd_Module = module.FindCommand(cmd)
+		if cmd_Module then
+			local newParameters = {
+				EXECUTOR = plr;
+			}
 
-				newTCC.Triggered:Connect(function(textsource:TextSource,text:string)
-					local plr = game.Players:GetPlayerByUserId(textsource.UserId)
-					if plr then
-						if module.PlayerCanUseCommand(plr,cmd) then
-							local params = string.split(text," ")
-							print(params)
+			local c_cmd = require(cmd_Module)
+			local c_params = c_cmd.Parameters
 
-						end
-
-					end
-				end)
+			local ct = 2
+			for par,k in pairs(c_params) do
+				newParameters[par] = params[ct]
+				ct += 1
 			end
 
-
-
-		end
-
-		for _,v in pairs(allCMDS) do
-			task.defer(function()
-				createTextChatCommand(v)
-			end)
+			c_cmd.Execute(newParameters)
+			
 		end
 	end
 end
+
+
+
 ----------------------------------------------------------------
 
 module.FindCommand = function(cmd)
@@ -112,7 +115,6 @@ module.PlayerCanUseCommand = function(plr:Player,cmd)
 	end
 	
 	
-	
 	if cmdInfo.ExecutableCommand == (true or nil) and cmdInfo.ExecutionLevel ~= nil then
 		if cmdInfo.LockToRank then
 			if rankId == cmdInfo.ExecutionLevel then
@@ -126,6 +128,18 @@ module.PlayerCanUseCommand = function(plr:Player,cmd)
 	end
 	
 	return false
+end
+
+module.GetAllPlayerUsableCommands = function(plr:Player)
+	local p_cmds = {}
+	if plr then
+		for _,v in pairs(allCMDS) do
+			if module.PlayerCanUseCommand(plr,v) then
+				table.insert(p_cmds,v.Name)
+			end
+		end
+	end
+	return p_cmds
 end
 
 ----------------------------------------------------------------
