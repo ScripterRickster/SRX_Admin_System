@@ -138,7 +138,7 @@ module.SetupPlayer = function(plr:Player)
 		setupPlayerRank()
 		
 		task.defer(function()
-			serverUtil.RegisterTextChatCommands(plr)
+			serverUtil.RegisterClientTextChatCommands(plr)
 		end)
 		
 		plr.CharacterAdded:Connect(function(char)
