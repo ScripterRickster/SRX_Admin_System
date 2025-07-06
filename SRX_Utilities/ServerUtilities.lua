@@ -1,13 +1,16 @@
 local module = {}
 ----------------------------------------------------------------
 repeat wait() until _G.SRX_ADMINSYS ~= nil
-local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("AdminSettings"))
+local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("SRXAdminSettings"))
 repeat wait() until _G.SRX_EVENTS ~= nil
 local EVENTS = _G.SRX_EVENTS
 repeat wait() until _G.SRX_COMMANDS ~= nil
 local COMMANDS = _G.SRX_COMMANDS
 repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
+----------------------------------------------------------------
+local TCS = game:GetService("TextChatService")
+local DDS = game:GetService("DataStoreService")
 ----------------------------------------------------------------
 local allCMDS = {}
 
@@ -16,6 +19,49 @@ for _,a in pairs(COMMANDS:GetChildren()) do
 end
 ----------------------------------------------------------------
 
+local customTCCRegistered = false
+module.RegisterTextChatCommands = function()
+	if SETTINGS.IncludeChatSlashCommands then
+		if customTCCRegistered then return end
+		customTCCRegistered = true
+		local customTCCFolder = Instance.new("Folder")
+		customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
+		customTCCFolder.Parent = TCS
+		local function createTextChatCommand(cmd:ModuleScript)
+			local cmdInfo = require(cmd)
+
+			if cmdInfo.ExecutableCommand == (true or nil) then
+				local newTCC = Instance.new("TextChatCommand")
+				newTCC.Name = cmd.Name
+				newTCC.PrimaryAlias = "/"..cmd.Name
+
+				newTCC.Parent = customTCCFolder
+
+				newTCC.Triggered:Connect(function(textsource:TextSource,text:string)
+					local plr = game.Players:GetPlayerByUserId(textsource.UserId)
+					if plr then
+						if module.PlayerCanUseCommand(plr,cmd) then
+							local params = string.split(text," ")
+							print(params)
+
+						end
+
+					end
+				end)
+			end
+
+
+
+		end
+
+		for _,v in pairs(allCMDS) do
+			task.defer(function()
+				createTextChatCommand(v)
+			end)
+		end
+	end
+end
+----------------------------------------------------------------
 
 module.FindCommand = function(cmd)
 	if cmd == nil or tostring(cmd) == "" then return nil end
@@ -52,6 +98,37 @@ module.CheckCommandRequirements = function(required_parameters,given_parameters:
 	end
 	return true
 end
+
+module.PlayerCanUseCommand = function(plr:Player,cmd)
+	local rankId = plr:GetAttribute("SRX_RANKID")
+	if rankId == nil then return false end
+	rankId = tonumber(rankId)
+	local cmdInfo = nil
+	if typeof(cmd) == 'string' then
+		local res = module.FindCommand(cmd)
+		if res then cmdInfo = require(res) end
+	elseif cmd:IsA("ModuleScript") then
+		cmdInfo = require(cmd)
+	end
+	
+	
+	
+	if cmdInfo.ExecutableCommand == (true or nil) and cmdInfo.ExecutionLevel ~= nil then
+		if cmdInfo.LockToRank then
+			if rankId == cmdInfo.ExecutionLevel then
+				return true
+			end
+		else
+			if rankId >= cmdInfo.ExecutionLevel then
+				return true
+			end
+		end
+	end
+	
+	return false
+end
+
+----------------------------------------------------------------
 
 
 module.GetHighestRank = function()
