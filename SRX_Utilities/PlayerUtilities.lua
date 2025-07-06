@@ -1,7 +1,7 @@
 local module = {}
 ----------------------------------------------------------------
 repeat wait() until _G.SRX_ADMINSYS ~= nil
-local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("AdminSettings"))
+local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("SRXAdminSettings"))
 repeat wait() until _G.SRX_EVENTS ~= nil
 local EVENTS = _G.SRX_EVENTS
 repeat wait() until _G.SRX_COMMANDS ~= nil
@@ -18,8 +18,11 @@ local US = game:GetService("UserService")
 local DDS = game:GetService("DataStoreService")
 ----------------------------------------------------------------
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
+----------------------------------------------------------------
 
+local OverheadTagStatus = {}
 
+----------------------------------------------------------------
 
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
@@ -132,7 +135,11 @@ module.SetupPlayer = function(plr:Player)
 			
 		end
 
-		task.defer(setupPlayerRank)
+		setupPlayerRank()
+		
+		task.defer(function()
+			serverUtil.RegisterTextChatCommands(plr)
+		end)
 		
 		plr.CharacterAdded:Connect(function(char)
 
@@ -141,30 +148,10 @@ module.SetupPlayer = function(plr:Player)
 		plr.Chatted:Connect(function(msg)
 			local fl = string.sub(msg,1,1)
 			if fl == SETTINGS.Prefix then
+			
 				msg = string.sub(msg,2,string.len(msg))
 				local parameters = string.split(msg," ")
-				local cmd = parameters[1]
-				
-				
-				local cmd_Module = serverUtil.FindCommand(cmd)
-
-
-				if cmd_Module ~= nil then
-					local newParameters = {
-						EXECUTOR = plr;
-					}
-
-					local c_cmd = require(cmd_Module)
-					local c_params = c_cmd.Parameters
-
-					local ct = 2
-					for par,k in pairs(c_params) do
-						newParameters[par] = parameters[ct]
-						ct += 1
-					end
-
-					c_cmd.Execute(newParameters)
-				end
+				serverUtil.HandleCommandExecution(plr,parameters)
 			end
 		end)
 	end
