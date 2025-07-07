@@ -18,10 +18,13 @@ local US = game:GetService("UserService")
 local DDS = game:GetService("DataStoreService")
 ----------------------------------------------------------------
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
+local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
 
+----------------------------------------------------------------
+local saveRanks = SETTINGS.SaveRanks
 ----------------------------------------------------------------
 
 module.SetupPlayer = function(plr:Player)
@@ -157,6 +160,31 @@ module.SetupPlayer = function(plr:Player)
 	end
 end
 
+module.PlayerLeft = function(plr:Player)
+	
+	if saveRanks then
+		local attempt_limit,current_tries,success = 3,0,false
+		repeat
+			local succ,err = pcall(function()
+				RankDDS:SetAsync(plr.UserId,{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
+			end)
+			
+			if not succ then
+				warn("FAILED TO SAVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..") WITH THE ERROR: "..tostring(err).." | RETRYING.....")
+			else
+				success = true
+				break
+			end
+			current_tries += 1
+			task.wait()
+		until current_tries == attempt_limit
+		if not success then
+			warn("FAILED TO SAVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..")")
+		end
+		
+	end
+end
+
 
 module.FindPlayer = function(username:string,userid:number)
 	local isValidPlayer,isInGame,plrObject = false,false,nil
@@ -188,7 +216,22 @@ module.FindPlayer = function(username:string,userid:number)
 	return isValidPlayer,isInGame
 end
 
-
+module.SetPlayerRank = function(plr:Player,rank_id:number)
+	if plr then
+		
+		local rank_name,rank_id,rank_colour = serverUtil.FindRank(rank_id,nil)
+		if rank_id ~= nil and rank_name ~= nil then
+			plr:SetAttribute("SRX_RANKID",rank_id)
+			plr:SetAttribute("SRX_RANKNAME",rank_name)
+			if rank_colour then
+				plr:SetAttribute("SRX_RANKCOLOUR")
+			end
+			task.defer(function()
+				serverUtil.RegisterClientTextChatCommands(plr)
+			end)
+		end
+	end
+end
 
 module.GetPlayerRankInfo = function(username:string,userid:number)
 	local isValidPlayer,isInGame,plrObject = module.FindPlayer(username,userid)
@@ -196,7 +239,9 @@ module.GetPlayerRankInfo = function(username:string,userid:number)
 	local rank_id,rank_name,rank_colour = nil,nil,nil
 	
 	if isValidPlayer and isInGame and plrObject then
-		rank_id = plrObject:WaitForChild("SRX_PlrSettings")
+		rank_id = plrObject:GetAttribute("SRX_RANKID")
+		rank_name = plrObject:GetAttribute("SRX_RANKNAME")
+		rank_colour = plrObject:GetAttribute("SRX_RANKCOLOUR")
 		
 	end
 	
