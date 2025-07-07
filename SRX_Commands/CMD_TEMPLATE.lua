@@ -11,6 +11,7 @@ local UTILITIES = _G.SRX_UTILITIES
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
+local playerUtil = require(UTILITIES.PlayerUtilities)
 
 ----------------------------------------------------------------
 
