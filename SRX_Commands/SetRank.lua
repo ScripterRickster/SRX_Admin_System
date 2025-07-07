@@ -50,8 +50,6 @@ module.Execute = function(parameters:table)
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,isInGame,target = playerUtil.FindPlayer(parameters["TARGET"])
 			
-			print(target)
-			
 			local rank_name,rank_id = serverUtil.FindRank(parameters["RANK"],parameters["RANK"])
 			if target and rank_id then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
