@@ -25,15 +25,25 @@ for _,a in pairs(COMMANDS:GetChildren()) do
 end
 
 ----------------------------------------------------------------
+module.IsAlpha = function(s:string)
+	return s:match("^%a+$") ~= nil
+end
+
+module.IsNumeric = function(s:string)
+	return tonumber(s) ~= nil
+end
+
+----------------------------------------------------------------
+local customTCCFolder = Instance.new("Folder")
+customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
+customTCCFolder.Parent = TCS
 
 local customTCCRegistered = false
 module.RegisterTextChatCommands = function()
 	if SETTINGS.IncludeChatSlashCommands then
 		if customTCCRegistered then return end
 		customTCCRegistered = true
-		local customTCCFolder = Instance.new("Folder")
-		customTCCFolder.Name = "SRX_TEXTCHATCOMMANDS"
-		customTCCFolder.Parent = TCS
+		
 		local function createTextChatCommand(cmd:ModuleScript)
 			local cmdInfo = require(cmd)
 
@@ -72,10 +82,19 @@ module.RegisterClientTextChatCommands = function(plr:Player)
 	end
 end
 
+----------------------------------------------------------------
+
 module.HandleCommandExecution = function(plr:Player,params:table)
 	if plr and params then
 		if #params == 0 then return end
-		local cmd = string.sub(params[1],2,string.len(params[1]))
+		
+		local s_idx = 2
+		
+		if module.IsAlpha(string.sub(params[1],1,1)) then
+			s_idx = 1
+		end
+		
+		local cmd = string.sub(params[1],s_idx,string.len(params[1]))
 		
 		local cmd_Module = module.FindCommand(cmd)
 		if cmd_Module then
@@ -97,10 +116,6 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 		end
 	end
 end
-
-
-
-----------------------------------------------------------------
 
 module.FindCommand = function(cmd)
 	if cmd == nil or tostring(cmd) == "" then return nil end
@@ -214,12 +229,13 @@ module.FindRank = function(rank_id,rank_name)
 				rankId = r.RankId
 				rankName = n
 				rankColour = r.RankColour
-				break
+				
+				return rankName,rankId,rankColour
 			end
 		end
-		
-	elseif rank_name then
-		
+	end
+	if rank_name then
+	
 		for n,r in pairs(SETTINGS.Ranks) do
 			if string.lower(n) == string.lower(tostring(rank_name)) then
 				rankId = r.RankId
@@ -228,8 +244,6 @@ module.FindRank = function(rank_id,rank_name)
 				break
 			end
 		end
-		
-		
 	end
 	return rankName,rankId,rankColour
 end
