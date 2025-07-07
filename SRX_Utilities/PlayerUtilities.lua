@@ -117,6 +117,31 @@ module.SetupPlayer = function(plr:Player)
 			
 			-------------------------------
 			
+			if not userRanked and saveRanks then
+				local attempt_limit,current_tries,result = 3,0,nil
+				repeat
+					local succ,res = pcall(function()
+						RankDDS:GetAsync(tostring(plr.UserId),{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
+					end)
+
+					if not succ then
+						warn("FAILED TO RETRIEVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..") | RETRYING.....")
+					else
+						result = res
+						break
+					end
+					current_tries += 1
+					task.wait()
+				until current_tries == attempt_limit
+				if result == nil then
+					warn("FAILED TO RETRIEVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..")")
+				else
+					DRN,DRID,DRC = result[1],result[2],result[3]
+				end
+			end
+			
+			-------------------------------
+			
 			-- PLAYER W/ NO RANK
 			
 			if not userRanked then
@@ -166,7 +191,7 @@ module.PlayerLeft = function(plr:Player)
 		local attempt_limit,current_tries,success = 3,0,false
 		repeat
 			local succ,err = pcall(function()
-				RankDDS:SetAsync(plr.UserId,{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
+				RankDDS:SetAsync(tostring(plr.UserId),{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
 			end)
 			
 			if not succ then
@@ -213,7 +238,7 @@ module.FindPlayer = function(username:string,userid:number)
 		isInGame = false
 		plrObject = nil
 	end
-	return isValidPlayer,isInGame
+	return isValidPlayer,isInGame,plrObject
 end
 
 module.SetPlayerRank = function(plr:Player,rank_id:number)
@@ -224,7 +249,7 @@ module.SetPlayerRank = function(plr:Player,rank_id:number)
 			plr:SetAttribute("SRX_RANKID",rank_id)
 			plr:SetAttribute("SRX_RANKNAME",rank_name)
 			if rank_colour then
-				plr:SetAttribute("SRX_RANKCOLOUR")
+				plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
 			end
 			task.defer(function()
 				serverUtil.RegisterClientTextChatCommands(plr)
