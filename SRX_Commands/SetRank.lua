@@ -54,8 +54,12 @@ module.Execute = function(parameters:table)
 			if target and rank_id then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
-				if tRankId <= e_rID and rank_id < e_rID then
+				if tRankId < e_rID and rank_id < e_rID then
 					playerUtil.SetPlayerRank(target,rank_id)
+					
+					task.defer(function() -- notifies the server to log this command being run
+						serverUtil.LogCommand(script,parameters)
+					end)
 				end
 			end
 			
