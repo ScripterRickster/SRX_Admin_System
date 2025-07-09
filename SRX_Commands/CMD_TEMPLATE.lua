@@ -48,6 +48,12 @@ module.Execute = function(parameters:table)
 		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
+			
+			task.defer(function() -- notifies the server to log this command being run
+				serverUtil.LogCommand(script,parameters)
+			end)
+			
+			
 			-- do whatever here
 		end
 	end
