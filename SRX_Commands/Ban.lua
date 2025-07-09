@@ -1,0 +1,112 @@
+local module = {}
+----------------------------------------------------------------
+repeat wait() until _G.SRX_ADMINSYS ~= nil
+local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("SRXAdminSettings"))
+repeat wait() until _G.SRX_EVENTS ~= nil
+local EVENTS = _G.SRX_EVENTS
+repeat wait() until _G.SRX_COMMANDS ~= nil
+local COMMANDS = _G.SRX_COMMANDS
+repeat wait() until _G.SRX_UTILITIES ~= nil
+local UTILITIES = _G.SRX_UTILITIES
+----------------------------------------------------------------
+
+local serverUtil = require(UTILITIES.ServerUtilities)
+local playerUtil = require(UTILITIES.PlayerUtilities)
+
+----------------------------------------------------------------
+
+module.ExecutableCommand = false; -- whether you can actually even use this command or not || this parameter is not required
+module.ExecutionLevel = 0; -- rank id required to execute the command
+module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
+
+module.CommandDescription = ""; -- description of the command
+
+module.Parameters = {
+	-- put whatever parameters you need for the command to work under here
+	--[[
+	[PARAMETER_NAME] = { -- name of the parameter
+		Description = ""; -- description of the parameter
+		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
+	}
+	
+	]]
+	
+	["TARGET"] = { -- name of parameter
+		Description = "Target of the command"; -- description of the parameter
+		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
+
+	};
+	["REASON"] = {
+		Description = "Reason for the ban";
+		Required = true;
+	};
+	["DURATION"] = {
+		Description = "Duration of the ban (-1 or nil = permanent) | In Days";
+		Required = false;
+	};
+	
+}
+
+
+module.Aliases = { -- other names that tie it to this command
+	-- "alias_name1";
+}
+
+local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
+
+
+module.Execute = function(parameters:table)
+	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
+	
+	local meetsRequirements = serverUtil.CheckCommandRequirements(module.Parameters,parameters)
+	
+	if meetsRequirements then
+		local executor = parameters.EXECUTOR
+		local e_rID = executor:GetAttribute("SRX_RANKID")
+		
+		if serverUtil.PlayerCanUseCommand(executor,script) then
+			local isValid,isInGame,target = playerUtil.FindPlayer(parameters["TARGET"])
+
+			local rank_name,rank_id = serverUtil.FindRank(parameters["RANK"],parameters["RANK"])
+			if target and rank_id then
+				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
+
+				if tRankId < e_rID and rank_id < e_rID then
+					playerUtil.SetPlayerRank(target,rank_id)
+				end
+				
+				local banReason,banDuration = serverUtil.FilterMessage(parameters["REASON"]),parameters["DURATION"]
+				if banReason == nil then banReason = "No Reason" end
+				banDuration = tonumber(tostring(banDuration))
+				if banDuration == nil then banDuration = -1 end
+				
+				
+				
+				local banConfig = {
+					UserIds = {target.UserId},
+					Duration = banDuration,
+					DisplayReason = banReason,
+					PrivateReason = banReason,
+					ExcludeAltAccounts = excludeAlts,
+					ApplyToUniverse = true,
+				}
+				
+				local succ,err = pcall(function()
+					game.Players:BanAsync(banConfig)
+				end)
+				
+				if not succ and err then
+					warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
+				elseif succ then
+					task.defer(function() -- notifies the server to log this command being run
+						serverUtil.LogCommand(script,parameters)
+					end)
+				end
+				
+			end
+		end
+	end
+	
+end
+
+return module
