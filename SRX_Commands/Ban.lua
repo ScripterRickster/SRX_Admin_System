@@ -75,7 +75,7 @@ module.Execute = function(parameters:table)
 					playerUtil.SetPlayerRank(target,rank_id)
 				end
 				
-				local banReason,banDuration = serverUtil.FilterMessage(parameters["REASON"]),parameters["DURATION"]
+				local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
 				if banReason == nil then banReason = "No Reason" end
 				banDuration = tonumber(tostring(banDuration))
 				if banDuration == nil then banDuration = -1 end
