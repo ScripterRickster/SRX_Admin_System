@@ -10,6 +10,7 @@ repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
 ----------------------------------------------------------------
 local TCS = game:GetService("TextChatService")
+local TS = game:GetService("TextService")
 local DDS = game:GetService("DataStoreService")
 ----------------------------------------------------------------
 local CSC_Func = EVENTS.CSC_Func
@@ -31,6 +32,16 @@ end
 
 module.IsNumeric = function(s:string)
 	return tonumber(s) ~= nil
+end
+
+----------------------------------------------------------------
+
+module.FilterMessage = function(plr,msg:string)
+	if msg == nil or msg == "" then return msg end
+	
+	local filteredRes = TS:FilterStringAsync(msg,plr.UserId)
+	
+	return filteredRes:GetNonChatStringForBroadcastAsync()
 end
 
 ----------------------------------------------------------------
@@ -114,6 +125,12 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 			c_cmd.Execute(newParameters)
 			
 		end
+	end
+end
+
+module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
+	if cmdModule and given_params ~= nil then
+		
 	end
 end
 
