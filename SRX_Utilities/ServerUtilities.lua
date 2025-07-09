@@ -222,6 +222,7 @@ end
 
 module.FindRank = function(rank_id,rank_name)
 	local rankName,rankId,rankColour = nil,nil,nil
+	rank_id = tonumber(tostring(rank_id))
 	if rank_id then
 		
 		for n,r in pairs(SETTINGS.Ranks) do
@@ -247,6 +248,50 @@ module.FindRank = function(rank_id,rank_name)
 	end
 	return rankName,rankId,rankColour
 end
+-----------------------------------------------------------------------------------
+
+module.GetDataFromDDS = function(key,datastore:DataStore)
+	local attempt_limit,current_tries,result = 3,0,nil
+	repeat
+		local succ,res = pcall(function()
+			return datastore:GetAsync(key)
+		end)
+
+		if not succ then
+			warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." | RETRYING.....")
+		else
+			result = res
+			break
+		end
+		current_tries += 1
+		task.wait()
+	until current_tries == attempt_limit
+	if result == nil then
+		warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM A DATASTORE")
+	end
+	return result
+end
+
+module.SaveDataToDDS = function(key,datastore:DataStore,data)
+	local attempt_limit,current_tries,success = 3,0,false
+	repeat
+		local succ,err = pcall(function()
+			datastore:SetAsync(key,data)
+		end)
+
+		if not succ then
+			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." | RETRYING.....")
+		else
+			break
+		end
+		current_tries += 1
+		task.wait()
+	until current_tries == attempt_limit
+	if not success then
+		warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO A DATASTORE")
+	end
+end
+
 -----------------------------------------------------------------------------------
 
 
