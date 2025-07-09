@@ -35,9 +35,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 _G.SRX_ADMINSYS = script
 
+script.SRX_Client.Parent = game.StarterPlayer.StarterPlayerScripts
 
 local events = script.SRX_Events
 _G.SRX_EVENTS = events
+
+events.Parent = game.ReplicatedStorage
 
 
 local commands = script.SRX_Commands
@@ -47,14 +50,57 @@ local utilities = script.SRX_Utilities
 _G.SRX_UTILITIES = utilities
 
 ----------------------------------------------------------------
-
+local adminSettings = require(script.SRXAdminSettings)
 local plrUtilities = require(utilities.PlayerUtilities)
+local serverUtilities = require(utilities.ServerUtilities)
 
 ----------------------------------------------------------------
+local CSC_Func = events.CSC_Func -- client-server remote function
+local CSC_Event = events.CSC_Event -- client-server remote event
 
+local SSC_Func = events.SSC_Func -- server-server bindable function
+local SSC_Event = events.SSC_Event -- server-server bindable event
+
+----------------------------------------------------------------
+task.defer(serverUtilities.RegisterTextChatCommands)
+----------------------------------------------------------------
+
+CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5) -- param1 = action
+	if plr then
+		param1 = string.lower(tostring(param1))
+		
+		if param1 == "chattagstatus" then
+			return adminSettings.ChatTags
+		elseif param1 == "chatslashcmdstatus" then
+			return adminSettings.IncludeChatSlashCommands
+		end
+		
+	end
+end
+
+CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,param5)
+	if plr then
+		param1 = string.lower(tostring(param1))
+		if param1 == "textcmdused" then
+			if param2[1] then
+				param2[1] = tostring(param2[1])
+				param2[1] = string.sub(param2[1],2,string.len(param2[1]))
+				serverUtilities.HandleCommandExecution(plr,param2)
+			end
+		end
+	end
+end)
+
+----------------------------------------------------------------
 game.Players.PlayerAdded:Connect(function(plr)
 	task.defer(function()
 		plrUtilities.SetupPlayer(plr)
+	end)
+end)
+
+game.Players.PlayerRemoving:Connect(function(plr)
+	task.defer(function()
+		plrUtilities.PlayerLeft(plr)
 	end)
 end)
 
