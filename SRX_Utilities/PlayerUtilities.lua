@@ -16,9 +16,11 @@ local serverUtil = require(UTILITIES.ServerUtilities)
 local MPS = game:GetService("MarketplaceService")
 local US = game:GetService("UserService")
 local DDS = game:GetService("DataStoreService")
+local HTTPS = game:GetService("HttpService")
 ----------------------------------------------------------------
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
+local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DataStore,"PLAYERJOINS")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
@@ -30,6 +32,17 @@ local saveRanks = SETTINGS.SaveRanks
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
+		
+		local joins = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerJoinsDDS)
+		if joins == 0 or joins == nil then
+			joins = 0
+			task.defer(function()
+				serverUtil.SaveDataToDDS(tostring(plr.UserId),InfractionDDS,{})
+			end)
+			
+		end
+		joins += 1
+		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerJoinsDDS,joins)
 		
 		local function setupPlayerRank()
 			local userRanked = false
@@ -118,24 +131,8 @@ module.SetupPlayer = function(plr:Player)
 			-------------------------------
 			
 			if not userRanked and saveRanks then
-				local attempt_limit,current_tries,result = 3,0,nil
-				repeat
-					local succ,res = pcall(function()
-						RankDDS:GetAsync(tostring(plr.UserId),{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
-					end)
-
-					if not succ then
-						warn("FAILED TO RETRIEVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..") | RETRYING.....")
-					else
-						result = res
-						break
-					end
-					current_tries += 1
-					task.wait()
-				until current_tries == attempt_limit
-				if result == nil then
-					warn("FAILED TO RETRIEVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..")")
-				else
+				local result = serverUtil.GetDataFromDDS(tostring(plr.UserId),RankDDS)
+				if result ~= nil then
 					DRN,DRID,DRC = result[1],result[2],result[3]
 				end
 			end
@@ -176,7 +173,6 @@ module.SetupPlayer = function(plr:Player)
 		plr.Chatted:Connect(function(msg)
 			local fl = string.sub(msg,1,1)
 			if fl == SETTINGS.Prefix then
-			
 				msg = string.sub(msg,2,string.len(msg))
 				local parameters = string.split(msg," ")
 				serverUtil.HandleCommandExecution(plr,parameters)
@@ -188,25 +184,10 @@ end
 module.PlayerLeft = function(plr:Player)
 	
 	if saveRanks then
-		local attempt_limit,current_tries,success = 3,0,false
-		repeat
-			local succ,err = pcall(function()
-				RankDDS:SetAsync(tostring(plr.UserId),{plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")})
-			end)
-			
-			if not succ then
-				warn("FAILED TO SAVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..") WITH THE ERROR: "..tostring(err).." | RETRYING.....")
-			else
-				success = true
-				break
-			end
-			current_tries += 1
-			task.wait()
-		until current_tries == attempt_limit
-		if not success then
-			warn("FAILED TO SAVE RANK FOR "..plr.Name.." ("..tostring(plr.UserId)..")")
-		end
-		
+		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
+		task.defer(function()
+			serverUtil.SaveDataToDDS(tostring(plr.UserId),RankDDS,dds_data)
+		end)
 	end
 end
 
@@ -275,6 +256,54 @@ module.GetPlayerRankInfo = function(username:string,userid:number)
 	
 	
 	
+end
+
+
+module.RecordPlayerInfraction = function(userid:number,infracData:table)
+	local isValidPlayer,isInGame,plrObject = module.FindPlayer(nil,userid)
+	
+	if isValidPlayer then
+		local duration = infracData["Duration"]
+		local reason = infracData["Reason"]
+		local infracType = infracData["InfractionType"]
+		local staffMemID = infracData["StaffMemberID"]
+		local infractionID = HTTPS:GenerateGUID(false)
+		local staffMemName = game.Players:GetNameFromUserIdAsync(staffMemID)
+		if isInGame and staffMemName ~= nil then
+			local utcTime = os.time(os.date("!*t"))
+			
+			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
+			
+			if currInfractions ~= nil then
+				local newInfraction = {
+					StaffMemberID = tonumber(staffMemID);
+					InfractionType = infracType;
+					Reason = reason;
+					Duration = duration;
+					InfractionTime = utcTime;
+				}
+
+				currInfractions[tostring(infractionID)] = newInfraction
+				
+				task.defer(function()
+					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,currInfractions)
+				end)
+			end
+		end
+	end
+end
+
+module.RemovePlayerInfraction = function(userid:number,infracID)
+	local isValidPlayer,isInGame,plrObject = module.FindPlayer(nil,userid)
+
+	if isValidPlayer and infracID then
+		local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
+		
+		if currInfractions[infracID] then
+			currInfractions[infracID] = nil
+			serverUtil.SaveDataToDDS(tostring(userid),currInfractions)
+		end
+	end
 end
 
 return module
