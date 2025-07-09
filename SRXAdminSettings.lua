@@ -82,6 +82,21 @@ module.SaveRanks = true; -- whether or not if ranks transfer from server to serv
 
 module.IncludeChatSlashCommands = true; -- whether or not if you want to include the "/" commands in the chat instead of relying just on the prefix (these slash commands also don't appear in the chat)
 
+module.BanSettings = { -- ban settings
+	BannedUsers = { -- who you want to manually perm-ban from your game (THIS DOES NOT GET RUN THROUGH ROBLOX'S BAN API
+		-- put their user id or their username here
+		--[[
+		EXAMPLE
+		
+		"Scripter_Rickster",
+		3422141408,
+		
+		]]
+		
+	};
+	
+	ExcludeAltsInBans = false; -- whether you want to not ban their alt accounts as well | false = ban alts | true = don't ban alts
+}
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
 	ServerOwnerRankId = 0; -- rank id for vip server owners
@@ -94,7 +109,7 @@ module.WebhookSettings = {
 	};
 	["DEV_CONSOLE"] = {
 		Enabled = true; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
-		WebhookLink = "";
+		WebhookLink = ""; -- webhook link
 	}
 }
 
