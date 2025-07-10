@@ -33,6 +33,13 @@ module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
 		
+		for _,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
+			if string.lower(plr.Name) == string.lower(v) or plr.UserId == v then
+				plr:Kick("You are not permitted to join this game")
+				return
+			end
+		end
+		
 		local joins = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerJoinsDDS)
 		if joins == 0 or joins == nil then
 			joins = 0
@@ -193,7 +200,7 @@ end
 
 
 module.FindPlayer = function(username:string,userid:number)
-	local isValidPlayer,isInGame,plrObject = false,false,nil
+	local isValidPlayer,userID,plrObject = false,false,nil
 	username = tostring(username)
 	if (username == nil or username == "") and (userid == nil or tonumber(userid) == nil) then return isValidPlayer,isInGame,plrObject end
 	
@@ -206,9 +213,9 @@ module.FindPlayer = function(username:string,userid:number)
 		
 		if pUID == userid or string.match(pN,username,1) then
 			isValidPlayer = true
-			isInGame = true
+			userID = pUID
 			plrObject = v
-			return isValidPlayer,isInGame,plrObject
+			return isValidPlayer,userid,plrObject
 		end
 		
 		
@@ -216,10 +223,15 @@ module.FindPlayer = function(username:string,userid:number)
 	
 	if game.Players:GetUserIdFromNameAsync(username) ~= nil or game.Players:GetNameFromUserIdAsync(userid) ~= nil then
 		isValidPlayer = true
-		isInGame = false
 		plrObject = nil
+		
+		if game.Players:GetUserIdFromNameAsync(username) then
+			userID = game.Players:GetUserIdFromNameAsync(username)
+		else
+			userID = userid
+		end
 	end
-	return isValidPlayer,isInGame,plrObject
+	return isValidPlayer,userID,plrObject
 end
 
 module.SetPlayerRank = function(plr:Player,rank_id:number)
@@ -305,5 +317,6 @@ module.RemovePlayerInfraction = function(userid:number,infracID)
 		end
 	end
 end
+
 
 return module
