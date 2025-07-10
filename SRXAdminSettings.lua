@@ -97,18 +97,27 @@ module.BanSettings = { -- ban settings
 	
 	ExcludeAltsInBans = false; -- whether you want to not ban their alt accounts as well | false = ban alts | true = don't ban alts
 }
+
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
 	ServerOwnerRankId = 0; -- rank id for vip server owners
 }
 
+module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel
+	Enabled = false; -- whether this feature is enabled
+	OpenCloudAPI_Key = ""; -- since this uses OpenAI's Open-Cloud API's, a key is required from them in order to use it
+	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
+}
+
 module.WebhookSettings = {
 	["COMMANDS"] = {
 		Enabled = true; -- whether to log commands or not
+		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	};
 	["DEV_CONSOLE"] = {
 		Enabled = true; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
+		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	}
 }
