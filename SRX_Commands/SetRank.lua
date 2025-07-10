@@ -48,7 +48,7 @@ module.Execute = function(parameters:table)
 		
 		local e_rID = executor:GetAttribute("SRX_RANKID")
 		if serverUtil.PlayerCanUseCommand(executor,script) then
-			local isValid,isInGame,target = playerUtil.FindPlayer(parameters["TARGET"])
+			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 			
 			local rank_name,rank_id = serverUtil.FindRank(parameters["RANK"],parameters["RANK"])
 			if target and rank_id then
