@@ -44,7 +44,7 @@ module.SetupPlayer = function(plr:Player)
 		if joins == 0 or joins == nil then
 			joins = 0
 			task.defer(function()
-				serverUtil.SaveDataToDDS(tostring(plr.UserId),InfractionDDS,{})
+				serverUtil.SaveDataToDDS(tostring(plr.UserId),InfractionDDS,HTTPS:JSONEncode({}))
 			end)
 			
 		end
