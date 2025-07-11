@@ -67,13 +67,8 @@ module.Execute = function(parameters:table)
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
-			local rank_name,rank_id = serverUtil.FindRank(parameters["RANK"],parameters["RANK"])
-			if target and rank_id then
+			if target then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-
-				if tRankId < e_rID and rank_id < e_rID then
-					playerUtil.SetPlayerRank(target,rank_id)
-				end
 				
 				local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
 				if banReason == nil then banReason = "No Reason" end
