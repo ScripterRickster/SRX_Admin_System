@@ -42,14 +42,30 @@ module.IsNumeric = function(s:string)
 	return tonumber(s) ~= nil
 end
 
+module.ConvertToDHMS = function(seconds:number) -- DHMS = Days Hours Minutes Seconds
+	seconds = tonumber(tostring(seconds))
+	if seconds == nil then return end
+	
+	local days = math.floor(seconds/86400)
+	local hours = math.floor((seconds%86400)/3600)
+	local minutes = math.floor((seconds%3600)/60)
+	local r_seconds = seconds % 60
+	return days,hours,minutes,r_seconds
+end
 ----------------------------------------------------------------
 
-module.FilterMessage = function(plr,msg:string)
+module.FilterMessage = function(plr,msg:string,forClient:boolean)
 	if msg == nil or msg == "" then return msg end
 	
 	local filteredRes = TS:FilterStringAsync(msg,plr.UserId)
 	
-	return filteredRes:GetNonChatStringForBroadcastAsync()
+	if not forClient then
+		return filteredRes:GetNonChatStringForBroadcastAsync()
+	else
+		return filteredRes:GetNonChatStringForUserAsync(plr.UserId)
+	end
+	
+	
 end
 
 ----------------------------------------------------------------
@@ -307,6 +323,7 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 		if not succ then
 			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." | RETRYING.....")
 		else
+			success = true
 			break
 		end
 		current_tries += 1
@@ -337,7 +354,7 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 	local succ,response = pcall(function()
 		return AIService:GenerateText(request)
 	end)
-	if succ then return module.FilterMessage(response.choices[1].text) else return "FAILED TO GET A RESPONSE" end
+	if succ then return module.FilterMessage(plr,response.choices[1].text,true) else return "FAILED TO GET A RESPONSE" end
 	
 end
 -----------------------------------------------------------------------------------
