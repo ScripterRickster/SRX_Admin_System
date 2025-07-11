@@ -31,9 +31,9 @@ module.Parameters = {
 	
 	]]
 	
-	["TARGET"] = { -- name of parameter
-		Description = "Target of the command"; -- description of the parameter
-		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
+	["TARGET"] = {
+		Description = "Target of the command";
+		Required = true; 
 
 	};
 	["REASON"] = {
