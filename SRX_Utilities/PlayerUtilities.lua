@@ -140,6 +140,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked and saveRanks then
 				local result = serverUtil.GetDataFromDDS(tostring(plr.UserId),RankDDS)
 				if result ~= nil then
+					result = HTTPS:JSONDecode(result)
 					DRN,DRID,DRC = result[1],result[2],result[3]
 				end
 			end
@@ -192,6 +193,7 @@ module.PlayerLeft = function(plr:Player)
 	
 	if saveRanks then
 		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
+		dds_data = HTTPS:JSONEncode(dds_data)
 		task.defer(function()
 			serverUtil.SaveDataToDDS(tostring(plr.UserId),RankDDS,dds_data)
 		end)
@@ -285,7 +287,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 			local utcTime = os.time(os.date("!*t"))
 			
 			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
-			
+			currInfractions = HTTPS:JSONDecode(currInfractions)
 			if currInfractions ~= nil then
 				local newInfraction = {
 					StaffMemberID = tonumber(staffMemID);
@@ -298,7 +300,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 				currInfractions[tostring(infractionID)] = newInfraction
 				
 				task.defer(function()
-					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,currInfractions)
+					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
 				end)
 			end
 		end
@@ -310,10 +312,10 @@ module.RemovePlayerInfraction = function(userid:number,infracID)
 
 	if isValidPlayer and infracID then
 		local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
-		
+		currInfractions = HTTPS:JSONDecode(currInfractions)
 		if currInfractions[infracID] then
 			currInfractions[infracID] = nil
-			serverUtil.SaveDataToDDS(tostring(userid),currInfractions)
+			serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
 		end
 	end
 end
