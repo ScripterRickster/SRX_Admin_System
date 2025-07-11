@@ -20,7 +20,7 @@ local HTTPS = game:GetService("HttpService")
 ----------------------------------------------------------------
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
-local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DataStore,"PLAYERJOINS")
+local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
