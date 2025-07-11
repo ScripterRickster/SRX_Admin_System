@@ -38,7 +38,7 @@ module.Parameters = {
 	};
 	["REASON"] = {
 		Description = "Reason for the ban";
-		Required = true;
+		Required = false;
 	};
 	["DURATION"] = {
 		Description = "Duration of the ban (-1 or nil = permanent) | In Days";
@@ -84,7 +84,7 @@ module.Execute = function(parameters:table)
 				
 				local banConfig = {
 					UserIds = {target.UserId},
-					Duration = banDuration,
+					Duration = banDuration * 86400,
 					DisplayReason = banReason,
 					PrivateReason = banReason,
 					ExcludeAltAccounts = excludeAlts,
@@ -98,6 +98,22 @@ module.Execute = function(parameters:table)
 				if not succ and err then
 					warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
 				elseif succ then
+					task.defer(function()
+						local durationText = "Permanent"
+						if banDuration ~= -1 then
+							durationText = banDuration.." Days"
+							
+						end
+						local infracData = {
+							
+							StaffMemberID = executor.UserId;
+							InfractionType = "Ban";
+							Reason = banReason;
+							Duration = durationText;
+							
+						}
+						serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+					end)
 					task.defer(function() -- notifies the server to log this command being run
 						serverUtil.LogCommand(script,parameters)
 					end)
