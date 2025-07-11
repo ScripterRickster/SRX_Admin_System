@@ -120,6 +120,7 @@ module.Execute = function(parameters:table)
 			
 			local reason = parameters["REASON"]
 			if reason == nil then reason = "N/A" end
+			reason = serverUtil.FilterMessage(executor,reason)
 			
 			if isValid and userID then
 				local isBanned = isUserBanned(userID)
