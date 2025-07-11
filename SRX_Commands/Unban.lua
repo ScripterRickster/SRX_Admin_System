@@ -31,11 +31,16 @@ module.Parameters = {
 	
 	]]
 	
-	["TARGET"] = { -- name of parameter
-		Description = "Target of the command"; -- description of the parameter
-		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
+	["TARGET"] = {
+		Description = "Target of the command"; 
+		Required = true; 
 
 	};
+	
+	["REASON"] = {
+		Description = "Reason for the unban";
+		Required = false;
+	}
 	
 	
 }
@@ -113,6 +118,9 @@ module.Execute = function(parameters:table)
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 			userID = tonumber(tostring(userID))
 			
+			local reason = parameters["REASON"]
+			if reason == nil then reason = "N/A" end
+			
 			if isValid and userID then
 				local isBanned = isUserBanned(userID)
 				
@@ -129,6 +137,19 @@ module.Execute = function(parameters:table)
 					if not succ and err then
 						warn("Failed to unban:",tostring(userID),"| Error: "..tostring(err))
 					elseif succ then
+						task.defer(function()
+							local durationText = "Permanent"
+							
+							local infracData = {
+
+								StaffMemberID = executor.UserId;
+								InfractionType = "Unban";
+								Reason = reason;
+								Duration = durationText;
+
+							}
+							serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+						end)
 						task.defer(function() -- notifies the server to log this command being run
 							serverUtil.LogCommand(script,parameters)
 						end)
