@@ -33,9 +33,14 @@ module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
 		
-		for _,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
-			if string.lower(plr.Name) == string.lower(v) or plr.UserId == v then
-				plr:Kick("You are not permitted to join this game")
+		for idx,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
+			if string.lower(plr.Name) == string.lower(tostring(idx)) or plr.UserId == idx then
+				local reason = v
+				if reason == nil then
+					reason = "No Reason"
+				end
+				reason = tostring(reason)
+				plr:Kick("You are not permitted to join this game | Reason:",reason)
 				return
 			end
 		end
