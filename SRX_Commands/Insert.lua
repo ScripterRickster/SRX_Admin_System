@@ -79,7 +79,7 @@ module.Execute = function(parameters:table)
 							
 							local exec_pos = exec_hrp.Position
 							
-							res:MoveTo(Vector3.new(exec_hrp.X,exec_hrp.Y+20,exec_hrp.Z))
+							res:MoveTo(Vector3.new(exec_pos.X,exec_pos.Y+20,exec_pos.Z))
 						end
 						
 						task.defer(function() -- notifies the server to log this command being run
