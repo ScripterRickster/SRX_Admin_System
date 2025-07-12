@@ -76,7 +76,7 @@ module.OverheadTags = {
 	Command = "/tag"; -- what command can be used to enable or disable the tag
 }
 
-module.DatastoreName = "SRX_DEFAULT_DS" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
+module.DatastoreName = "SRX_DEFAULT_DS0" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
 
 module.SaveRanks = true; -- whether or not if ranks transfer from server to server (permanent rank changes)
 
@@ -84,15 +84,20 @@ module.IncludeChatSlashCommands = true; -- whether or not if you want to include
 
 module.BanSettings = { -- ban settings
 	BannedUsers = { -- who you want to manually perm-ban from your game (THIS DOES NOT GET RUN THROUGH ROBLOX'S BAN API
-		-- put their user id or their username here
+		-- [username] = reason;
+		-- [userid] = reason;
 		--[[
 		EXAMPLE
 		
-		"Scripter_Rickster",
-		3422141408,
+		
+		
+		["Scripter_Rickster"] = "banned because why not";
+		[3422141408] = "banned because why not";
 		
 		]]
 		
+		
+	
 	};
 	
 	ExcludeAltsInBans = false; -- whether you want to not ban their alt accounts as well | false = ban alts | true = don't ban alts
