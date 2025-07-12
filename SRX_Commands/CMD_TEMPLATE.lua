@@ -8,6 +8,8 @@ repeat wait() until _G.SRX_COMMANDS ~= nil
 local COMMANDS = _G.SRX_COMMANDS
 repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
+repeat wait() until _G.SRX_WORKSPACE ~= nil
+local SRX_WORKSPACE = _G.SRX_WORKSPACE
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
