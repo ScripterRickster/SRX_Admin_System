@@ -49,10 +49,17 @@ _G.SRX_COMMANDS = commands
 local utilities = script.SRX_Utilities
 _G.SRX_UTILITIES = utilities
 
+
+local srx_workspace = Instance.new("Folder")
+srx_workspace.Name = "SRX_WORKSPACE"
+srx_workspace.Parent = game.Workspace
+_G.SRX_WORKSPACE = srx_workspace
+
 ----------------------------------------------------------------
 local adminSettings = require(script.SRXAdminSettings)
 local plrUtilities = require(utilities.PlayerUtilities)
 local serverUtilities = require(utilities.ServerUtilities)
+----------------------------------------------------------------
 
 ----------------------------------------------------------------
 local CSC_Func = events.CSC_Func -- client-server remote function
