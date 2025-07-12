@@ -15,8 +15,8 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 
 ----------------------------------------------------------------
 
-module.ExecutableCommand = true; -- whether you can actually even use this command or not
-module.ExecutionLevel = 3; -- rank id required to execute the command
+
+module.ExecutionLevel = 4; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
 
 module.CommandDescription = "Sets the rank of the player"
