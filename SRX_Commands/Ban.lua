@@ -16,7 +16,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 ----------------------------------------------------------------
 
 module.ExecutableCommand = false; -- whether you can actually even use this command or not || this parameter is not required
-module.ExecutionLevel = 0; -- rank id required to execute the command
+module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
 
 module.CommandDescription = "Bans the target"; -- description of the command
@@ -70,49 +70,53 @@ module.Execute = function(parameters:table)
 			if target then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
-				local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
-				if banReason == nil then banReason = "No Reason" end
-				banDuration = tonumber(tostring(banDuration))
-				if banDuration == nil then banDuration = -1 end
-				
-				
-				
-				local banConfig = {
-					UserIds = {target.UserId},
-					Duration = banDuration * 86400,
-					DisplayReason = banReason,
-					PrivateReason = banReason,
-					ExcludeAltAccounts = excludeAlts,
-					ApplyToUniverse = true,
-				}
-				
-				local succ,err = pcall(function()
-					game.Players:BanAsync(banConfig)
-				end)
-				
-				if not succ and err then
-					warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
-				elseif succ then
-					task.defer(function()
-						local durationText = "Permanent"
-						if banDuration ~= -1 then
-							durationText = banDuration.." Days"
-							
-						end
-						local infracData = {
-							
-							StaffMemberID = executor.UserId;
-							InfractionType = "Ban";
-							Reason = banReason;
-							Duration = durationText;
-							
-						}
-						serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+				if tRankId < e_rID then
+					local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
+					if banReason == nil then banReason = "No Reason" end
+					banDuration = tonumber(tostring(banDuration))
+					if banDuration == nil then banDuration = -1 end
+
+
+
+					local banConfig = {
+						UserIds = {target.UserId},
+						Duration = banDuration * 86400,
+						DisplayReason = banReason,
+						PrivateReason = banReason,
+						ExcludeAltAccounts = excludeAlts,
+						ApplyToUniverse = true,
+					}
+
+					local succ,err = pcall(function()
+						game.Players:BanAsync(banConfig)
 					end)
-					task.defer(function() -- notifies the server to log this command being run
-						serverUtil.LogCommand(script,parameters)
-					end)
+
+					if not succ and err then
+						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
+					elseif succ then
+						task.defer(function()
+							local durationText = "Permanent"
+							if banDuration ~= -1 then
+								durationText = banDuration.." Days"
+
+							end
+							local infracData = {
+
+								StaffMemberID = executor.UserId;
+								InfractionType = "Ban";
+								Reason = banReason;
+								Duration = durationText;
+
+							}
+							serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+						end)
+						task.defer(function() -- notifies the server to log this command being run
+							serverUtil.LogCommand(script,parameters)
+						end)
+					end
 				end
+				
+				
 				
 			end
 		end
