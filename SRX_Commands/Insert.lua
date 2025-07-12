@@ -69,18 +69,23 @@ module.Execute = function(parameters:table)
 					warn("FAILED TO INSERT:",tostring(asset_id))
 				else
 					if res then
-						if res:IsA("Tool") then
-							res.Parent = executor.Backpack
-						elseif res:IsA("Model") then
-							res.Parent = SRX_WORKSPACE
-							
-							local exec_char = executor.Character or executor.CharacterAdded:Wait()
-							local exec_hrp = exec_char:WaitForChild("HumanoidRootPart")
-							
-							local exec_pos = exec_hrp.Position
-							
-							res:MoveTo(Vector3.new(exec_pos.X,exec_pos.Y+20,exec_pos.Z))
+						local exec_char = executor.Character or executor.CharacterAdded:Wait()
+						local exec_hrp = exec_char:WaitForChild("HumanoidRootPart")
+
+						local exec_pos = exec_hrp.Position
+						
+						for _,v in pairs(res:GetChildren()) do
+							if v:IsA("Tool") then
+								v.Parent = executor.Backpack
+							elseif v:IsA("Model") then
+								v.Parent = SRX_WORKSPACE
+
+								
+
+								v:MoveTo(Vector3.new(exec_pos.X,exec_pos.Y+20,exec_pos.Z))
+							end
 						end
+
 						
 						task.defer(function() -- notifies the server to log this command being run
 							serverUtil.LogCommand(script,parameters)
