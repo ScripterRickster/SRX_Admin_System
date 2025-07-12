@@ -1,4 +1,4 @@
-local module = {}
+zlocal module = {}
 ----------------------------------------------------------------
 repeat wait() until _G.SRX_ADMINSYS ~= nil
 local SETTINGS = require(_G.SRX_ADMINSYS:WaitForChild("SRXAdminSettings"))
@@ -15,8 +15,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 
 ----------------------------------------------------------------
 
-module.ExecutableCommand = false; -- whether you can actually even use this command or not || this parameter is not required
-module.ExecutionLevel = 0; -- rank id required to execute the command
+module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
 
 module.CommandDescription = "Unbans the target if they're banned"; -- description of the command
