@@ -8,6 +8,8 @@ repeat wait() until _G.SRX_COMMANDS ~= nil
 local COMMANDS = _G.SRX_COMMANDS
 repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
+repeat wait() until _G.SRX_ASSETS ~= nil
+local ASSETS = _G.SRX_ASSETS
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
@@ -24,15 +26,69 @@ local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
+local rtag = ASSETS:WaitForChild("SRX_RANKTAG")
 
 ----------------------------------------------------------------
 local saveRanks = SETTINGS.SaveRanks
 ----------------------------------------------------------------
 
+module.SetupPlayerTag = function(plr:Player)
+	if plr and SETTINGS["OverheadTags"]["Enabled"] then
+		local char = plr.Character or plr.CharacterAdded:Wait()
+		local head = char:WaitForChild("Head")
+		if plr:GetAttribute("SRX_RANKCOLOUR") ~= nil and plr:GetAttribute("SRX_RANKNAME") ~= nil then
+			
+			local newTag = nil
+			if head:FindFirstChild("SRX_RANKTAG") == nil then
+				newTag = rtag:Clone()
+				newTag.Parent = head
+			else
+				newTag = head:FindFirstChild("SRX_RANKTAG")
+			end
+			if newTag ~= nil then
+				for _,v in pairs(newTag:GetDescendants()) do
+					if string.lower(v.Name) == "ranktext" and v:IsA("TextLabel") then
+						v.Text = plr:GetAttribute("SRX_RANKNAME")
+						v.TextColor3 = plr:GetAttribute("SRX_RANKCOLOUR")
+					elseif string.lower(v.Name) == "overlay" and v:IsA("Frame") then
+						v.BackgroundColor3 = plr:GetAttribute("SRX_RANKCOLOUR") 
+					end
+				end
+				
+				newTag.Enabled = OverheadTagStatus[plr.UserId]
+			end
+		else
+			if head:FindFirstChild("SRX_RANKTAG") ~= nil then
+				head:FindFirstChild("SRX_RANKTAG"):Destroy()
+			end
+			OverheadTagStatus[plr.UserId] = false
+		end
+	end
+end
+
+module.ManagePlayerTag = function(plr:Player,forcedStatus:boolean)
+	if plr and SETTINGS["OverheadTags"]["Enabled"] then
+		local char = plr.Character or plr.CharacterAdded:Wait()
+		local head = char:WaitForChild("Head")
+		if head:FindFirstChild("SRX_RANKTAG") then
+			if forcedStatus ~= nil and typeof(forcedStatus) == "boolean" then
+				OverheadTagStatus[plr.UserId] = forcedStatus
+			else
+				OverheadTagStatus[plr.UserId] = not OverheadTagStatus[plr.UserId]
+			end
+			head:FindFirstChild("SRX_RANKTAG").Enabled = OverheadTagStatus[plr.UserId]
+		end
+	end
+end
+
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
 		plr:SetAttribute("SRX_MUTED",false)
+		
+		OverheadTagStatus[plr.UserId] = false
+		
+		
 		
 		for idx,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
 			if string.lower(plr.Name) == string.lower(tostring(idx)) or plr.UserId == idx then
@@ -176,15 +232,31 @@ module.SetupPlayer = function(plr:Player)
 
 		setupPlayerRank()
 		
+		
+		task.defer(function()
+			module.SetupPlayerTag(plr)
+		end)
+		
 		task.defer(function()
 			serverUtil.RegisterClientTextChatCommands(plr)
 		end)
 		
 		plr.CharacterAdded:Connect(function(char)
-
+			task.defer(function()
+				module.SetupPlayerTag(plr)
+			end)
 		end)
 
 		plr.Chatted:Connect(function(msg)
+			if SETTINGS.OverheadTags["Enabled"] then
+				if string.lower(tostring(SETTINGS.OverheadTags["Command"])) == string.lower(msg) then
+					task.defer(function()
+						module.ManagePlayerTag(plr)
+					end)
+					return
+				end
+			end
+			
 			local fl = string.sub(msg,1,1)
 			if fl == SETTINGS.Prefix then
 				msg = string.sub(msg,2,string.len(msg))
@@ -249,9 +321,10 @@ module.SetPlayerRank = function(plr:Player,rank_id:number)
 		if rank_id ~= nil and rank_name ~= nil then
 			plr:SetAttribute("SRX_RANKID",rank_id)
 			plr:SetAttribute("SRX_RANKNAME",rank_name)
-			if rank_colour then
-				plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
-			end
+			plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
+			task.defer(function()
+				module.SetupPlayerTag(plr)
+			end)
 			task.defer(function()
 				serverUtil.RegisterClientTextChatCommands(plr)
 			end)
