@@ -82,7 +82,7 @@ module.RegisterTextChatCommands = function()
 		local function createTextChatCommand(cmd:ModuleScript)
 			local cmdInfo = require(cmd)
 
-			if cmdInfo.ExecutableCommand == (true or nil) then
+			if cmdInfo.ExecutableCommand ~= false then
 				local newTCC = Instance.new("TextChatCommand")
 				newTCC.AutocompleteVisible = false
 				newTCC.Name = cmd.Name
@@ -168,12 +168,12 @@ module.FindCommand = function(cmd)
 	for n,c in pairs(allCMDS) do
 		local tempC = require(c)
 		if string.match(n,cmd,1) then
-			if tempC.ExecutableCommand == (true or nil) then
+			if tempC.ExecutableCommand ~= false then
 				return c
 			end
 		elseif tempC.Aliases ~= nil then
 			if table.find(tempC.Aliases,cmd) ~= nil then
-				if tempC.ExecutableCommand == (true or nil) then
+				if tempC.ExecutableCommand ~= false then
 					return c
 				end
 			end
@@ -207,7 +207,7 @@ module.PlayerCanUseCommand = function(plr:Player,cmd)
 	end
 	
 	
-	if cmdInfo.ExecutableCommand == (true or nil) and cmdInfo.ExecutionLevel ~= nil then
+	if cmdInfo.ExecutableCommand ~= false and cmdInfo.ExecutionLevel ~= nil then
 		if cmdInfo.LockToRank then
 			if rankId == cmdInfo.ExecutionLevel then
 				return true
