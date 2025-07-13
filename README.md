@@ -10,7 +10,7 @@ Affiliated With: SR Studios
 
 Modular, configurable, and clean admin system for ROBLOX
 
-Created to replace the old SR Admin System\
+Created to replace the old SR Admin System
 
 Features:
 - Clean, organized, and unobfuscated code
