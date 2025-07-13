@@ -69,13 +69,13 @@ module.Execute = function(parameters:table)
 			if target  then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
-				if tRankId < e_rID then
+				if tRankId <= e_rID then
 					local kickReason = parameters["REASON"]
 					
 					if kickReason == nil then kickReason = "N/A" end
 					
 					kickReason = serverUtil.FilterMessage(executor,kickReason)
-					target:Kick(kickReason)
+					
 					task.defer(function()
 						local durationText = "Not Applicable"
 						local infracData = {
@@ -87,7 +87,9 @@ module.Execute = function(parameters:table)
 
 						}
 						serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+						target:Kick(kickReason)
 					end)
+					
 					task.defer(function() -- notifies the server to log this command being run
 						serverUtil.LogCommand(script,parameters)
 					end)
