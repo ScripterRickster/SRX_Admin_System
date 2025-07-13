@@ -32,6 +32,7 @@ local saveRanks = SETTINGS.SaveRanks
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
+		plr:SetAttribute("SRX_MUTED",false)
 		
 		for idx,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
 			if string.lower(plr.Name) == string.lower(tostring(idx)) or plr.UserId == idx then
@@ -40,7 +41,7 @@ module.SetupPlayer = function(plr:Player)
 					reason = "No Reason"
 				end
 				reason = tostring(reason)
-				plr:Kick("You are not permitted to join this game | Reason:",reason)
+				plr:Kick("You are not permitted to join this game | Reason: "..tostring(reason))
 				return
 			end
 		end
@@ -209,7 +210,7 @@ end
 module.FindPlayer = function(username:string,userid:number)
 	local isValidPlayer,userID,plrObject = false,false,nil
 	username = tostring(username)
-	if (username == nil or username == "") and (userid == nil or tonumber(userid) == nil) then return isValidPlayer,isInGame,plrObject end
+	if (username == nil or username == "") and (userid == nil or tonumber(userid) == nil) then return isValidPlayer,userID,plrObject end
 	
 	username = string.lower(username)
 	
@@ -222,7 +223,7 @@ module.FindPlayer = function(username:string,userid:number)
 			isValidPlayer = true
 			userID = pUID
 			plrObject = v
-			return isValidPlayer,userid,plrObject
+			return isValidPlayer,userID,plrObject
 		end
 		
 		
