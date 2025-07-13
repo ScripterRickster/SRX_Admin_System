@@ -55,6 +55,9 @@ srx_workspace.Name = "SRX_WORKSPACE"
 srx_workspace.Parent = game.Workspace
 _G.SRX_WORKSPACE = srx_workspace
 
+local assets = script.SRX_Assets
+_G.SRX_ASSETS = assets
+
 ----------------------------------------------------------------
 local adminSettings = require(script.SRXAdminSettings)
 local plrUtilities = require(utilities.PlayerUtilities)
