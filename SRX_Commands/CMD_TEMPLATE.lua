@@ -31,6 +31,7 @@ module.Parameters = {
 	[PARAMETER_NAME] = { -- name of the parameter
 		Description = ""; -- description of the parameter
 		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
+		Class = "classType" -- to make it easier to identify parameters || NOT REQUIRED TO INCLUDE THIS IN EACH PARAMETER
 	}
 	
 	]]
