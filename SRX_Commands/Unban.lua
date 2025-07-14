@@ -37,6 +37,7 @@ module.Parameters = {
 	["TARGET"] = {
 		Description = "Target of the command"; 
 		Required = true; 
+		Class = "User";
 
 	};
 	
