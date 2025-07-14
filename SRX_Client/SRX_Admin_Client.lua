@@ -38,9 +38,10 @@ end
 TCS.OnIncomingMessage = function(msg:TextChatMessage)
 	local ts = msg.TextSource
 	if ts then
-		if chatTagsEnabled then
-			local plr = game.Players:GetPlayerByUserId(ts.UserId)
-			if plr then
+		local plr = game.Players:GetPlayerByUserId(ts.UserId)
+		if plr then
+			if plr:GetAttribute("SRX_MUTED") then return false end
+			if chatTagsEnabled then
 				local rn = plr:GetAttribute("SRX_RANKNAME")
 				local rc = plr:GetAttribute("SRX_RANKCOLOUR")
 				if rn and rc then
