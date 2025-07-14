@@ -42,6 +42,10 @@ module.IsNumeric = function(s:string)
 	return tonumber(s) ~= nil
 end
 
+module.IsPart = function(p)
+	return p~=nil and (p:IsA("Part") or p:IsA("UnionOperation") or p:IsA("MeshPart"))
+end
+
 module.ConvertToDHMS = function(seconds:number) -- DHMS = Days Hours Minutes Seconds
 	seconds = tonumber(tostring(seconds))
 	if seconds == nil then return end
