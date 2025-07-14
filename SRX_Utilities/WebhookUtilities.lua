@@ -87,7 +87,7 @@ webhook.FormatCommandWebhook = function(command:string,args:table)
 			["title"] = string.upper(tostring(command)).." | Command Execution",
 			["description"] = "More Information Below:",
 			["type"] = "rich",
-			["color"] = tonumber(commandEmbedColour:ToHex()),
+			["color"] = tonumber(commandEmbedColour:ToHex(),16),
 			["fields"] = {
 				
 			}
