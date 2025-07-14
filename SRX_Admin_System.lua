@@ -61,14 +61,17 @@ local assets = script.SRX_Assets
 _G.SRX_ASSETS = assets
 
 ----------------------------------------------------------------
+
 local adminSettings = require(script.SRXAdminSettings)
 local plrUtilities = require(utilities.PlayerUtilities)
 local serverUtilities = require(utilities.ServerUtilities)
 local webhookUtilities = require(utilities.WebhookUtilities)
 ----------------------------------------------------------------
 
+
 local dev_consoleWebhookLink = adminSettings["WebhookSettings"]["DEV_CONSOLE"]["WebhookLink"]
 local dev_consoleWebhookEnabled = adminSettings["WebhookSettings"]["DEV_CONSOLE"]["Enabled"]
+
 
 ----------------------------------------------------------------
 local CSC_Func = events.CSC_Func -- client-server remote function
@@ -101,17 +104,25 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,p
 			if param2[1] then
 				param2[1] = tostring(param2[1])
 				param2[1] = string.sub(param2[1],2,string.len(param2[1]))
-				serverUtilities.HandleCommandExecution(plr,param2)
+				--serverUtilities.HandleCommandExecution(plr,param2)
 			end
 		end
 	end
 end)
+
+SSC_Func.OnInvoke = function(action,param1,param2,param3,param4,param5)
+	action = string.lower(tostring(action))
+	if action == "getplayer" then
+		return plrUtilities.FindPlayer(param1,param1)
+	end
+end
 ----------------------------------------------------------------
 if dev_consoleWebhookEnabled then
 	game:GetService("LogService").MessageOut:Connect(function(message, messageType)
 		local command = message:match("^> (.*)")
 
 		if messageType == Enum.MessageType.MessageOutput and command then
+			print(command)
 			webhookUtilities.SendLog(dev_consoleWebhookLink,webhookUtilities.FormatDevConsoleLogWebhook(command))
 		end
 	end)
