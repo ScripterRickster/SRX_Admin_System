@@ -10,10 +10,10 @@ repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
 repeat wait() until _G.SRX_ASSETS ~= nil
 local ASSETS = _G.SRX_ASSETS
-
 ----------------------------------------------------------------
-
-local webhookUtility = require(UTILITIES:WaitForChild("WebhookUtilities"))
+print(UTILITIES.WebhookUtilities)
+local  webhookUtilities = require(UTILITIES.WebhookUtilities)
+--local webhookUtilities = require(UTILITIES.WebhookUtilities)
 ----------------------------------------------------------------
 local TCS = game:GetService("TextChatService")
 local TS = game:GetService("TextService")
@@ -165,13 +165,12 @@ end
 module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 	if cmdModule and given_params ~= nil then
 		if SETTINGS["WebhookSettings"]["COMMANDS"]["Enabled"] then
-			if not webhookUtility.CheckIfNoLogCMD(cmdModule.Name) then
+			--if not webhookUtilities.CheckIfNoLogCMD(cmdModule.Name) then
 				task.defer(function()
 					local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
-					webhookUtility.SendLog(webhookID,webhookUtility.FormatCommandWebhook(cmdModule.Name,given_params))
+					--webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule.Name,given_params))
 				end)
-			end
-
+			--end
 		end
 	end
 end
@@ -378,40 +377,6 @@ end
 -----------------------------------------------------------------------------------
 
 
-local serverID = game.JobId
-if game.PrivateServerId ~= "" then
-	serverID = game.PrivateServerId
-end
-
-if game:GetService("RunService"):IsStudio() then
-	serverID = "STUDIO SERVER | NO SERVER ID IS AVAILABLE"
-end
-
-local serverType = "REGULAR"
-local serverOwner = game.CreatorId
-
-if game.PrivateServerId ~= "" then
-	serverType = "VIP"
-	serverOwner = game.PrivateServerOwnerId
-end
-
-local sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
-if game.CreatorType == Enum.CreatorType.Group then
-	sOwner = "["..game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId).Name.."](https://www.roblox.com/groups/"..game.CreatorId..")"
-end
-
-module.getServerInfo = function()
-	return serverType,serverID,sOwner
-end
-
-module.getServerLink = function()
-	return tostring(serverID)..'\n[Join This Server](https://www.roblox.com/games/start?placeId='..tostring(game.PlaceId)..'%&launchData='..tostring(serverID)..')'
-end
-
-module.getTimeStampForDiscordEmbeds = function()
-	local ct = os.time(os.date("!*t"))
-	return "<t:"..ct..":F>"
-end
 
 
 
