@@ -18,6 +18,10 @@ local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
 local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
 
 ----------------------------------------------------------------
+
+local cam = game.Workspace.CurrentCamera
+
+----------------------------------------------------------------
 -- 
 function registerTextChatCommand(cmd)
 	if SRX_TextCMDS:FindFirstChild(cmd) then
@@ -66,6 +70,12 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 				registerTextChatCommand(v)
 			end)
 		end
+		
+	elseif param1 == "view" and param2~=nil and param2:IsA("Player") then
+		
+		local t_char = param2.Character or param2.CharacterAdded:Wait()
+		
+		cam.CameraSubject = t_char:WaitForChild("Humanoid")
 		
 	end
 end)
