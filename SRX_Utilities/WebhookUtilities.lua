@@ -73,6 +73,7 @@ end
 
 ----------------------------------------------------------------
 
+local SSC_Func = EVENTS:WaitForChild("SSC_Func")
 ----------------------------------------------------------------
 
 local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]["EmbedColour"]
@@ -82,33 +83,33 @@ local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["Embed
 
 local defaultParameters = {
 	{
-		["name"] = "Date & Time:",
+		["name"] = "DATE & TIME:",
 		["value"] = module.getTimeStampForDiscordEmbeds(),
 		["inline"] = true
 	},
 
 
 	{
-		["name"] = "Server ID:",
+		["name"] = "SERVER ID:",
 		["value"] = "``"..serverID.."``",
 		["inline"] = true
 	},
 
 
 	{
-		["name"] = "Server Type:",
+		["name"] = "SERVER TYPE:",
 		["value"] = serverType,
 		["inline"] = true
 	},
 
 	{
-		["name"] = "Server Owner:",
+		["name"] = "SERVER OWNER:",
 		["value"] = sOwner,
 		["inline"] = true
 	},
 
 	{
-		["name"] = "Game/Experience :",
+		["name"] = "GAME/EXPERIENCE:",
 		["value"] = "["..tostring(game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)["Name"]).."](https://www.roblox.com/games/"..game.PlaceId.."/)",
 		["inline"] = true
 	},
@@ -131,10 +132,25 @@ module.FormatCommandWebhook = function(command:string,args:table)
 	}
 	
 	for idx,v in pairs(args) do
+		
+		local value = tostring(v)
+		local isValid,userID,target = SSC_Func:Invoke("GETPLAYER",v)
+		
+		if isValid then
+			if target then
+				value = "["..target.Name.."](https://www.roblox.com/users/"..tostring(target.UserId).."/profile)"
+			elseif target == nil and userID ~= nil then
+				local username = game.Players:GetNameFromUserIdAsync(tonumber(userID))
+				value = "["..username.."](https://www.roblox.com/users/"..tostring(userID).."/profile)"
+				
+				
+			end
+		end
+	
 		table.insert(data["embeds"][1]["fields"],
 			{
-				["name"] = "__"..tostring(idx).."__",
-				["value"] = tostring(v),
+				["name"] = string.upper(tostring(idx))..":",
+				["value"] = value,
 				["inline"] = true,
 			}
 		)
@@ -161,7 +177,7 @@ module.FormatDevConsoleLogWebhook = function(command:string)
 			["fields"] = {
 
 				{
-					["name"] = "Command:",
+					["name"] = "COMMAND:",
 					["value"] = command,
 					["inline"] = true
 				},
