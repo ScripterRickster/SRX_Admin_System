@@ -122,7 +122,6 @@ if dev_consoleWebhookEnabled then
 		local command = message:match("^> (.*)")
 
 		if messageType == Enum.MessageType.MessageOutput and command then
-			print(command)
 			webhookUtilities.SendLog(dev_consoleWebhookLink,webhookUtilities.FormatDevConsoleLogWebhook(command))
 		end
 	end)
