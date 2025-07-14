@@ -66,7 +66,7 @@ module.Execute = function(parameters:table)
 				if not target:GetAttribute("SRX_FROZEN") then
 					local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 
-					if tRankId <= e_rID then
+					if tRankId < e_rID then
 						
 						target:SetAttribute("SRX_FROZEN",true)
 						local char = target.Character or target.CharacterAdded:Wait()
