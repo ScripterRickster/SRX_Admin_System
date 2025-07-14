@@ -11,9 +11,7 @@ local UTILITIES = _G.SRX_UTILITIES
 repeat wait() until _G.SRX_ASSETS ~= nil
 local ASSETS = _G.SRX_ASSETS
 ----------------------------------------------------------------
-print(UTILITIES.WebhookUtilities)
 local  webhookUtilities = require(UTILITIES.WebhookUtilities)
---local webhookUtilities = require(UTILITIES.WebhookUtilities)
 ----------------------------------------------------------------
 local TCS = game:GetService("TextChatService")
 local TS = game:GetService("TextService")
@@ -165,12 +163,12 @@ end
 module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 	if cmdModule and given_params ~= nil then
 		if SETTINGS["WebhookSettings"]["COMMANDS"]["Enabled"] then
-			--if not webhookUtilities.CheckIfNoLogCMD(cmdModule.Name) then
+			if not webhookUtilities.CheckIfNoLog(cmdModule.Name) then
 				task.defer(function()
 					local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
-					--webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule.Name,given_params))
+					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule.Name,given_params))
 				end)
-			--end
+			end
 		end
 	end
 end
