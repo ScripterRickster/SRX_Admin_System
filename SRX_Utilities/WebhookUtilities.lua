@@ -75,8 +75,8 @@ end
 
 ----------------------------------------------------------------
 
-local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]
-local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]
+local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]["EmbedColour"]
+local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["EmbedColour"]
 
 ----------------------------------------------------------------
 
