@@ -31,6 +31,8 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------
+SELLING THIS SYSTEM; ANY PART OF THIS SYSTEM REGARDLESS IF IT IS MODIFIED OR NOT IS NOT ALLOWED || THIS SYSTEM WAS CREATED TO BE A FREE RESOURCE, NOT SOMETHING TO CAPITALIZE ON
+----------------------------------------------------------------
 ]]
 
 _G.SRX_ADMINSYS = script
@@ -62,7 +64,11 @@ _G.SRX_ASSETS = assets
 local adminSettings = require(script.SRXAdminSettings)
 local plrUtilities = require(utilities.PlayerUtilities)
 local serverUtilities = require(utilities.ServerUtilities)
+local webhookUtilities = require(utilities.WebhookUtilities)
 ----------------------------------------------------------------
+
+local dev_consoleWebhookLink = adminSettings["WebhookSettings"]["DEV_CONSOLE"]["WebhookLink"]
+local dev_consoleWebhookEnabled = adminSettings["WebhookSettings"]["DEV_CONSOLE"]["Enabled"]
 
 ----------------------------------------------------------------
 local CSC_Func = events.CSC_Func -- client-server remote function
@@ -100,6 +106,16 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,p
 		end
 	end
 end)
+----------------------------------------------------------------
+if dev_consoleWebhookEnabled then
+	game:GetService("LogService").MessageOut:Connect(function(message, messageType)
+		local command = message:match("^> (.*)")
+
+		if messageType == Enum.MessageType.MessageOutput and command then
+			webhookUtilities.SendLog(dev_consoleWebhookLink,webhookUtilities.FormatDevConsoleLogWebhook(command))
+		end
+	end)
+end
 
 ----------------------------------------------------------------
 game.Players.PlayerAdded:Connect(function(plr)
