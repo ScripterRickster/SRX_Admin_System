@@ -37,6 +37,7 @@ module.Parameters = {
 	["TARGET"] = {
 		Description = "The player you wish to freeze";
 		Required = true;
+		Class = "User";
 	}
 }
 
