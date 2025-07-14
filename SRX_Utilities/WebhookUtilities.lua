@@ -6,25 +6,64 @@ repeat wait() until _G.SRX_COMMANDS ~= nil
 local COMMANDS = _G.SRX_COMMANDS
 repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
+repeat wait() until _G.SRX_ASSETS ~= nil
+local ASSETS = _G.SRX_ASSETS
+
+
+----------------------------------------------------------------
+
+local module = {
+
+	NoLogCMDS = {}; -- the names of the commands that are not to be logged if executed
+}
+
 
 ----------------------------------------------------------------
 local HTTP = game:GetService("HttpService")
 
 ----------------------------------------------------------------
+local serverID = game.JobId
+if game.PrivateServerId ~= "" then
+	serverID = game.PrivateServerId
+end
 
+if game:GetService("RunService"):IsStudio() then
+	serverID = "STUDIO SERVER | NO SERVER ID IS AVAILABLE"
+end
+
+local serverType = "REGULAR"
+local serverOwner = game.CreatorId
+
+if game.PrivateServerId ~= "" then
+	serverType = "VIP"
+	serverOwner = game.PrivateServerOwnerId
+end
+
+local sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
+if game.CreatorType == Enum.CreatorType.Group then
+	sOwner = "["..game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId).Name.."](https://www.roblox.com/groups/"..game.CreatorId..")"
+end
+
+module.getServerInfo = function()
+	return serverType,serverID,sOwner
+end
+
+module.getServerLink = function()
+	return tostring(serverID)..'\n[Join This Server](https://www.roblox.com/games/start?placeId='..tostring(game.PlaceId)..'%&launchData='..tostring(serverID)..')'
+end
+
+module.getTimeStampForDiscordEmbeds = function()
+	local ct = os.time(os.date("!*t"))
+	return "<t:"..ct..":F>"
+end
 ----------------------------------------------------------------
 
-local webhook = {
-	
-	NoLogCMDS = {}; -- the names of the commands that are not to be logged if executed
-}
 
-
-webhook.CheckIfNoLog = function(command:string)
+module.CheckIfNoLog = function(command:string)
 	if command == nil then return true end
 	command = tostring(command)
 	if command == "" then return true end
-	for _,v in pairs(webhook.NoLogCMDS) do
+	for _,v in pairs(module.NoLogCMDS) do
 		if string.lower(v.Name) == string.lower(command) then
 			return true
 		end
@@ -33,9 +72,6 @@ webhook.CheckIfNoLog = function(command:string)
 end
 
 ----------------------------------------------------------------
-
-local sInfoModule = require(UTILITIES.ServerUtilities)
-local serverType,serverID,sOwner = sInfoModule.getServerInfo()
 
 ----------------------------------------------------------------
 
@@ -47,7 +83,7 @@ local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]
 local defaultParameters = {
 	{
 		["name"] = "Date & Time:",
-		["value"] = sInfoModule.getTimeStampForDiscordEmbeds(),
+		["value"] = module.getTimeStampForDiscordEmbeds(),
 		["inline"] = true
 	},
 
@@ -80,7 +116,7 @@ local defaultParameters = {
 
 ----------------------------------------------------------------
 
-webhook.FormatCommandWebhook = function(command:string,args:table)
+module.FormatCommandWebhook = function(command:string,args:table)
 	local data = {
 		["content"] = "",
 		["embeds"] = {{
@@ -111,7 +147,7 @@ webhook.FormatCommandWebhook = function(command:string,args:table)
 	return data
 end
 
-webhook.FormatDevConsoleLogWebhook = function(command:string)
+module.FormatDevConsoleLogWebhook = function(command:string)
 	command = tostring(command)
 
 	local data = {
@@ -140,11 +176,7 @@ webhook.FormatDevConsoleLogWebhook = function(command:string)
 	return data
 end
 
-
-
-
-
-webhook.SendLog = function(wbhkid,data)
+module.SendLog = function(wbhkid,data)
 	if wbhkid and data then
 
 		local wbhk_proxys = { 
@@ -188,4 +220,4 @@ end
 
 
 
-return webhook
+return module
