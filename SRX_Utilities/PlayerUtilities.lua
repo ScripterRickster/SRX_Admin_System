@@ -300,7 +300,7 @@ module.FindPlayer = function(username:string,userid:number)
 	if (username == nil or username == "") and (userid == nil or tonumber(userid) == nil) then return isValidPlayer,userID,plrObject end
 	
 	username = string.lower(username)
-	
+
 	for _,v in pairs(game.Players:GetChildren()) do
 		local pN = string.lower(v.Name)
 		local pUID = v.UserId
@@ -316,16 +316,29 @@ module.FindPlayer = function(username:string,userid:number)
 		
 	end
 	
-	if game.Players:GetUserIdFromNameAsync(username) ~= nil or game.Players:GetNameFromUserIdAsync(userid) ~= nil then
-		isValidPlayer = true
-		plrObject = nil
+	if tonumber(userid) ~= nil then
+		local succ,temp_name = pcall(function()
+			return game.Players:GetNameFromUserIdAsync(tonumber(userid))
+		end)
+		if succ then
+			isValidPlayer = true
+			plrObject = nil
+			userID = tonumber(userid)
+			return isValidPlayer,userID,plrObject
+		end
+	else
+		local succ,temp_id = pcall(function()
+			return game.Players:GetUserIdFromNameAsync(tostring(username))
+		end)
 		
-		if game.Players:GetUserIdFromNameAsync(username) then
-			userID = game.Players:GetUserIdFromNameAsync(username)
-		else
-			userID = userid
+		if succ then
+			isValidPlayer = true
+			plrObject = nil
+			userID = temp_id
+			return isValidPlayer,userID,plrObject
 		end
 	end
+
 	return isValidPlayer,userID,plrObject
 end
 
