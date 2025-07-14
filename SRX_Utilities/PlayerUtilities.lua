@@ -28,6 +28,9 @@ local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
 local OverheadTagStatus = {}
 local rtag = ASSETS:WaitForChild("SRX_RANKTAG")
 
+
+local ftag = ASSETS:WaitForChild("SRX_FROZENTAG")
+
 ----------------------------------------------------------------
 local saveRanks = SETTINGS.SaveRanks
 ----------------------------------------------------------------
@@ -85,6 +88,7 @@ module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		plr:SetAttribute("SRX_SETUP",true)
 		plr:SetAttribute("SRX_MUTED",false)
+		plr:SetAttribute("SRX_FROZEN",false)
 		
 		OverheadTagStatus[plr.UserId] = false
 		
@@ -242,6 +246,17 @@ module.SetupPlayer = function(plr:Player)
 		end)
 		
 		plr.CharacterAdded:Connect(function(char)
+			task.defer(function()
+				if plr:GetAttribute("SRX_FROZEN") then
+					ftag:Clone().Parent = char:WaitForChild("Head")
+					local hrp = char:WaitForChild("HumanoidRootPart")
+					
+					if plr:GetAttribute("SRX_FREEZECFRAME") then
+						hrp.CFrame = plr:GetAttribute("SRX_FREEZECFRAME")
+					end
+					hrp.Anchored = true
+				end
+			end)
 			task.defer(function()
 				module.SetupPlayerTag(plr)
 			end)
