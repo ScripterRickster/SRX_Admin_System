@@ -37,6 +37,7 @@ module.Parameters = {
 	["TARGET"] = {
 		Description = "The player you wish to teleport to";
 		Required = true;
+		Class = "User";
 	}
 }
 
