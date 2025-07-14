@@ -166,7 +166,7 @@ module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 			if not webhookUtilities.CheckIfNoLog(cmdModule.Name) then
 				task.defer(function()
 					local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
-					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule.Name,given_params))
+					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule,given_params))
 				end)
 			end
 		end
