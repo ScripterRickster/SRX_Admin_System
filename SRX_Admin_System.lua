@@ -79,9 +79,23 @@ local CSC_Event = events.CSC_Event -- client-server remote event
 
 local SSC_Func = events.SSC_Func -- server-server bindable function
 local SSC_Event = events.SSC_Event -- server-server bindable event
+----------------------------------------------------------------
+
+local MS = game:GetService("MessagingService")
+local HTTP = game:GetService("HttpService")
 
 ----------------------------------------------------------------
 task.defer(serverUtilities.RegisterTextChatCommands)
+----------------------------------------------------------------
+MS:SubscribeAsync("SRX_GLOBALANNOUNCEMENTS",function(info)
+	local data = HTTP:JSONDecode(info.Data)
+	
+	local staffID = data["STAFF_ID"]
+	local msg = data["MESSAGE"]
+	
+	CSC_Event:FireAllClients("announcement",staffID,msg)
+	
+end)
 ----------------------------------------------------------------
 
 CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5) -- param1 = action
