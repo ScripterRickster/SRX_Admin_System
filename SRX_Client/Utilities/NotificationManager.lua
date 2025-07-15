@@ -8,6 +8,65 @@ module.GetClientTime = function(utcTime)
 end
 
 -----------------------------------------
+local TWS = game:GetService("TweenService")
+
+-----------------------------------------
+
+local assets = script.Parent.Parent:WaitForChild("Assets")
+local events = game.ReplicatedStorage:WaitForChild("SRX_Events")
+-----------------------------------------
+local plr = game.Players.LocalPlayer
+-----------------------------------------
+
+local announcement_template = assets:WaitForChild("AnnouncementTemplate")
+
+-----------------------------------------
+
+module.CreateAnnouncement = function(posterID:number,text:string)
+	if text == nil or posterID == nil or tonumber(tostring(posterID)) == nil then return end
+	local newAnnouncement = announcement_template:Clone()
+	
+	local msg = newAnnouncement:WaitForChild("Main"):WaitForChild("Message")
+	msg.Text = text
+	
+	local pfp = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("PFP")
+	local username = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("Name")
+	
+	local posterName = game.Players:GetNameFromUserIdAsync(posterID)
+	username.Text = string.upper(posterName)
+	pfp.Image = game.Players:GetUserThumbnailAsync(posterID,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
+	
+	local close = newAnnouncement:WaitForChild("Main"):WaitForChild("Close")
+	newAnnouncement.Parent = plr.PlayerGui
+	
+	local tweenGoal = UDim2.new(0.5,0,0.5,0)
+	local tweenGoal2 = UDim2.new(0.5,0,-1,0)
+	local tweenInfo = TweenInfo.new(1)
+
+	
+	local tween = TWS:Create(newAnnouncement:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
+	local tween2 = TWS:Create(newAnnouncement:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+	
+	tween:Play()
+	tween.Completed:Connect(function()
+		close.Active = true
+		
+		local closed = false
+		close.Activated:Connect(function()
+			if not closed then
+				closed = true
+				close.Active = false
+				
+				tween2:Play()
+				tween2.Completed:Connect(function()
+					newAnnouncement:Destroy()
+				end)
+				
+			end
+		end)
+		
+	end)
+end
 
 
 
