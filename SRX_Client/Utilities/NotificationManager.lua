@@ -32,9 +32,15 @@ module.CreateAnnouncement = function(posterID:number,text:string)
 	local pfp = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("PFP")
 	local username = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("Name")
 	
+	local timeText = newAnnouncement:WaitForChild("Main"):WaitForChild("Time"):WaitForChild("LocalTime")
+	
 	local posterName = game.Players:GetNameFromUserIdAsync(posterID)
 	username.Text = string.upper(posterName)
 	pfp.Image = game.Players:GetUserThumbnailAsync(posterID,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
+	
+	local hour,minute,ampm = os.date("%I"),os.date("%M"),os.date("%p")
+
+	timeText.Text = tostring(hour)..":"..tostring(minute).." "..tostring(ampm)
 	
 	local close = newAnnouncement:WaitForChild("Main"):WaitForChild("Close")
 	newAnnouncement.Parent = plr.PlayerGui
@@ -42,6 +48,8 @@ module.CreateAnnouncement = function(posterID:number,text:string)
 	local tweenGoal = UDim2.new(0.5,0,0.5,0)
 	local tweenGoal2 = UDim2.new(0.5,0,-1,0)
 	local tweenInfo = TweenInfo.new(1)
+	
+	
 
 	
 	local tween = TWS:Create(newAnnouncement:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
