@@ -1,13 +1,18 @@
 repeat task.wait() until game.ReplicatedStorage:FindFirstChild("SRX_Events") ~= nil
 local SRX_Events = game.ReplicatedStorage:FindFirstChild("SRX_Events")
 ----------------------------------------------------------------
-local Utilities = script.Parent.Utilities
+local Utilities = script.Parent:WaitForChild("Utilities")
+local Assets = script.Parent:WaitForChild("Assets")
+
+
+local NotificaitonUtility = require(Utilities:WaitForChild("NotificationManager"))
 ----------------------------------------------------------------
 local CS_Func = SRX_Events:WaitForChild("CSC_Func")
 local CS_Event = SRX_Events:WaitForChild("CSC_Event")
 ----------------------------------------------------------------
 
 local TCS = game:GetService("TextChatService")
+local TWS = game:GetService("TweenService")
 
 ----------------------------------------------------------------
 local chatTagsEnabled = CS_Func:InvokeServer("ChatTagStatus")
@@ -16,6 +21,8 @@ local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
 ----------------------------------------------------------------
 
 local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
+
+----------------------------------------------------------------
 
 ----------------------------------------------------------------
 
@@ -61,6 +68,9 @@ end
 ----------------------------------------------------------------
 
 
+----------------------------------------------------------------
+
+
 CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 	param1 = string.lower(tostring(param1))
 	if param1 == "allslashcmds" and param2 and chatSlashCMDS then
@@ -76,7 +86,10 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		local t_char = param2.Character or param2.CharacterAdded:Wait()
 		
 		cam.CameraSubject = t_char:WaitForChild("Humanoid")
-		
+	elseif param1 == "announcement" and param2 and param3 then
+		task.defer(function()
+			NotificaitonUtility.CreateAnnouncement(param2,param3)
+		end)
 	end
 end)
 
