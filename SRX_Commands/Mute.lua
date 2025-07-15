@@ -52,7 +52,6 @@ module.Aliases = { -- other names that tie it to this command
 	-- "alias_name1";
 }
 
-local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
 
 
 module.Execute = function(parameters:table)
