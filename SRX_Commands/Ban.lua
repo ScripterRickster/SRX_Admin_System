@@ -113,7 +113,7 @@ module.Execute = function(parameters:table)
 								Duration = durationText;
 
 							}
-							serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
 						end)
 						task.defer(function() -- notifies the server to log this command being run
 							serverUtil.LogCommand(script,parameters)
