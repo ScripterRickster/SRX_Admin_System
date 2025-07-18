@@ -86,7 +86,7 @@ module.Execute = function(parameters:table)
 							Duration = durationText;
 
 						}
-						serverUtil.RecordPlayerInfraction(target.UserId,infracData)
+						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
 						target:Kick(kickReason)
 					end)
 					
