@@ -86,9 +86,15 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		local t_char = param2.Character or param2.CharacterAdded:Wait()
 		
 		cam.CameraSubject = t_char:WaitForChild("Humanoid")
+		
 	elseif param1 == "announcement" and param2 and param3 then
 		task.defer(function()
 			NotificaitonUtility.CreateAnnouncement(param2,param3)
+		end)
+	
+	elseif param1 == "warn" and param2 and param3 then
+		task.defer(function()
+			NotificaitonUtility.CreateWarning(param2,param3)
 		end)
 	end
 end)
