@@ -78,6 +78,7 @@ local SSC_Func = EVENTS:WaitForChild("SSC_Func")
 
 local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]["EmbedColour"]
 local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["EmbedColour"]
+local join_logEmbedColour = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["EmbedColour"]
 
 ----------------------------------------------------------------
 
@@ -117,11 +118,12 @@ local defaultParameters = {
 
 ----------------------------------------------------------------
 
-module.FormatCommandWebhook = function(command:string,args:table)
+module.FormatCommandWebhook = function(command:ModuleScript,args:table)
+	if command == nil then return nil end
 	local data = {
 		["content"] = "",
 		["embeds"] = {{
-			["title"] = string.upper(tostring(command)).." | Command Execution",
+			["title"] = string.upper(command.Name).." | Command Execution",
 			["description"] = "More Information Below:",
 			["type"] = "rich",
 			["color"] = tonumber(commandEmbedColour:ToHex(),16),
@@ -131,21 +133,36 @@ module.FormatCommandWebhook = function(command:string,args:table)
 		}}
 	}
 	
+	local cmd = require(command)
+	
 	for idx,v in pairs(args) do
 		
 		local value = tostring(v)
-		local isValid,userID,target = SSC_Func:Invoke("GETPLAYER",v)
 		
-		if isValid then
-			if target then
-				value = "["..target.Name.."](https://www.roblox.com/users/"..tostring(target.UserId).."/profile)"
-			elseif target == nil and userID ~= nil then
-				local username = game.Players:GetNameFromUserIdAsync(tonumber(userID))
-				value = "["..username.."](https://www.roblox.com/users/"..tostring(userID).."/profile)"
-				
-				
+		if string.lower(idx) ~= "executor" then
+			local param_type = cmd["Parameters"][idx]["Class"]
+			if string.lower(tostring(param_type)) == "user" then
+				local isValid,userID,target = SSC_Func:Invoke("GETPLAYER",v)
+
+				if isValid then
+					if target then
+						value = "["..target.Name.."](https://www.roblox.com/users/"..tostring(target.UserId).."/profile)"
+					elseif target == nil and userID ~= nil then
+						local username = game.Players:GetNameFromUserIdAsync(tonumber(userID))
+						value = "["..username.."](https://www.roblox.com/users/"..tostring(userID).."/profile)"
+					end
+				end
+			end
+		else
+			if v:IsA("Player") then
+				value = "["..v.Name.."](https://www.roblox.com/users/"..tostring(v.UserId).."/profile)"
 			end
 		end
+		
+		
+		
+	
+		
 	
 		table.insert(data["embeds"][1]["fields"],
 			{
@@ -190,6 +207,45 @@ module.FormatDevConsoleLogWebhook = function(command:string)
 	end
 
 	return data
+end
+
+module.FormatJoinLogWebhook = function(plr:Player,joinType:string)
+	if plr and joinType then
+		joinType = string.upper(tostring(joinType))
+		
+		local data = {
+
+			["content"] = "",
+			["embeds"] = {{
+				["title"] = "Join/Leave Log",
+				["description"] = "More Information Below: ",
+				["type"] = "rich",
+				["color"] = tonumber(join_logEmbedColour:ToHex(),16),
+				["fields"] = {
+
+					{
+						["name"] = "PLAYER:",
+						["value"] = "["..plr.Name.."](https://www.roblox.com/users/"..tostring(plr.UserId).."/profile)",
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "TYPE:",
+						["value"] = joinType,
+						["inline"] = true
+					},
+				}
+			}}
+		}
+
+		for _,v in pairs(defaultParameters) do
+			table.insert(data["embeds"][1]["fields"],v)
+		end
+		
+		return data
+		
+	end
+	return nil
 end
 
 module.SendLog = function(wbhkid,data)
