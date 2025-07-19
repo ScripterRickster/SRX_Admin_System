@@ -209,7 +209,7 @@ module.FormatDevConsoleLogWebhook = function(command:string)
 	return data
 end
 
-module.FormatJoinLogWebhook = function(plr:Player,joinType:string)
+module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number)
 	if plr and joinType then
 		joinType = string.upper(tostring(joinType))
 		
@@ -237,6 +237,19 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string)
 				}
 			}}
 		}
+		
+		if joinType == "JOIN" and tonumber(tostring(totalJoins)) ~= nil then
+			totalJoins = tostring(totalJoins)
+			
+			local newParam = {
+				["name"] = "TOTAL JOINS:",
+				["value"] = "``"..totalJoins.."``",
+				["inline"] = true
+			}
+			
+			table.insert(data["embeds"][1]["fields"],newParam)
+			
+		end
 
 		for _,v in pairs(defaultParameters) do
 			table.insert(data["embeds"][1]["fields"],v)
@@ -276,9 +289,11 @@ module.SendLog = function(wbhkid,data)
 			end
 
 			local succ,err = pcall(function()
+				
 				HTTP:PostAsync(webhook,ndata)
 			end)
-
+			
+			
 			if succ then
 				print("SRX Admin System Successfully Logged An Action")
 				return
