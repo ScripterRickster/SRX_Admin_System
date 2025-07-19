@@ -116,15 +116,20 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel
 
 module.WebhookSettings = {
 	["COMMANDS"] = {
-		Enabled = true; -- whether to log commands or not
+		Enabled = false; -- whether to log commands or not
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	};
 	["DEV_CONSOLE"] = {
-		Enabled = true; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
+		Enabled = false; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	}
+	["JOIN_LOGS"] = { 
+		Enabled = false; -- whether or not if the system sends a log every time a user joins / leaves || NOT RECOMMENDED TO HAVE ENABLED
+		EmbedColour = Color3.fromRGB(255,255,255);
+		WebhookLink = ""; -- webhook link
+	};
 }
 
 
