@@ -13,6 +13,7 @@ local ASSETS = _G.SRX_ASSETS
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
+local webhookUtil = require(UTILITIES.WebhookUtilities)
 
 ----------------------------------------------------------------
 local MPS = game:GetService("MarketplaceService")
@@ -33,6 +34,9 @@ local ftag = ASSETS:WaitForChild("SRX_FROZENTAG")
 
 ----------------------------------------------------------------
 local saveRanks = SETTINGS.SaveRanks
+
+local logJoins = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["Enabled"]
+local joinLogsWebhook = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["WebhookLink"]
 ----------------------------------------------------------------
 
 module.SetupPlayerTag = function(plr:Player)
@@ -106,6 +110,20 @@ module.SetupPlayer = function(plr:Player)
 			end
 		end
 		
+		if game:GetAttribute("SRX_SERVERLOCK") then
+			if game.CreatorType ~= Enum.CreatorType.Group then
+				if game.PrivateServerId ~= "" then
+					if plr.UserId ~= game.PrivateServerOwnerId then
+						plr:Kick("SERVER IS LOCKED")
+					end
+				else
+					if plr.UserId ~= game.CreatorId then
+						plr:Kick("SERVER IS LOCKED")
+					end
+				end
+			end
+		end
+		
 		local joins = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerJoinsDDS)
 		if joins == 0 or joins == nil then
 			joins = 0
@@ -115,7 +133,16 @@ module.SetupPlayer = function(plr:Player)
 			
 		end
 		joins += 1
-		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerJoinsDDS,joins)
+		task.defer(function()
+			serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerJoinsDDS,joins)
+
+		end)
+		
+		if logJoins then
+			task.defer(function()
+				webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"JOIN",joins))
+			end)
+		end
 		
 		local function setupPlayerRank()
 			local userRanked = false
@@ -283,7 +310,11 @@ module.SetupPlayer = function(plr:Player)
 end
 
 module.PlayerLeft = function(plr:Player)
-	
+	if logJoins then
+		task.defer(function()
+			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE"))
+		end)
+	end
 	if saveRanks then
 		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
 		dds_data = HTTPS:JSONEncode(dds_data)
