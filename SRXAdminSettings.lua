@@ -114,6 +114,11 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
 }
 
+module.ToolLocations = { -- locations of where the tools are at in the game
+	game.ReplicatedStorage,
+	game.ServerStorage,
+}
+
 module.WebhookSettings = {
 	["COMMANDS"] = {
 		Enabled = false; -- whether to log commands or not
