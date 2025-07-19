@@ -38,6 +38,8 @@ for _,a in pairs(COMMANDS:GetChildren()) do
 end
 
 ----------------------------------------------------------------
+local toolLocations = SETTINGS["ToolLocations"]
+----------------------------------------------------------------
 module.IsAlpha = function(s:string)
 	return s:match("^%a+$") ~= nil
 end
@@ -374,8 +376,22 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 end
 -----------------------------------------------------------------------------------
 
+module.FindTool = function(toolName:string)
+	local toolObject,fullToolName = nil,nil
+	if toolName == nil or toolName == "" then return toolObject,fullToolName end
+	
+	for _,l in pairs(toolLocations) do
+		for _,t in pairs(l:GetDescendants()) do
+			if t.ClassName == "Tool" and string.match(string.lower(t.Name),string.lower(toolName)) ~= nil then
+				toolObject,fullToolName = t,t.Name
+				return toolObject,fullToolName
+			end
+		end
+	end
+	return toolObject,fullToolName
+end
 
-
+-----------------------------------------------------------------------------------
 
 
 return module
