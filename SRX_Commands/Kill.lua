@@ -22,7 +22,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 module.ExecutionLevel = 1; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
 
-module.CommandDescription = "Gods the player"; -- description of the command
+module.CommandDescription = "Kills the player"; -- description of the command
 
 module.Parameters = {
 	-- put whatever parameters you need for the command to work under here
@@ -35,7 +35,7 @@ module.Parameters = {
 	]]
 	
 	["TARGET"] = {
-		Description = "The player you wish to god";
+		Description = "Target of the command";
 		Required = true;
 		Class = "User";
 	}
