@@ -78,6 +78,7 @@ local SSC_Func = EVENTS:WaitForChild("SSC_Func")
 
 local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]["EmbedColour"]
 local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["EmbedColour"]
+local infractionEmbedColour = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["EmbedColour"]
 local join_logEmbedColour = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["EmbedColour"]
 
 ----------------------------------------------------------------
@@ -209,6 +210,85 @@ module.FormatDevConsoleLogWebhook = function(command:string)
 	return data
 end
 
+module.FormatInfractionLogWebhook = function(targID:number,infracData:table,action:string)
+	if tonumber(tostring(targID)) ~= nil and infracData and action then
+		
+		local staffMemID = infracData["StaffMemberID"]
+		local staffMemName = game.Players:GetNameFromUserIdAsync(tonumber(staffMemID))
+		
+		local targName = game.Players:GetNameFromUserIdAsync(tonumber(targID))
+		
+		local infracID = infracData["InfractionID"]
+		
+		
+		local data = {
+
+			["content"] = "",
+			["embeds"] = {{
+				["title"] = "Infraction Log",
+				["description"] = "More Information Below: ",
+				["type"] = "rich",
+				["color"] = tonumber(infractionEmbedColour:ToHex(),16),
+				["fields"] = {
+					
+					{
+						["name"] = "STAFF MEMBER:",
+						["value"] = "["..staffMemName.."](https://www.roblox.com/users/"..tostring(staffMemID).."/profile)",
+						["inline"] = true
+					},
+
+					{
+						["name"] = "PLAYER:",
+						["value"] = "["..targName.."](https://www.roblox.com/users/"..tostring(targID).."/profile)",
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "INFRACTION TYPE:",
+						["value"] = tostring(infracData["InfractionType"]),
+						["inline"] = true
+					},
+
+					{
+						["name"] = "ACTION:",
+						["value"] = "``"..action.."``",
+						["inline"] = true
+					},
+					
+					
+					{
+						["name"] = "REASON:",
+						["value"] = tostring(infracData["Reason"]),
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "DURATION:",
+						["value"] = tostring(infracData["Duration"]),
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "INFRACTION ID:",
+						["value"] = "``"..tostring(infracData["InfractionID"]).."``",
+						["inline"] = true
+					},
+					
+					
+					
+				}
+			}}
+		}
+
+		for _,v in pairs(defaultParameters) do
+			table.insert(data["embeds"][1]["fields"],v)
+		end
+
+		return data
+	end
+	return nil
+end
+
 module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number)
 	if plr and joinType then
 		joinType = string.upper(tostring(joinType))
@@ -266,8 +346,8 @@ module.SendLog = function(wbhkid,data)
 
 		local wbhk_proxys = { 
 			-- {proxy link, can queue (so like adding /queue to the end of the link, but make sure the proxy service supports links with /queue)}
-
-			--{"https://hook.proximatech.us/api/webhooks/",false},
+			
+			{"http://c4.play2go.cloud:20894/api/webhooks/",false},
 			{"https://webhook.newstargeted.com/api/webhooks/",false},
 			{"https://webhook.lewisakura.moe/api/webhooks/",true},
 
