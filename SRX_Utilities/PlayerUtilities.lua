@@ -37,6 +37,9 @@ local saveRanks = SETTINGS.SaveRanks
 
 local logJoins = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["Enabled"]
 local joinLogsWebhook = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["WebhookLink"]
+
+local logInfractions = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["Enabled"]
+local infractionsWebhook = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["WebhookLink"]
 ----------------------------------------------------------------
 
 module.SetupPlayerTag = function(plr:Player)
@@ -392,11 +395,11 @@ module.SetPlayerRank = function(plr:Player,rank_id:number)
 end
 
 module.GetPlayerRankInfo = function(username:string,userid:number)
-	local isValidPlayer,isInGame,plrObject = module.FindPlayer(username,userid)
+	local isValidPlayer,plrID,plrObject = module.FindPlayer(username,userid)
 	
 	local rank_id,rank_name,rank_colour = nil,nil,nil
 	
-	if isValidPlayer and isInGame and plrObject then
+	if isValidPlayer and plrObject then
 		rank_id = plrObject:GetAttribute("SRX_RANKID")
 		rank_name = plrObject:GetAttribute("SRX_RANKNAME")
 		rank_colour = plrObject:GetAttribute("SRX_RANKCOLOUR")
@@ -412,7 +415,7 @@ end
 
 
 module.RecordPlayerInfraction = function(userid:number,infracData:table)
-	local isValidPlayer,isInGame,plrObject = module.FindPlayer(nil,userid)
+	local isValidPlayer,plrID,plrObject = module.FindPlayer(nil,userid)
 	
 	if isValidPlayer then
 		local duration = infracData["Duration"]
@@ -421,7 +424,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 		local staffMemID = infracData["StaffMemberID"]
 		local infractionID = HTTPS:GenerateGUID(false)
 		local staffMemName = game.Players:GetNameFromUserIdAsync(staffMemID)
-		if isInGame and staffMemName ~= nil then
+		if plrID and staffMemName ~= nil then
 			local utcTime = os.time(os.date("!*t"))
 			
 			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
@@ -433,6 +436,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 					Reason = reason;
 					Duration = duration;
 					InfractionTime = utcTime;
+					InfractionID = infractionID;
 				}
 
 				currInfractions[tostring(infractionID)] = newInfraction
@@ -440,18 +444,29 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 				task.defer(function()
 					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
 				end)
+				
+				if logInfractions then
+					task.defer(function()
+						webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,newInfraction,"CREATE"))
+					end)
+				end
 			end
 		end
 	end
 end
 
 module.RemovePlayerInfraction = function(userid:number,infracID)
-	local isValidPlayer,isInGame,plrObject = module.FindPlayer(nil,userid)
+	local isValidPlayer,plrID,plrObject = module.FindPlayer(nil,userid)
 
 	if isValidPlayer and infracID then
 		local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
 		currInfractions = HTTPS:JSONDecode(currInfractions)
 		if currInfractions[infracID] then
+			if logInfractions then
+				task.defer(function()
+					webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,currInfractions[infracID],"DELETE"))
+				end)
+			end
 			currInfractions[infracID] = nil
 			serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
 		end
