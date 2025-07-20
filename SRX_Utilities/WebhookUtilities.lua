@@ -232,6 +232,12 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 				["fields"] = {
 					
 					{
+						["name"] = "ACTION:",
+						["value"] = "``"..action.."``",
+						["inline"] = true
+					},
+					
+					{
 						["name"] = "STAFF MEMBER:",
 						["value"] = "["..staffMemName.."](https://www.roblox.com/users/"..tostring(staffMemID).."/profile)",
 						["inline"] = true
@@ -249,12 +255,6 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 						["inline"] = true
 					},
 
-					{
-						["name"] = "ACTION:",
-						["value"] = "``"..action.."``",
-						["inline"] = true
-					},
-					
 					
 					{
 						["name"] = "REASON:",
