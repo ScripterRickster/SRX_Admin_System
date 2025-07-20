@@ -149,15 +149,39 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 
 			local c_cmd = require(cmd_Module)
 			local c_params = c_cmd.Parameters
+			
+			local applyToAllUsers,userParams = false,{}
+			
 
 			local ct = 2
 			for par,k in pairs(c_params) do
+				
+				if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
+					applyToAllUsers = true
+					
+					table.insert(userParams,par)
+				end
 				newParameters[par] = params[ct]
 				ct += 1
 			end
-
-			c_cmd.Execute(newParameters)
 			
+			if applyToAllUsers then
+				for _,p in pairs(game.Players:GetChildren()) do
+					local paramClone = table.clone(newParameters)
+					
+					for _,newP in pairs(userParams) do
+						paramClone[newP] = p
+					end
+					
+					task.defer(function()
+						c_cmd.Execute(paramClone)
+					end)
+				end
+			else
+				task.defer(function()
+					c_cmd.Execute(newParameters)
+				end)
+			end
 		end
 	end
 end
