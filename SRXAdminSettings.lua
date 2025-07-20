@@ -130,6 +130,11 @@ module.WebhookSettings = {
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	}
+	["INFRACTION_LOGS"] = { 
+		Enabled = false; -- whether or not if the system sends a log every time an infraction is created or removed
+		EmbedColour = Color3.fromRGB(255,255,255);
+		WebhookLink = ""; -- webhook link
+	};
 	["JOIN_LOGS"] = { 
 		Enabled = false; -- whether or not if the system sends a log every time a user joins / leaves || NOT RECOMMENDED TO HAVE ENABLED
 		EmbedColour = Color3.fromRGB(255,255,255);
