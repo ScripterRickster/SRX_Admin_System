@@ -149,7 +149,7 @@ module.SetupPlayer = function(plr:Player)
 		
 		local function setupPlayerRank()
 			local userRanked = false
-			local DRN,DRID,DRC = nil,nil,nil
+			local DRN,DRID,DRC,DCUP = nil,nil,nil,nil
 			-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
 			
 			if game.CreatorType ~= Enum.CreatorType.Group then
@@ -157,7 +157,7 @@ module.SetupPlayer = function(plr:Player)
 				-------------------------------
 				if game.PrivateServerId ~= "" then --private server
 					if plr.UserId == game.PrivateServerOwnerId and SETTINGS.VIPServerSettings.VIPCommands then
-						DRN,DRID,DRC = serverUtil.FindRank(tonumber(SETTINGS.VIPServerSettings.ServerOwnerRankId))
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(SETTINGS.VIPServerSettings.ServerOwnerRankId))
 						
 						userRanked = true
 						
@@ -167,7 +167,7 @@ module.SetupPlayer = function(plr:Player)
 				-------------------------------
 				
 				if plr.UserId == game.CreatorId and not userRanked then
-					DRN,DRID,DRC = serverUtil.GetHighestRank()
+					DRN,DRID,DRC,DCUP = serverUtil.GetHighestRank()
 					userRanked = true
 				end
 			end
@@ -177,7 +177,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for _,u in pairs(SETTINGS.RankBinds.Users) do
 					if string.lower(u[1]) == string.lower(plr.Name) or u[1] == plr.UserId then
-						DRN,DRID,DRC = serverUtil.FindRank(tonumber(u[2]))
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(u[2]))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -192,7 +192,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for gid,g in pairs(SETTINGS.RankBinds.Groups) do
 					if plr:GetRankInGroup(tonumber(gid)) >= g.Min_Group_Rank then
-						DRN,DRID,DRC = serverUtil.FindRank(tonumber(g.RankId))
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(g.RankId))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -206,7 +206,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for gpid,g in pairs(SETTINGS.RankBinds.Gamepasses) do
 					if MPS:UserOwnsGamePassAsync(plr.UserId,tonumber(gpid)) then
-						DRN,DRID,DRC = serverUtil.FindRank(tonumber(gpid))
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(gpid))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -222,7 +222,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for aid,a in pairs(SETTINGS.RankBinds.OtherAssets) do
 					if MPS:PlayerOwnsAsset(plr,tonumber(aid)) then
-						DRN,DRID,DRC = serverUtil.FindRank(tonumber(a))
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(a))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -237,7 +237,7 @@ module.SetupPlayer = function(plr:Player)
 				local result = serverUtil.GetDataFromDDS(tostring(plr.UserId),RankDDS)
 				if result ~= nil then
 					result = HTTPS:JSONDecode(result)
-					DRN,DRID,DRC = result[1],result[2],result[3]
+					DRN,DRID,DRC,DCUP = result[1],result[2],result[3],result[4]
 				end
 			end
 			
@@ -246,7 +246,7 @@ module.SetupPlayer = function(plr:Player)
 			-- PLAYER W/ NO RANK
 			
 			if not userRanked then
-				DRN,DRID,DRC = serverUtil.GetLowestRank()
+				DRN,DRID,DRC,DCUP = serverUtil.GetLowestRank()
 				userRanked = true
 			end
 			
@@ -259,6 +259,10 @@ module.SetupPlayer = function(plr:Player)
 
 				if DRC then
 					plr:SetAttribute("SRX_RANKCOLOUR",DRC)
+				end
+				
+				if DCUP then
+					plr:SetAttribute("SRX_CANUSEPANEL",DCUP)
 				end
 			end
 			
