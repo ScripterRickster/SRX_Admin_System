@@ -16,14 +16,11 @@ local  webhookUtilities = require(UTILITIES.WebhookUtilities)
 local TCS = game:GetService("TextChatService")
 local TS = game:GetService("TextService")
 local DDS = game:GetService("DataStoreService")
-local OCS = game:GetService("OpenCloudService")
+local HTTP = game:GetService("HttpService")
 
 
 local OpenAICloud_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
-local AIService = nil
-if OpenAICloud_Key ~= nil and OpenAICloud_Key ~= "" then
-	AIService = OCS:new(OpenAICloud_Key)
-end
+
 ----------------------------------------------------------------
 local CSC_Func = EVENTS.CSC_Func
 local CSC_Event = EVENTS.CSC_Event
@@ -394,22 +391,36 @@ end
 
 module.GetAIResponse = function(plr:Player,prompt:string)
 	if not SETTINGS["AI_Services"]["Enabled"] then return nil end
-	if AIService == nil then return nil end
+	if OpenAICloud_Key == nil then return nil end
 	if plr:GetAttribute("SRX_RANKID") < SETTINGS["AI_Services"]["MinRank"] then return nil end
-	local request = {
-		model = "text-davinci-003",
-		prompt = prompt,
-		max_tokens = 2048,
-		temperature = 0.5,
-		top_p = 1,
-		frequency_penalty = 0.5,
-		presence_penalty = 0.0,
-		stop = {"\n"}
+
+	local headers: headers = {
+		["Content-Type"] = "application/json",
+		["Authorization"] = `Bearer {OpenAICloud_Key}`
 	}
+
+	local body: body = {
+		["model"] = "text-davinci-003",
+		["prompt"] = prompt,
+		["temperature"] = 0.5,
+		["max_tokens"] = 2048,
+		["top_p"] = 1,
+		["frequency_penalty"] = 0.5,
+		["presence_penalty"] = 0.0
+	}
+
+	-- Use the information from this request. Make sure to decode the JSON body.
+	
 	
 	local succ,response = pcall(function()
-		return AIService:GenerateText(request)
+		return HTTP:RequestAsync({
+			["Url"] = "https://api.openai.com/v1/completions",
+			["Method"] = "POST",
+			["Headers"] = headers,
+			["Body"] = HTTP:JSONEncode(body)
+		})
 	end)
+	
 	if succ then return module.FilterMessage(plr,response.choices[1].text,true) else return "FAILED TO GET A RESPONSE" end
 	
 end
