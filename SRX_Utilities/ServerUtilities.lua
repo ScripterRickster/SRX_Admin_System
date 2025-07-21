@@ -408,8 +408,6 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 		["frequency_penalty"] = 0.5,
 		["presence_penalty"] = 0.0
 	}
-
-	-- Use the information from this request. Make sure to decode the JSON body.
 	
 	
 	local succ,response = pcall(function()
