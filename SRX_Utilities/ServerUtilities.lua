@@ -291,31 +291,33 @@ end
 
 
 module.GetHighestRank = function()
-	local rankName,rankId,rankColour = nil,-math.huge,nil
+	local rankName,rankId,rankColour,canUsePanel = nil,-math.huge,nil,nil
 	for n,r in pairs(SETTINGS.Ranks) do
 		if r.RankId > rankId then
 			rankName = n
 			rankId = r.RankId
 			rankColour = r.RankColour
+			canUsePanel = r.CanUsePanel
 		end
 	end
-	return rankName,rankId,rankColour
+	return rankName,rankId,rankColour,canUsePanel
 end
 
 module.GetLowestRank = function()
-	local rankName,rankId,rankColour = nil,math.huge,nil
+	local rankName,rankId,rankColour,canUsePanel = nil,math.huge,nil,nil
 	for n,r in pairs(SETTINGS.Ranks) do
 		if r.RankId < rankId then
 			rankName = n
 			rankId = r.RankId
 			rankColour = r.RankColour
+			canUsePanel = r.CanUsePanel
 		end
 	end
-	return rankName,rankId,rankColour
+	return rankName,rankId,rankColour,canUsePanel
 end
 
 module.FindRank = function(rank_id,rank_name)
-	local rankName,rankId,rankColour = nil,nil,nil
+	local rankName,rankId,rankColour,canUsePanel = nil,nil,nil,nil
 	rank_id = tonumber(tostring(rank_id))
 	if rank_id then
 		
@@ -324,8 +326,9 @@ module.FindRank = function(rank_id,rank_name)
 				rankId = r.RankId
 				rankName = n
 				rankColour = r.RankColour
+				canUsePanel = r.CanUsePanel
 				
-				return rankName,rankId,rankColour
+				return rankName,rankId,rankColour,canUsePanel
 			end
 		end
 	end
@@ -336,11 +339,12 @@ module.FindRank = function(rank_id,rank_name)
 				rankId = r.RankId
 				rankName = n
 				rankColour = r.RankColour
+				canUsePanel = r.CanUsePanel
 				break
 			end
 		end
 	end
-	return rankName,rankId,rankColour
+	return rankName,rankId,rankColour,canUsePanel
 end
 -----------------------------------------------------------------------------------
 
