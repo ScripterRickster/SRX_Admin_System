@@ -67,8 +67,9 @@ module.Execute = function(parameters:table)
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
+			local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 			local toolName = parameters["TOOL"]
-			if target and toolName and table.find(ignoreToolNames,tostring(toolName)) == nil then
+			if target and toolName and table.find(ignoreToolNames,tostring(toolName)) == nil and tRankId <= e_rID then
 				local desiredTool,fullToolName = serverUtil.FindTool(toolName)
 				if desiredTool then
 					desiredTool:Clone().Parent = target.Backpack
