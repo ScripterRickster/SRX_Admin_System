@@ -6,7 +6,14 @@
 
 Developed By: Scripter_Rickster
 
-Affiliated With: SR Studios
+Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
+
+Devforum Post: N/A
+--------------------------------------------------------
+Version 1.0.0 Progress:
+- Basic framework (95% Done)
+- Pre-made commands (90% Done)
+- Panel UI (0% Done)
 
 --------------------------------------------------------
 
@@ -30,6 +37,6 @@ Upcoming Features:
 - N/A
 --------------------------------------------------------
 
-Devforum Post: N/A 
 
-[Discord Invite](https://discord.gg/neTcS23xh7)
+
+
