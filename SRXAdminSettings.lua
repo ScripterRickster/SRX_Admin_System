@@ -9,6 +9,7 @@ module.Ranks = { -- ranks for the admin system to use
 	[rank_name] = { -- rank name
 		RankId = 0; -- rank id
 		RankColour = Color3.fromRGB(255,255,255); -- rank colour (optional parameter) | not including this means the user will not have a chat tag and an overhead tag if enabled
+		CanUsePanel = false; -- whether the person at this rank can use the built-in admin panel
 	}
 	
 	]]
@@ -16,30 +17,36 @@ module.Ranks = { -- ranks for the admin system to use
 	["Owner"] = { 
 		RankId = 5;
 		RankColour = Color3.fromRGB(0, 120, 180);
+		CanUsePanel = true;
 		
 	};
 	["Head Administrator"] = { 
 		RankId = 4;
 		RankColour = Color3.fromRGB(85, 255, 0);
+		CanUsePanel = true;
 
 	};
 	["Developer"] = { 
 		RankId = 3;
 		RankColour = Color3.fromRGB(255, 170, 0);
+		CanUsePanel = true;
 
 	};
 	["Administrator"] = { 
 		RankId = 2;
 		RankColour = Color3.fromRGB(255, 0, 0);
+		CanUsePanel = true;
 
 	};
 	["Moderator"] = { 
 		RankId = 1;
 		RankColour = Color3.fromRGB(255, 255, 0);
+		CanUsePanel = true;
 
 	};
 	["Regular"] = { 
 		RankId = 0;
+		CanUsePanel = false;
 
 	};
 	
