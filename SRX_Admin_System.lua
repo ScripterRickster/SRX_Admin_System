@@ -114,13 +114,7 @@ end
 CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,param5)
 	if plr then
 		param1 = string.lower(tostring(param1))
-		if param1 == "textcmdused" then
-			if param2[1] then
-				param2[1] = tostring(param2[1])
-				param2[1] = string.sub(param2[1],2,string.len(param2[1]))
-				--serverUtilities.HandleCommandExecution(plr,param2)
-			end
-		end
+
 	end
 end)
 
