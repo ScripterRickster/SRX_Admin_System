@@ -131,7 +131,8 @@ end
 
 module.HandleCommandExecution = function(plr:Player,params:table)
 	if plr and params then
-		if #params == 0 then return end
+		local totalParams = #params
+		if totalParams == 0 then return end
 		
 		local s_idx = 2
 		
@@ -153,7 +154,7 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 			local applyToAllUsers,userParams = false,{}
 			
 
-			local ct = 2
+			local ct,lastParam = 2,nil
 			for par,k in pairs(c_params) do
 				
 				if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
@@ -162,8 +163,22 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 					table.insert(userParams,par)
 				end
 				newParameters[par] = params[ct]
+				lastParam = par
+				
 				ct += 1
 			end
+			
+			local endString = params[ct-1]
+			
+			for ms=ct,totalParams do
+				endString = endString.." "..tostring(params[ms])
+			end
+			
+			newParameters[lastParam] = endString
+			
+			
+			
+			
 			
 			if applyToAllUsers then
 				for _,p in pairs(game.Players:GetChildren()) do
