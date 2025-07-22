@@ -12,7 +12,7 @@ Devforum Post: N/A
 --------------------------------------------------------
 Version 1.0.0 Progress:
 - Basic framework (95% Done)
-- Pre-made commands (90% Done)
+- Pre-made commands (98% Done)
 - Panel UI (0% Done)
 
 --------------------------------------------------------
