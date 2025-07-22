@@ -93,28 +93,26 @@ module.Execute = function(parameters:table)
 					}
 
 					local succ,err = pcall(function()
+						local durationText = "Permanent"
+						if banDuration ~= -1 then
+							durationText = banDuration.." Days"
+
+						end
+						local infracData = {
+
+							StaffMemberID = executor.UserId;
+							InfractionType = "Ban";
+							Reason = banReason;
+							Duration = durationText;
+
+						}
+						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
 						game.Players:BanAsync(banConfig)
 					end)
 
 					if not succ and err then
 						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
 					elseif succ then
-						task.defer(function()
-							local durationText = "Permanent"
-							if banDuration ~= -1 then
-								durationText = banDuration.." Days"
-
-							end
-							local infracData = {
-
-								StaffMemberID = executor.UserId;
-								InfractionType = "Ban";
-								Reason = banReason;
-								Duration = durationText;
-
-							}
-							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
-						end)
 						task.defer(function() -- notifies the server to log this command being run
 							serverUtil.LogCommand(script,parameters)
 						end)
