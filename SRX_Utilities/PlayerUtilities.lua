@@ -291,10 +291,17 @@ module.SetupPlayer = function(plr:Player)
 		end)
 		
 		plr.CharacterAdded:Connect(function(char)
+			plr:SetAttribute("SRX_FLYING",false)
+			local hrp = char:WaitForChild("HumanoidRootPart")
+			
+			local srx_attach = Instance.new("Attachment")
+			srx_attach.Name = "SRX_ATTACHMENT"
+			srx_attach.Parent = hrp
+			
 			task.defer(function()
 				if plr:GetAttribute("SRX_FROZEN") then
 					ftag:Clone().Parent = char:WaitForChild("Head")
-					local hrp = char:WaitForChild("HumanoidRootPart")
+					
 					
 					if plr:GetAttribute("SRX_FREEZECFRAME") then
 						hrp.CFrame = plr:GetAttribute("SRX_FREEZECFRAME")
