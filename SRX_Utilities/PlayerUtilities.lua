@@ -40,6 +40,16 @@ local joinLogsWebhook = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["WebhookLink"]
 
 local logInfractions = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["Enabled"]
 local infractionsWebhook = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["WebhookLink"]
+
+----------------------------------------------------------------
+
+local default_attributes = {
+	["SRX_SETUP"] = true;
+	["SRX_MUTED"] = false;
+	["SRX_FROZEN"] = false;
+	["SRX_FLYING"] = false;
+}
+
 ----------------------------------------------------------------
 
 module.SetupPlayerTag = function(plr:Player)
@@ -93,9 +103,10 @@ end
 
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
-		plr:SetAttribute("SRX_SETUP",true)
-		plr:SetAttribute("SRX_MUTED",false)
-		plr:SetAttribute("SRX_FROZEN",false)
+		
+		for attr,aVal in pairs(default_attributes) do
+			plr:SetAttribute(attr,aVal)
+		end
 		
 		OverheadTagStatus[plr.UserId] = false
 		
