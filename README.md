@@ -11,7 +11,7 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 Devforum Post: N/A
 --------------------------------------------------------
 Version 1.0.0 Progress:
-- Basic framework (95% Done)
+- Basic framework (96% Done)
 - Pre-made commands (100% Done)
 - Panel UI (0% Done)
 
