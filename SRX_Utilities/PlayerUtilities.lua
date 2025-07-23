@@ -152,6 +152,12 @@ module.SetupPlayer = function(plr:Player)
 			end
 		end
 		
+		local pChar = plr.Character or plr.CharacterAdded:Wait()
+		
+		local b_srx_attach = Instance.new("Attachment")
+		b_srx_attach.Name = "SRX_ATTACHMENT"
+		b_srx_attach.Parent = pChar:WaitForChild("HumanoidRootPart")
+		
 		local joins = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerJoinsDDS)
 		if joins == 0 or joins == nil then
 			joins = 0
@@ -306,11 +312,18 @@ module.SetupPlayer = function(plr:Player)
 		
 		plr.CharacterAdded:Connect(function(char)
 			plr:SetAttribute("SRX_FLYING",false)
+			
 			local hrp = char:WaitForChild("HumanoidRootPart")
 			
 			local srx_attach = Instance.new("Attachment")
 			srx_attach.Name = "SRX_ATTACHMENT"
 			srx_attach.Parent = hrp
+			
+			task.defer(function()
+				for _,p2 in pairs(trackedUsers[plr.UserId]) do
+					module.TrackPlayer(plr,game.Players:GetPlayerByUserId(p2),true)
+				end
+			end)
 			
 			task.defer(function()
 				if plr:GetAttribute("SRX_FROZEN") then
@@ -350,6 +363,12 @@ end
 
 module.PlayerLeft = function(plr:Player)
 	trackedUsers[plr.UserId] = {}
+	
+	for _,v in pairs(game.Players:GetChildren()) do
+		task.defer(function()
+			module.UntrackPlayer(v,plr)
+		end)
+	end
 	
 	
 	if logJoins then
