@@ -541,7 +541,7 @@ end
 
 module.TrackPlayer = function(p1:Player,p2:Player,forceTrack:boolean)
 	if p1 and p2 then
-		--if p1 == p2 then return end
+		if p1 == p2 then return end
 		if forceTrack then
 			CSC_Event:FireClient(p1,"track",p2)
 			return
