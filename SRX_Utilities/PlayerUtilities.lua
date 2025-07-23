@@ -10,6 +10,10 @@ repeat wait() until _G.SRX_UTILITIES ~= nil
 local UTILITIES = _G.SRX_UTILITIES
 repeat wait() until _G.SRX_ASSETS ~= nil
 local ASSETS = _G.SRX_ASSETS
+
+----------------------------------------------------------------
+
+local CSC_Event = EVENTS:WaitForChild("CSC_Event")
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
@@ -48,6 +52,12 @@ local default_attributes = {
 	["SRX_MUTED"] = false;
 	["SRX_FROZEN"] = false;
 	["SRX_FLYING"] = false;
+}
+
+----------------------------------------------------------------
+
+local trackedUsers = {
+	--[userid] = {}
 }
 
 ----------------------------------------------------------------
@@ -101,12 +111,16 @@ module.ManagePlayerTag = function(plr:Player,forcedStatus:boolean)
 	end
 end
 
+----------------------------------------------------------------
+
 module.SetupPlayer = function(plr:Player)
 	if plr:GetAttribute("SRX_SETUP") == (false or nil) then
 		
 		for attr,aVal in pairs(default_attributes) do
 			plr:SetAttribute(attr,aVal)
 		end
+		
+		trackedUsers[plr.UserId] = {}
 		
 		OverheadTagStatus[plr.UserId] = false
 		
@@ -335,6 +349,9 @@ module.SetupPlayer = function(plr:Player)
 end
 
 module.PlayerLeft = function(plr:Player)
+	trackedUsers[plr.UserId] = {}
+	
+	
 	if logJoins then
 		task.defer(function()
 			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE"))
@@ -348,6 +365,8 @@ module.PlayerLeft = function(plr:Player)
 		end)
 	end
 end
+
+----------------------------------------------------------------
 
 
 module.FindPlayer = function(username:string,userid:number)
@@ -398,6 +417,8 @@ module.FindPlayer = function(username:string,userid:number)
 	return isValidPlayer,userID,plrObject
 end
 
+----------------------------------------------------------------
+
 module.SetPlayerRank = function(plr:Player,rank_id:number)
 	if plr then
 		
@@ -434,6 +455,8 @@ module.GetPlayerRankInfo = function(username:string,userid:number)
 	
 	
 end
+
+----------------------------------------------------------------
 
 
 module.RecordPlayerInfraction = function(userid:number,infracData:table)
@@ -494,6 +517,34 @@ module.RemovePlayerInfraction = function(userid:number,infracID)
 		end
 	end
 end
+
+----------------------------------------------------------------
+
+module.TrackPlayer = function(p1:Player,p2:Player,forceTrack:boolean)
+	if p1 and p2 then
+		--if p1 == p2 then return end
+		if forceTrack then
+			CSC_Event:FireClient(p1,"track",p2)
+			return
+		end
+		if table.find(trackedUsers[p1.UserId],p2.UserId) == nil then
+			table.insert(trackedUsers[p1.UserId],p2.UserId)
+			CSC_Event:FireClient(p1,"track",p2)
+		end
+	end
+end
+
+module.UntrackPlayer = function(p1:Player,p2:Player)
+	if p1 and p2 then
+		local idx = table.find(trackedUsers[p1.UserId],p2.UserId)
+		if idx ~= nil then
+			CSC_Event:FireClient(p1,"untrack",p2)
+			table.remove(trackedUsers[p1.UserId],idx)
+		end
+	end
+end
+
+----------------------------------------------------------------
 
 
 return module
