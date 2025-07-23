@@ -23,7 +23,7 @@ local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
 local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
 
 ----------------------------------------------------------------
-
+local plr = game.Players.LocalPlayer
 ----------------------------------------------------------------
 
 local cam = game.Workspace.CurrentCamera
@@ -81,6 +81,11 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 			end)
 		end
 		
+	elseif param1 == "unfly" then
+		local char = plr.Character or plr.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+		
+		hum.PlatformStand = false
 	elseif param1 == "view" and param2~=nil and param2:IsA("Player") then
 		
 		local t_char = param2.Character or param2.CharacterAdded:Wait()
@@ -96,6 +101,34 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		task.defer(function()
 			NotificaitonUtility.CreateWarning(param2,param3)
 		end)
+		
+	elseif param1 == "track" and param2 then
+		local t_char = param2.Character or param2.CharacterAdded:Wait()
+		local t_char_hrp = t_char:WaitForChild("HumanoidRootPart")
+		
+		local char = plr.Character or plr.CharacterAdded:Wait()
+		local hrp = char:WaitForChild("HumanoidRootPart")
+		
+		local a1,a2 = hrp:FindFirstChild("SRX_ATTACHMENT"),t_char_hrp:FindFirstChild("SRX_ATTACHMENT")
+		
+		if a1 and a2 and hrp:FindFirstChild(param2.Name) == nil then
+			local trackBeam = Instance.new("Beam")
+			trackBeam.Color = ColorSequence.new(Color3.new(0.333333, 1, 1))
+			trackBeam.Attachment0 = a1
+			trackBeam.Attachment1 = a2
+			trackBeam.Name = param2.Name
+			trackBeam.Parent = hrp
+			trackBeam.Enabled = true
+		end
+		
+	elseif param1 == "untrack" and param2 then
+
+		local char = plr.Character or plr.CharacterAdded:Wait()
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		local t_beam = hrp:FindFirstChild(param2.Name)
+		
+		if t_beam then t_beam:Destroy() end
 	end
 end)
 
