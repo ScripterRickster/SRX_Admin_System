@@ -486,6 +486,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 		local reason = infracData["Reason"]
 		local infracType = infracData["InfractionType"]
 		local staffMemID = infracData["StaffMemberID"]
+		local canRemove = infracData["Deletable"]
 		local infractionID = HTTPS:GenerateGUID(false)
 		local staffMemName = game.Players:GetNameFromUserIdAsync(staffMemID)
 		if plrID and staffMemName ~= nil then
@@ -499,6 +500,7 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 					InfractionType = infracType;
 					Reason = reason;
 					Duration = duration;
+					CanDelete = canRemove;
 					InfractionTime = utcTime;
 					InfractionID = infractionID;
 				}
