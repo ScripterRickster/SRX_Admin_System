@@ -85,6 +85,7 @@ module.Execute = function(parameters:table)
 							StaffMemberID = executor.UserId;
 							InfractionType = "Warn";
 							Reason = warnReason;
+							Deletable = true;
 							Duration = durationText;
 						}
 						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
