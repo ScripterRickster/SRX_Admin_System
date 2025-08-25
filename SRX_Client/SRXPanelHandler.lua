@@ -1,4 +1,4 @@
--- please note that this script is not actually under the SRX_Client folder || this is simply placed here in order to allow users to view this script without actually having to grab the model
+
 local events = game.ReplicatedStorage:WaitForChild("SRX_Events")
 local csc_event = events:WaitForChild("CSC_Event")
 local csc_func = events:WaitForChild("CSC_Func")
@@ -26,12 +26,17 @@ returnBttn.Visible = false
 
 -- home page
 local H_Options = home:WaitForChild("MainOptions")
-local AIChatBttn = H_Options:WaitForChild("AIChat"):WaitForChild("Enter")
-local CMDSBttn = H_Options:WaitForChild("Commands"):WaitForChild("Enter")
-local InfracBttn = H_Options:WaitForChild("Infractions"):WaitForChild("Enter")
-local LogsBttn = H_Options:WaitForChild("Logs"):WaitForChild("Enter")
-local SettingsBttn = H_Options:WaitForChild("Settings"):WaitForChild("Enter")
+local MainButtons = {
+	["AIChatBttn"] = H_Options:WaitForChild("AIChat"):WaitForChild("Enter");
+	["CMDSBttn"] = H_Options:WaitForChild("Commands"):WaitForChild("Enter");
+	["InfracBttn"] = H_Options:WaitForChild("Infractions"):WaitForChild("Enter");
+	["LogsBttn"] = H_Options:WaitForChild("Logs"):WaitForChild("Enter");
+	["SettingsBttn"] = H_Options:WaitForChild("Settings"):WaitForChild("Enter");
+	
+}
 
+
+-------------------------------------------------------------------------------------
 
 function setupGeneralInfo()
 	local rID,rName,rClr = csc_func:InvokeServer("GETRANKINFO")
@@ -39,7 +44,10 @@ function setupGeneralInfo()
 	local sID = csc_func:InvokeServer("GETSERVERID")
 	local canUseAI = csc_func:InvokeServer("CANUSEAI")
 	
-	AIChatBttn.Parent.Visible = canUseAI
+	userPFPDisplay.Image = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+	
+	MainButtons["AIChatBttn"].Parent.Visible = canUseAI
+	
 
 	userNameDisplay.Text = string.upper(player.Name)
 	userRankDisplay.Text = string.upper(rName)
@@ -53,8 +61,7 @@ end
 
 
 
-
-function returnToHomePage()
+function changePage(bttn)
 	
 end
 
