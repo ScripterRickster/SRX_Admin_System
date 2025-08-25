@@ -120,6 +120,10 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			
 			if tonumber(tostring(rID)) == nil or tonumber(tostring(minAIRankID)) == nil then return false end
 			return tonumber(tostring(rID)) >= tonumber(tostring(minAIRankID))
+		elseif param1 == "getplayercmds" then
+			return serverUtilities.GetAllPlayerUsableCommands(plr)
+		elseif param1 == "getcmdinfo" and param2 then
+			return serverUtilities.GetCommandInformation(param2)
 		end
 		
 	end
@@ -128,6 +132,29 @@ end
 CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,param5)
 	if plr then
 		param1 = string.lower(tostring(param1))
+		
+		if param1 == "getadminpanel" then
+			
+			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
+			
+			if rID and rName then
+				local tbl = adminSettings["Ranks"][rName]
+				if tbl then
+					if tbl["CanUsePanel"] then
+						local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
+						
+						if currPanel == nil then
+							local adminPanel = assets:WaitForChild("SRXPanelUI")
+							local newAdminPanel = adminPanel:Clone()
+							newAdminPanel.Parent = plr.PlayerGui
+							newAdminPanel.Enabled = true
+						else
+							currPanel.Enabled = true
+						end
+					end
+				end
+			end
+		end
 
 	end
 end)
