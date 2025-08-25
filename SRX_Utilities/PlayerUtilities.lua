@@ -36,6 +36,8 @@ local rtag = ASSETS:WaitForChild("SRX_RANKTAG")
 
 local ftag = ASSETS:WaitForChild("SRX_FROZENTAG")
 
+local adminTool = ASSETS:WaitForChild("SRXAdminTool")
+
 ----------------------------------------------------------------
 local saveRanks = SETTINGS.SaveRanks
 
@@ -294,6 +296,7 @@ module.SetupPlayer = function(plr:Player)
 				
 				if DCUP then
 					plr:SetAttribute("SRX_CANUSEPANEL",DCUP)
+					adminTool:Clone().Parent = plr.Backpack
 				end
 			end
 			
@@ -318,6 +321,13 @@ module.SetupPlayer = function(plr:Player)
 			local srx_attach = Instance.new("Attachment")
 			srx_attach.Name = "SRX_ATTACHMENT"
 			srx_attach.Parent = hrp
+			
+			if plr:GetAttribute("SRX_CANUSEPANEL") then
+				if not plr.Backpack:FindFirstChild(adminTool.Name) then
+					adminTool:Clone().Parent = plr.Backpack
+				end
+				
+			end
 			
 			task.defer(function()
 				for _,p2 in pairs(trackedUsers[plr.UserId]) do
