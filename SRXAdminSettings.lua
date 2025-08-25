@@ -126,6 +126,15 @@ module.ToolLocations = { -- locations of where the tools are at in the game
 	game.ServerStorage,
 }
 
+module.ClientThemes = { -- themes that can be switched to for each client
+	--[[
+	["TEMPLATE"] = { -- theme name
+		ThemeID = ""; -- asset id of this theme
+		
+	}
+	]]
+}
+
 module.WebhookSettings = {
 	["COMMANDS"] = {
 		Enabled = false; -- whether to log commands or not
