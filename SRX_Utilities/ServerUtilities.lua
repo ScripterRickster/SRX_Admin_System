@@ -236,6 +236,17 @@ module.FindCommand = function(cmd)
 	return nil
 end
 
+module.GetCommandInformation = function(cmd)
+	local targCMD = module.FindCommand(cmd)
+	if targCMD then
+		local rCMD = require(targCMD)
+		
+		return rCMD.CommandDescription,rCMD.Parameters
+	else 
+		return nil
+	end
+end
+
 module.CheckCommandRequirements = function(required_parameters,given_parameters:table)
 	for x,v in pairs(required_parameters) do
 		if v.Required then
