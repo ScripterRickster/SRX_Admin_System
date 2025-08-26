@@ -11,10 +11,10 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 Devforum Post: N/A
 --------------------------------------------------------
 Version 1.0.0 Progress:
-- Basic framework (97% Done)
+- Basic framework (98% Done)
 - Pre-made commands (100% Done)
-- Panel UI (20% Done)
-- UI Framework (0% Done)
+- Panel UI (70% Done)
+- UI Framework (30% Done)
 
 --------------------------------------------------------
 
@@ -22,7 +22,7 @@ Modular, configurable, and clean admin system for ROBLOX
 
 Created to replace the old SR Admin System
 
-Features:
+Features (Version 1.0.0):
 - Clean, organized, and unobfuscated code
 - The standard pre-made commands
 - Modular system that can easily be utilized by other systems if required
@@ -34,8 +34,9 @@ Features:
 - Optional feature to include webhook-logging via Discord
 - and more stuff that I forgot about
 
-Upcoming Features:
-- N/A
+Upcoming Features (Version 1.0.1):
+- Client Settings
+- Client Themes
 --------------------------------------------------------
 
 
