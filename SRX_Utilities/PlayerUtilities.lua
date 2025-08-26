@@ -64,6 +64,7 @@ local trackedUsers = {
 
 ----------------------------------------------------------------
 
+
 module.SetupPlayerTag = function(plr:Player)
 	if plr and SETTINGS["OverheadTags"]["Enabled"] then
 		local char = plr.Character or plr.CharacterAdded:Wait()
@@ -279,8 +280,17 @@ module.SetupPlayer = function(plr:Player)
 			-- PLAYER W/ NO RANK
 			
 			if not userRanked then
-				DRN,DRID,DRC,DCUP = serverUtil.GetLowestRank()
-				userRanked = true
+				
+				local defaultRank = SETTINGS.RankBinds.DefaultAdminRank
+				if defaultRank and tonumber(tostring(defaultRank)) ~= nil then
+					defaultRank = tonumber(tostring(defaultRank))
+					
+					DRN,DRID,DRC,DCUP = serverUtil.FindRank(defaultRank)
+					userRanked = true
+				else
+					DRN,DRID,DRC,DCUP = serverUtil.GetLowestRank()
+					userRanked = true
+				end
 			end
 			
 			-------------------------------
