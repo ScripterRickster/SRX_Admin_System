@@ -564,6 +564,19 @@ module.RemovePlayerInfraction = function(userid:number,infracID)
 	end
 end
 
+module.GetPlayerInfractions = function(userid:number)
+	local isValidPlayer,plrID,plrObject = module.FindPlayer(nil,userid)
+
+	if isValidPlayer then
+		local plrInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
+		
+		local allInfracs = HTTPS:JSONDecode(plrInfractions)
+		
+		return allInfracs
+	end
+	return nil
+end
+
 ----------------------------------------------------------------
 
 module.TrackPlayer = function(p1:Player,p2:Player,forceTrack:boolean)
