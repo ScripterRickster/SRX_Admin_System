@@ -24,8 +24,13 @@ local timeText = generalInfo:WaitForChild("Time"):WaitForChild("TimeText")
 local userPFPDisplay,userRankDisplay,userNameDisplay = generalInfo:WaitForChild("UserDisplay"):WaitForChild("PFP"),generalInfo:WaitForChild("UserDisplay"):WaitForChild("Rank"),generalInfo:WaitForChild("UserDisplay"):WaitForChild("Username")
 local returnBttn = generalInfo:WaitForChild("Return")
 local closeBttn = generalInfo:WaitForChild("Close")
+local homeBttn = generalInfo:WaitForChild("Home")
 returnBttn.Visible = false
+homeBttn.Visible = false
 closeBttn.Visible = true
+
+
+
 
 -- home page
 local H_Options = home:WaitForChild("MainOptions")
@@ -59,6 +64,12 @@ local cmdList = cmds:WaitForChild("CMDFrame"):WaitForChild("CMDList")
 local cmdTemplate = cmdList:WaitForChild("Template")
 local cmdSearch = cmds:WaitForChild("CMDSearch"):WaitForChild("SearchBox")
 
+-- cmdpanel
+local cmdPanel = main:WaitForChild("CMDPanel")
+local currCMDNameText = cmdPanel:WaitForChild("Titles"):WaitForChild("CMDName")
+local cmdActivateBttn = cmdPanel:WaitForChild("Activate")
+local cmdParameterList = cmdPanel:WaitForChild("Parameters"):WaitForChild("List")
+local cmdParameterTemplate = cmdParameterList:WaitForChild("Template")
 
 -- other
 local pageHistory = {
@@ -93,6 +104,35 @@ function setupGeneralInfo()
 	task.defer(loadUserCommands)
 end
 
+function loadCMDPanel(cmd,cmdParams)
+	if cmd and cmdParams then
+		for _,v in pairs(cmdParameterList:GetChildren()) do
+			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then v:Destroy() end
+		end
+		currCMDNameText.Text = tostring(cmd)
+		for pName,v in pairs(cmdParams) do
+			local newParamTemplate = cmdParameterTemplate:Clone()
+			
+			local placeholderTxt = v["Description"]
+			
+			if placeholderTxt == nil or placeholderTxt == "" then placeholderTxt = "Input......" end
+			newParamTemplate:WaitForChild("Input").PlaceholderText = placeholderTxt
+			
+			local paramRequired = v["Required"]
+			if paramRequired == nil then paramRequired = false end
+			newParamTemplate:WaitForChild("Input"):SetAttribute("Required",paramRequired)
+			
+			newParamTemplate:WaitForChild("Title").Text = pName
+			
+			newParamTemplate.Name = pName
+			
+			newParamTemplate.Parent = cmdParameterList
+			newParamTemplate.Visible = true
+		end
+		
+	end
+end
+
 function loadUserCommands()
 	for _,v in pairs(cmdList:GetChildren()) do
 		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
@@ -116,11 +156,30 @@ function loadUserCommands()
 		newCMDTemplate.Visible = true
 		
 		newCMDTemplate:WaitForChild("Use").Activated:Connect(function()
-			
+			loadCMDPanel(string.upper(tostring(v)),cmdParams)
+			changePage(cmdPanel)
 		end)
 	end
 end
 
+
+function clearInputs(dPage:Frame)
+	for _,v in pairs(dPage:GetDescendants()) do
+		if v:IsA("TextBox") then v.Text = "" end
+	end
+end
+
+function changeVisibleStatus(dPage:Frame,CName,DName:string,Status:boolean,CaseSensitive:boolean)
+	if dPage and CName and DName and Status ~= nil then
+		for _,v in pairs(dPage:GetDescendants()) do
+			if v:IsA(CName) then
+				if (CaseSensitive and DName == v.Name) or (not CaseSensitive and string.lower(DName) == string.lower(v.Name)) then
+					v.Visible = Status
+				end
+			end
+		end
+	end
+end
 
 
 function changePage(dPage:Frame)
@@ -136,9 +195,11 @@ function changePage(dPage:Frame)
 		
 		if dPage ~= home then 
 			returnBttn.Visible = true 
+			homeBttn.Visible = true
 			closeBttn.Visible = false 
 		else 
 			returnBttn.Visible = false 
+			homeBttn.Visible = false
 			closeBttn.Visible = true 
 		end
 	end
@@ -165,10 +226,98 @@ returnBttn.Activated:Connect(function()
 	changePage(pageHistory[#pageHistory])
 end)
 
+homeBttn.Activated:Connect(function()
+	pageHistory[#pageHistory].Visible = false
+	table.clear(pageHistory)
+	changePage(home)
+end)
+
 closeBttn.Activated:Connect(function()
 	csc_event:FireServer("closeadminpanel")
 end)
 
+
+cmdActivateBttn.Activated:Connect(function()
+	local currPage = pageHistory[#pageHistory]
+	if currPage == cmdPanel then
+		local dParams = cmdParameterList:GetChildren()
+		local allParams = {}
+		
+		local c_cmd = currCMDNameText.Text
+		
+		local succ = true
+		
+		for _,v in pairs(dParams) do
+			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+				local userInput = v:WaitForChild("Input")
+				local txt = userInput.Text
+				local paramName = v.Name
+				
+				local warnMsg = v:WaitForChild("WarnMessage")
+				
+				if userInput:GetAttribute("Required") then
+					if txt == "" or txt == nil then
+						warnMsg.Visible = true
+						succ = false
+					end
+				end
+				
+				allParams[paramName] = txt
+			end
+			
+		end
+		
+		
+		if succ then
+			csc_event:FireServer("CMDACTIVATION",c_cmd,allParams)
+			task.defer(function()
+				changeVisibleStatus(cmdPanel,"TextLabel","WarnMessage",false,false)
+			end)
+			task.defer(function()
+				clearInputs(cmdPanel)
+			end)
+		end
+		
+	end
+end)
+
+
+---------------------
+-- Draggable UI Stuff
+
+local UIS = game:GetService('UserInputService')
+local dragToggle = nil
+local dragSpeed = 0.25
+local dragStart = nil
+local startPos = nil
+
+local function updateInput(input)
+	local delta = input.Position - dragStart
+	local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	game:GetService('TweenService'):Create(main, TweenInfo.new(dragSpeed), {Position = position}):Play()
+end
+
+main.InputBegan:Connect(function(input)
+	if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
+		dragToggle = true
+		dragStart = input.Position
+		startPos = main.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragToggle = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		if dragToggle then
+			updateInput(input)
+		end
+	end
+end)
 
 
 task.defer(setupGeneralInfo)
