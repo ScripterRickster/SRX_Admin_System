@@ -67,8 +67,15 @@ module.Execute = function(parameters:table)
 				if tRankId <= e_rID then
 
 					local char = target.Character or target.CharacterAdded:Wait()
+					local hrp = char:WaitForChild("HumanoidRootPart")
+					local cCFrame = hrp.CFrame
 					
-					char:LoadCharacter()
+					target:LoadCharacter()
+					task.delay(1,function()
+						char = target.Character or target.CharacterAdded:Wait()
+						hrp = char:WaitForChild("HumanoidRootPart")
+						hrp.CFrame = cCFrame
+					end)
 
 					task.defer(function() -- notifies the server to log this command being run
 						serverUtil.LogCommand(script,parameters)
