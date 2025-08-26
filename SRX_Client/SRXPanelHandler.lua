@@ -244,6 +244,7 @@ cmdActivateBttn.Activated:Connect(function()
 		local allParams = {}
 		
 		local c_cmd = currCMDNameText.Text
+		table.insert(allParams,c_cmd)
 		
 		local succ = true
 		
@@ -262,14 +263,14 @@ cmdActivateBttn.Activated:Connect(function()
 					end
 				end
 				
-				allParams[paramName] = txt
+				table.insert(allParams,txt)
 			end
 			
 		end
 		
 		
 		if succ then
-			csc_event:FireServer("CMDACTIVATION",c_cmd,allParams)
+			csc_event:FireServer("CMDACTIVATION",allParams)
 			task.defer(function()
 				changeVisibleStatus(cmdPanel,"TextLabel","WarnMessage",false,false)
 			end)
