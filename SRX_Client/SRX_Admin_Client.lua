@@ -102,6 +102,11 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 			NotificaitonUtility.CreateWarning(param2,param3)
 		end)
 		
+	elseif param1 == "notification" and param2 and param3 then
+		task.defer(function()
+			NotificaitonUtility.CreateNotification(param2,param3)
+		end)
+		
 	elseif param1 == "track" and param2 then
 		local t_char = param2.Character or param2.CharacterAdded:Wait()
 		local t_char_hrp = t_char:WaitForChild("HumanoidRootPart")
@@ -111,12 +116,12 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		
 		local a1,a2 = hrp:FindFirstChild("SRX_ATTACHMENT"),t_char_hrp:FindFirstChild("SRX_ATTACHMENT")
 		
-		if a1 and a2 and hrp:FindFirstChild(param2.Name) == nil then
+		if a1 and a2 and hrp:FindFirstChild(string.lower(param2.Name)) == nil then
 			local trackBeam = Instance.new("Beam")
 			trackBeam.Color = ColorSequence.new(Color3.new(0.333333, 1, 1))
 			trackBeam.Attachment0 = a1
 			trackBeam.Attachment1 = a2
-			trackBeam.Name = param2.Name
+			trackBeam.Name = string.lower(param2.Name)
 			trackBeam.Parent = hrp
 			trackBeam.Enabled = true
 		end
@@ -126,7 +131,7 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local hrp = char:WaitForChild("HumanoidRootPart")
 
-		local t_beam = hrp:FindFirstChild(param2.Name)
+		local t_beam = hrp:FindFirstChild(string.lower(param2.Name))
 		
 		if t_beam then t_beam:Destroy() end
 	end
