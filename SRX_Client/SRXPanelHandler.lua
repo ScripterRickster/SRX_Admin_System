@@ -1,6 +1,7 @@
 local events = game.ReplicatedStorage:WaitForChild("SRX_Events")
 local csc_event = events:WaitForChild("CSC_Event")
 local csc_func = events:WaitForChild("CSC_Func")
+local panelcsc_event = events:WaitForChild("PanelCSC_Event")
 
 local player = game.Players.LocalPlayer
 
@@ -70,6 +71,11 @@ local currCMDNameText = cmdPanel:WaitForChild("Titles"):WaitForChild("CMDName")
 local cmdActivateBttn = cmdPanel:WaitForChild("Activate")
 local cmdParameterList = cmdPanel:WaitForChild("Parameters"):WaitForChild("List")
 local cmdParameterTemplate = cmdParameterList:WaitForChild("Template")
+
+-- infractions page
+local infracUserSearch = infractions:WaitForChild("UserSearch"):WaitForChild("SearchBox")
+local infractionList = infractions:WaitForChild("InfractionFrame"):WaitForChild("InfractionList")
+local infractionTemplate = infractionList:WaitForChild("Template")
 
 -- other
 local pageHistory = {
@@ -163,6 +169,71 @@ function loadUserCommands()
 	end
 end
 
+function loadUserInfractions(targUID)
+	for _,v in pairs(infractionList:GetChildren()) do
+		if string.lower(v.Name) ~= "template" and v:IsA("Frame") then v:Destroy() end
+	end
+	if targUID then
+		local uInfracs = csc_func:InvokeServer("GETPLAYERINFRACTIONS",targUID)
+		if uInfracs ~= nil then
+			for infracID,infracInfo in pairs(uInfracs) do
+
+				local newInfractionTemplate = infractionTemplate:Clone()
+				newInfractionTemplate.Name = tostring(infracID)
+				
+				local infracReason = tostring(infracInfo["Reason"])
+				local staffMem = game.Players:GetNameFromUserIdAsync(tonumber(infracInfo["StaffMemberID"]))
+				local canDelete = infracInfo["CanDelete"]
+				local infracDuration = infracInfo["Duration"]
+				local infracReason = tostring(infracInfo["Reason"])
+				local infracType = tostring(infracInfo["InfractionType"])
+				local timeIssued = os.date("*t",tonumber(tostring(infracInfo["InfractionTime"])))
+				
+				local formattedTime = string.format("%02d/%02d/%04d %02d:%02d:%02d",
+					timeIssued.day,
+					timeIssued.month,
+					timeIssued.year,
+					timeIssued.hour,
+					timeIssued.min,
+					timeIssued.sec
+				)
+				
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("StaffMember"):WaitForChild("Content").Text = staffMem.." ("..tostring(infracInfo["StaffMemberID"])..")"
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("InfractionID"):WaitForChild("Content").Text = tostring(infracID)
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Description"):WaitForChild("Content").Text = infracReason
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("TimeIssued"):WaitForChild("Content").Text = formattedTime
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Duration"):WaitForChild("Content").Text = tostring(infracDuration)
+				
+				if infracType == nil or infracType == "" then
+					infracType = "UNKNOWN"
+				end
+				
+				infracType = tostring(infracType)
+				
+				newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("InfractionType"):WaitForChild("Content").Text = infracType
+				
+				if infracDuration == nil or infracDuration == "" then
+					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Duration").Visible  = false
+				else
+					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Duration").Visible = true
+				end
+				
+				if canDelete then
+					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Delete").Visible = true
+					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Delete").Activated:Connect(function()
+						csc_event:FireServer("REMOVEINFRACTION",targUID,infracID)
+						loadUserInfractions(targUID)
+					end)
+				else
+					newInfractionTemplate:WaitForChild('InternalFrame'):WaitForChild("Delete").Visible = false
+				end
+				newInfractionTemplate.Parent = infractionList
+				newInfractionTemplate.Visible = true
+			end
+		end
+	end
+end
+
 function filterCMDS(txt:string)
 	if txt == nil then return end
 	txt = string.lower(tostring(txt))
@@ -191,6 +262,8 @@ function clearInputs(dPage:Frame)
 	end
 end
 
+
+
 function changeVisibleStatus(dPage:Frame,CName,DName:string,Status:boolean,CaseSensitive:boolean)
 	if dPage and CName and DName and Status ~= nil then
 		for _,v in pairs(dPage:GetDescendants()) do
@@ -204,26 +277,30 @@ function changeVisibleStatus(dPage:Frame,CName,DName:string,Status:boolean,CaseS
 end
 
 
-function changePage(dPage:Frame)
+function changePage(dPage:Frame,returning:boolean)
 	if dPage then
 		local currPage = pageHistory[#pageHistory]
 		
 		if currPage then currPage.Visible = false end
 		
+		if returning then
+			table.remove(pageHistory,#pageHistory)
+		end
 		
-		
-		dPage.Visible = true
-		table.insert(pageHistory,dPage)
 		
 		if dPage ~= home then 
 			returnBttn.Visible = true 
 			homeBttn.Visible = true
 			closeBttn.Visible = false 
 		else 
+			table.clear(pageHistory)
 			returnBttn.Visible = false 
 			homeBttn.Visible = false
 			closeBttn.Visible = true 
 		end
+		
+		dPage.Visible = true
+		table.insert(pageHistory,dPage)
 	end
 end
 
@@ -243,14 +320,11 @@ end
 
 
 returnBttn.Activated:Connect(function()
-	pageHistory[#pageHistory].Visible = false
-	table.remove(pageHistory,#pageHistory)
-	changePage(pageHistory[#pageHistory])
+	local idx = math.max(#pageHistory-1,0)
+	changePage(pageHistory[idx],true)
 end)
 
 homeBttn.Activated:Connect(function()
-	pageHistory[#pageHistory].Visible = false
-	table.clear(pageHistory)
 	changePage(home)
 end)
 
@@ -309,6 +383,29 @@ cmdSearch:GetPropertyChangedSignal("Text"):Connect(function()
 	filterCMDS(cmdSearch.Text)
 end)
 
+infracUserSearch.FocusLost:Connect(function()
+	local targUID = tonumber(infracUserSearch.Text)
+	
+	if targUID == nil and infracUserSearch.Text ~= "" then
+		targUID = game.Players:GetUserIdFromNameAsync(infracUserSearch.Text)
+	end
+	loadUserInfractions(targUID)
+end)
+
+
+panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
+	if param1 then
+		param1 = string.lower(tostring(param1))
+		
+		if param1 == "updatepanel" then
+			changePage(home)
+			task.defer(setupGeneralInfo)
+		end
+	end
+end)
+
+task.defer(setupGeneralInfo)
+
 ---------------------
 -- Draggable UI Stuff
 
@@ -347,4 +444,3 @@ UIS.InputChanged:Connect(function(input)
 end)
 
 
-task.defer(setupGeneralInfo)
