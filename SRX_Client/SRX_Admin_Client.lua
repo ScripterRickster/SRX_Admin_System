@@ -163,6 +163,8 @@ module.CreateNotification = function(notifName:string,notifMessage:text)
 	local tween = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
 	local tween2 = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
 	
+	newNotif.Parent = plr.PlayerGui
+	
 	tween:Play()
 	
 	tween.Completed:Connect(function()
