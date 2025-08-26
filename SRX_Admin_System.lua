@@ -125,14 +125,15 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "getcmdinfo" and param2 then
 			return serverUtilities.GetCommandInformation(param2)
 			
-		elseif param1 == "getplrinfractions" and param2 then
+		elseif param1 == "getplayerinfractions" and param2 then
 			param2 = tostring(param2)
 			local uid = tonumber(param2)
 			if tonumber(param2) == nil then
 				uid = game.Players:GetUserIdFromNameAsync(param2)
 			end
 			
-			return plrUtilities.GetPlayerInfractions(uid)
+			local results = plrUtilities.GetPlayerInfractions(uid)
+			return results
 
 		end
 		
