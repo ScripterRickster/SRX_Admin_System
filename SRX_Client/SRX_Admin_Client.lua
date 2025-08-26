@@ -1,140 +1,190 @@
-repeat task.wait() until game.ReplicatedStorage:FindFirstChild("SRX_Events") ~= nil
-local SRX_Events = game.ReplicatedStorage:FindFirstChild("SRX_Events")
-----------------------------------------------------------------
-local Utilities = script.Parent:WaitForChild("Utilities")
-local Assets = script.Parent:WaitForChild("Assets")
+local module = {}
 
+module.GetClientTime = function(utcTime)
+	local utc_curr = os.time()
+	local client_curr = math.floor(tick())
+	local diff = client_curr - utc_curr
+	return utcTime + diff
+end
 
-local NotificaitonUtility = require(Utilities:WaitForChild("NotificationManager"))
-----------------------------------------------------------------
-local CS_Func = SRX_Events:WaitForChild("CSC_Func")
-local CS_Event = SRX_Events:WaitForChild("CSC_Event")
-----------------------------------------------------------------
-
-local TCS = game:GetService("TextChatService")
+-----------------------------------------
 local TWS = game:GetService("TweenService")
 
-----------------------------------------------------------------
-local chatTagsEnabled = CS_Func:InvokeServer("ChatTagStatus")
-local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
+-----------------------------------------
 
-----------------------------------------------------------------
-
-local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
-
-----------------------------------------------------------------
+local assets = script.Parent.Parent:WaitForChild("Assets")
+local events = game.ReplicatedStorage:WaitForChild("SRX_Events")
+-----------------------------------------
 local plr = game.Players.LocalPlayer
-----------------------------------------------------------------
+-----------------------------------------
 
-local cam = game.Workspace.CurrentCamera
+local announcement_template = assets:WaitForChild("AnnouncementTemplate")
+local warning_template = assets:WaitForChild("WarningTemplate")
+local notification_template = assets:WaitForChild("NotificationTemplate")
 
-----------------------------------------------------------------
--- 
-function registerTextChatCommand(cmd)
-	if SRX_TextCMDS:FindFirstChild(cmd) then
-		SRX_TextCMDS:FindFirstChild(cmd).AutocompleteVisible = true
-	end
-end
+-----------------------------------------
 
-function resetTextChatCommands()
-	for _,v in pairs(SRX_TextCMDS:GetChildren()) do
-		if v:IsA("TextChatCommand") then
-			v.AutocompleteVisible = false
-		end
-	end
-end
-----------------------------------------------------------------
+module.CreateAnnouncement = function(posterID:number,text:string)
+	if text == nil or posterID == nil or tonumber(tostring(posterID)) == nil then return end
+	local newAnnouncement = announcement_template:Clone()
+	newAnnouncement.Name = "SRX_ANNOUNCEMENT"
+	
+	local msg = newAnnouncement:WaitForChild("Main"):WaitForChild("Message")
+	msg.Text = text
+	
+	local pfp = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("PFP")
+	local username = newAnnouncement:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("Name")
+	
+	local timeText = newAnnouncement:WaitForChild("Main"):WaitForChild("Time"):WaitForChild("LocalTime")
+	
+	local posterName = game.Players:GetNameFromUserIdAsync(posterID)
+	username.Text = string.upper(posterName)
+	pfp.Image = game.Players:GetUserThumbnailAsync(posterID,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
+	
+	local hour,minute,ampm = os.date("%I"),os.date("%M"),os.date("%p")
 
--- chat tags
-TCS.OnIncomingMessage = function(msg:TextChatMessage)
-	local ts = msg.TextSource
-	if ts then
-		local plr = game.Players:GetPlayerByUserId(ts.UserId)
-		if plr then
-			if plr:GetAttribute("SRX_MUTED") then return false end
-			if chatTagsEnabled then
-				local rn = plr:GetAttribute("SRX_RANKNAME")
-				local rc = plr:GetAttribute("SRX_RANKCOLOUR")
-				if rn and rc then
-					local n_msg_prp = Instance.new("TextChatMessageProperties")
-					n_msg_prp.PrefixText = '<font color="#'..rc:ToHex()..'">['..tostring(rn)..']</font> '..msg.PrefixText
-					return n_msg_prp
-				end
+	timeText.Text = tostring(hour)..":"..tostring(minute).." "..tostring(ampm)
+	
+	local close = newAnnouncement:WaitForChild("Main"):WaitForChild("Close")
+	newAnnouncement.Parent = plr.PlayerGui
+	
+	local tweenGoal = UDim2.new(0.5,0,0.5,0)
+	local tweenGoal2 = UDim2.new(0.5,0,-1,0)
+	local tweenInfo = TweenInfo.new(1)
+	
+	
+
+	
+	local tween = TWS:Create(newAnnouncement:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
+	local tween2 = TWS:Create(newAnnouncement:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+	
+	tween:Play()
+	tween.Completed:Connect(function()
+		close.Active = true
+		
+		local closed = false
+		close.Activated:Connect(function()
+			if not closed then
+				closed = true
+				close.Active = false
+				
+				tween2:Play()
+				tween2.Completed:Connect(function()
+					newAnnouncement:Destroy()
+				end)
+				
 			end
-		end
-	end
+		end)
+		
+	end)
 end
 
-----------------------------------------------------------------
+
+module.CreateWarning = function(posterID:number,text:string)
+	if text == nil or posterID == nil or tonumber(tostring(posterID)) == nil then return end
+	local newWarning = warning_template:Clone()
+	newWarning.Name = "SRX_WARNING"
+
+	local msg = newWarning:WaitForChild("Main"):WaitForChild("Message")
+	msg.Text = text
+
+	local pfp = newWarning:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("PFP")
+	local username = newWarning:WaitForChild("Main"):WaitForChild("UserInfo"):WaitForChild("Name")
+
+	local timeText = newWarning:WaitForChild("Main"):WaitForChild("Time"):WaitForChild("LocalTime")
+
+	local posterName = game.Players:GetNameFromUserIdAsync(posterID)
+	username.Text = string.upper(posterName)
+	pfp.Image = game.Players:GetUserThumbnailAsync(posterID,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
+
+	local hour,minute,ampm = os.date("%I"),os.date("%M"),os.date("%p")
+
+	timeText.Text = tostring(hour)..":"..tostring(minute).." "..tostring(ampm)
+
+	local close = newWarning:WaitForChild("Main"):WaitForChild("Close")
+	
+	local outlineCLR = newWarning:WaitForChild("Main"):WaitForChild("OutlineCLR")
+	local function flashBorder()
+		if newWarning == nil or newWarning.Parent == nil then return end
+		outlineCLR.Color = Color3.new(255,255,255)
+		task.wait(0.5)
+		outlineCLR.Color = Color3.new(255,0,0)
+		task.delay(0.5,flashBorder)
+	end
+	
+	newWarning.Parent = plr.PlayerGui
+	
+	task.defer(flashBorder)
+
+	local tweenGoal = UDim2.new(0.5,0,0.5,0)
+	local tweenGoal2 = UDim2.new(0.5,0,-1,0)
+	local tweenInfo = TweenInfo.new(1)
 
 
-----------------------------------------------------------------
 
 
-CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
-	param1 = string.lower(tostring(param1))
-	if param1 == "allslashcmds" and param2 and chatSlashCMDS then
-		resetTextChatCommands()
-		for _,v in pairs(param2) do
-			task.defer(function()
-				registerTextChatCommand(v)
+	local tween = TWS:Create(newWarning:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
+	local tween2 = TWS:Create(newWarning:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+
+	tween:Play()
+	tween.Completed:Connect(function()
+		close.Active = true
+
+		local closed = false
+		close.Activated:Connect(function()
+			if not closed then
+				closed = true
+				close.Active = false
+
+				tween2:Play()
+				tween2.Completed:Connect(function()
+					newWarning:Destroy()
+				end)
+
+			end
+		end)
+
+	end)
+end
+
+module.CreateNotification = function(notifName:string,notifMessage:text)
+	if notifName == nil or notifMessage == nil then return end
+	
+	local newNotif = notification_template:Clone()
+	newNotif:WaitForChild("Main"):WaitForChild("Title").Text = "<u>"..string.upper(tostring(notifName)).."</u>"
+	newNotif:WaitForChild("Main"):WaitForChild("Message").Text = tostring(notifMessage)
+	
+	local close = newNotif:WaitForChild("Main"):WaitForChild("Close")
+	
+	local tweenGoal = UDim2.new(0.91,0,0.923,0)
+	local tweenGoal2 = UDim2.new(2,0,0.923,0)
+	local tweenInfo = TweenInfo.new(1)
+	
+	local tween = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
+	local tween2 = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+	
+	tween:Play()
+	
+	tween.Completed:Connect(function()
+		local closed = false
+		local function closeNotif()
+			if closed then return end
+			close.Active = false
+			closed = true
+			tween2:Play()
+			tween2.Completed:Connect(function()
+				newNotif:Destroy()
 			end)
 		end
 		
-	elseif param1 == "unfly" then
-		local char = plr.Character or plr.CharacterAdded:Wait()
-		local hum = char:WaitForChild("Humanoid")
-		
-		hum.PlatformStand = false
-	elseif param1 == "view" and param2~=nil and param2:IsA("Player") then
-		
-		local t_char = param2.Character or param2.CharacterAdded:Wait()
-		
-		cam.CameraSubject = t_char:WaitForChild("Humanoid")
-		
-	elseif param1 == "announcement" and param2 and param3 then
-		task.defer(function()
-			NotificaitonUtility.CreateAnnouncement(param2,param3)
+		close.Activated:Connect(function()
+			task.defer(closeNotif)
 		end)
+		
+		task.delay(10,closeNotif)
+	end)
 	
-	elseif param1 == "warn" and param2 and param3 then
-		task.defer(function()
-			NotificaitonUtility.CreateWarning(param2,param3)
-		end)
-		
-	elseif param1 == "notification" and param2 and param3 then
-		task.defer(function()
-			NotificaitonUtility.CreateNotification(param2,param3)
-		end)
-		
-	elseif param1 == "track" and param2 then
-		local t_char = param2.Character or param2.CharacterAdded:Wait()
-		local t_char_hrp = t_char:WaitForChild("HumanoidRootPart")
-		
-		local char = plr.Character or plr.CharacterAdded:Wait()
-		local hrp = char:WaitForChild("HumanoidRootPart")
-		
-		local a1,a2 = hrp:FindFirstChild("SRX_ATTACHMENT"),t_char_hrp:FindFirstChild("SRX_ATTACHMENT")
-		
-		if a1 and a2 and hrp:FindFirstChild(string.lower(param2.Name)) == nil then
-			local trackBeam = Instance.new("Beam")
-			trackBeam.Color = ColorSequence.new(Color3.new(0.333333, 1, 1))
-			trackBeam.Attachment0 = a1
-			trackBeam.Attachment1 = a2
-			trackBeam.Name = string.lower(param2.Name)
-			trackBeam.Parent = hrp
-			trackBeam.Enabled = true
-		end
-		
-	elseif param1 == "untrack" and param2 then
+end
 
-		local char = plr.Character or plr.CharacterAdded:Wait()
-		local hrp = char:WaitForChild("HumanoidRootPart")
 
-		local t_beam = hrp:FindFirstChild(string.lower(param2.Name))
-		
-		if t_beam then t_beam:Destroy() end
-	end
-end)
-
-----------------------------------------------------------------
+return module
