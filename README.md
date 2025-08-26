@@ -14,7 +14,7 @@ Version 1.0.0 Progress:
 - Basic framework (98% Done)
 - Pre-made commands (100% Done)
 - Panel UI (70% Done)
-- UI Framework (30% Done)
+- UI Framework (35% Done)
 
 --------------------------------------------------------
 
