@@ -152,6 +152,7 @@ function loadUserCommands()
 		
 		cmdDesc = tostring(cmdDesc)
 		newCMDTemplate:WaitForChild("Description").Text = cmdDesc
+		newCMDTemplate.Name = tostring(v)
 		newCMDTemplate.Parent = cmdList
 		newCMDTemplate.Visible = true
 		
@@ -159,6 +160,27 @@ function loadUserCommands()
 			loadCMDPanel(string.upper(tostring(v)),cmdParams)
 			changePage(cmdPanel)
 		end)
+	end
+end
+
+function filterCMDS(txt:string)
+	if txt == nil then return end
+	txt = string.lower(tostring(txt))
+	for _,v in pairs(cmdList:GetChildren()) do
+		if string.lower(v.Name) ~= "template" and v:IsA("Frame") then 
+			if txt == "" then
+				v.Visible = true 
+			else
+				local cName = string.lower(v.Name)
+				if string.match(cName,txt) ~= nil then
+					v.Visible = true
+				else
+					v.Visible = false
+				end
+			end
+			
+		end
+		
 	end
 end
 
@@ -282,6 +304,10 @@ cmdActivateBttn.Activated:Connect(function()
 	end
 end)
 
+
+cmdSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	filterCMDS(cmdSearch.Text)
+end)
 
 ---------------------
 -- Draggable UI Stuff
