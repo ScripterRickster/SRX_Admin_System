@@ -154,6 +154,11 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,p
 					end
 				end
 			end
+		elseif param1 == "closeadminpanel" then
+			local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
+			if currPanel then
+				currPanel:Destroy()
+			end
 		end
 
 	end
