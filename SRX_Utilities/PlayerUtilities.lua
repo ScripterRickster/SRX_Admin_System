@@ -14,6 +14,7 @@ local ASSETS = _G.SRX_ASSETS
 ----------------------------------------------------------------
 
 local CSC_Event = EVENTS:WaitForChild("CSC_Event")
+local PanelCSC_Event = EVENTS:WaitForChild("PanelCSC_Event")
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
@@ -466,6 +467,10 @@ module.SetPlayerRank = function(plr:Player,rank_id:number)
 			plr:SetAttribute("SRX_RANKID",rank_id)
 			plr:SetAttribute("SRX_RANKNAME",rank_name)
 			plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
+			
+			CSC_Event:FireClient(plr,"notification","RANK UPDATE","Your rank has been updated to: "..tostring(rank_name))
+			PanelCSC_Event:FireClient(plr,"updatepanel")
+			
 			task.defer(function()
 				module.SetupPlayerTag(plr)
 			end)
