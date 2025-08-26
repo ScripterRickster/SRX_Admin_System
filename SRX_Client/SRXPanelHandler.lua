@@ -23,7 +23,9 @@ local serverIDText = generalInfo:WaitForChild("ServerId"):WaitForChild("IDText")
 local timeText = generalInfo:WaitForChild("Time"):WaitForChild("TimeText")
 local userPFPDisplay,userRankDisplay,userNameDisplay = generalInfo:WaitForChild("UserDisplay"):WaitForChild("PFP"),generalInfo:WaitForChild("UserDisplay"):WaitForChild("Rank"),generalInfo:WaitForChild("UserDisplay"):WaitForChild("Username")
 local returnBttn = generalInfo:WaitForChild("Return")
+local closeBttn = generalInfo:WaitForChild("Close")
 returnBttn.Visible = false
+closeBttn.Visible = true
 
 -- home page
 local H_Options = home:WaitForChild("MainOptions")
@@ -59,7 +61,9 @@ local cmdSearch = cmds:WaitForChild("CMDSearch"):WaitForChild("SearchBox")
 
 
 -- other
-local currPage = home
+local pageHistory = {
+	home,
+}
 -------------------------------------------------------------------------------------
 
 function setupGeneralInfo()
@@ -121,12 +125,22 @@ end
 
 function changePage(dPage:Frame)
 	if dPage then
+		local currPage = pageHistory[#pageHistory]
+		
 		if currPage then currPage.Visible = false end
 		
-		dPage.Visible = true
-		currPage = dPage
 		
-		if currPage ~= home then returnBttn.Visible = true else returnBttn.Visible = false end
+		
+		dPage.Visible = true
+		table.insert(pageHistory,dPage)
+		
+		if dPage ~= home then 
+			returnBttn.Visible = true 
+			closeBttn.Visible = false 
+		else 
+			returnBttn.Visible = false 
+			closeBttn.Visible = true 
+		end
 	end
 end
 
@@ -146,7 +160,13 @@ end
 
 
 returnBttn.Activated:Connect(function()
-	changePage(home)
+	pageHistory[#pageHistory].Visible = false
+	table.remove(pageHistory,#pageHistory)
+	changePage(pageHistory[#pageHistory])
+end)
+
+closeBttn.Activated:Connect(function()
+	csc_event:FireServer("closeadminpanel")
 end)
 
 
