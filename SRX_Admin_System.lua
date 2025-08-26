@@ -124,6 +124,16 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return serverUtilities.GetAllPlayerUsableCommands(plr)
 		elseif param1 == "getcmdinfo" and param2 then
 			return serverUtilities.GetCommandInformation(param2)
+			
+		elseif param1 == "getplrinfractions" and param2 then
+			param2 = tostring(param2)
+			local uid = tonumber(param2)
+			if tonumber(param2) == nil then
+				uid = game.Players:GetUserIdFromNameAsync(param2)
+			end
+			
+			return plrUtilities.GetPlayerInfractions(uid)
+
 		end
 		
 	end
@@ -159,6 +169,10 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,p
 			if currPanel then
 				currPanel:Destroy()
 			end
+		elseif param1 == "cmdactivation" then
+			task.defer(function()
+				serverUtilities.HandleCommandExecution(plr,param2)
+			end)
 		end
 
 	end
