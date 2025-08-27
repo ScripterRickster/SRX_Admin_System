@@ -80,6 +80,7 @@ local commandEmbedColour = SETTINGS["WebhookSettings"]["COMMANDS"]["EmbedColour"
 local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["EmbedColour"]
 local infractionEmbedColour = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["EmbedColour"]
 local join_logEmbedColour = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["EmbedColour"]
+local chat_logEmbedColour = SETTINGS["WebhookSettings"]["CHAT_LOGS"]["EmbedColour"]
 
 ----------------------------------------------------------------
 
@@ -229,6 +230,10 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 				["description"] = "More Information Below: ",
 				["type"] = "rich",
 				["color"] = tonumber(infractionEmbedColour:ToHex(),16),
+				["footer"] = {
+					["text"] = "INFRACTION ID | "..tostring(infracData["InfractionID"]),
+					["icon_url"] = "",
+				},
 				["fields"] = {
 					
 					{
@@ -265,12 +270,6 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 					{
 						["name"] = "DURATION:",
 						["value"] = tostring(infracData["Duration"]),
-						["inline"] = true
-					},
-					
-					{
-						["name"] = "INFRACTION ID:",
-						["value"] = "``"..tostring(infracData["InfractionID"]).."``",
 						["inline"] = true
 					},
 					
@@ -337,6 +336,43 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:num
 		
 		return data
 		
+	end
+	return nil
+end
+
+module.FormatChatLogWebhook = function(plr:Player,msg:string)
+	if plr then
+		msg = tostring(msg)
+		
+		local data = {
+
+			["content"] = "",
+			["embeds"] = {{
+				["title"] = "Chat Log",
+				["description"] = "More Information Below: ",
+				["type"] = "rich",
+				["color"] = tonumber(join_logEmbedColour:ToHex(),16),
+				["fields"] = {
+
+					{
+						["name"] = "PLAYER:",
+						["value"] = "["..plr.Name.."](https://www.roblox.com/users/"..tostring(plr.UserId).."/profile)",
+						["inline"] = true
+					},
+
+					{
+						["name"] = "MESSAGE:",
+						["value"] = msg,
+						["inline"] = true
+					},
+				}
+			}}
+		}
+		
+		for _,v in pairs(defaultParameters) do
+			table.insert(data["embeds"][1]["fields"],v)
+		end
+		return data
 	end
 	return nil
 end
