@@ -15,7 +15,7 @@ local cmds = main:WaitForChild("Commands")
 local cmdPanel = main:WaitForChild("CMDPanel")
 local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
-local aiPage = nil
+local aiPage = main:WaitForChild("AI_Panel")
 
 -- general info
 local generalInfo = main:WaitForChild("GeneralInfo")
@@ -86,6 +86,13 @@ local cmdlogTemplate = commandLogsList:WaitForChild("Template")
 
 local cmdlogSearch = logs:WaitForChild("SearchAreas"):WaitForChild("CMDLogSearchBox")
 local chatlogSearch = logs:WaitForChild("SearchAreas"):WaitForChild("ChatLogSearchBox")
+
+-- ai page
+local AICommList = aiPage:WaitForChild("CommunicationFrame"):WaitForChild("MessagesList")
+local AI_UTemplate = AICommList:WaitForChild("UserTemplate")
+local AI_AITemplate = AICommList:WaitForChild("AITemplate")
+local AI_SearchBox = aiPage:WaitForChild("SearchArea"):WaitForChild("SearchBox")
+local AIMsgCount,AIDebounce = 0,false
 
 -- other
 local pageHistory = {
@@ -334,6 +341,50 @@ function createLog(logType:string,logInfo:table)
 	end
 end
 
+function newAIPrompt(prmpt:string)
+	if prmpt == "" or prmpt == nil or AIDebounce then return end
+	
+	AI_SearchBox.TextEditable = false
+	AI_SearchBox.Text = "Waiting For A Reponse......."
+	
+	AIDebounce = true
+	
+	AIMsgCount += 1
+	
+	local newUserMsgTemplate = AI_UTemplate:Clone()
+	newUserMsgTemplate:WaitForChild("TextContent").Text = prmpt
+	newUserMsgTemplate.LayoutOrder = AIMsgCount
+	newUserMsgTemplate.Name = "UserPromptMsg"
+	newUserMsgTemplate.Parent = AICommList
+	
+	
+	local aiResponse = csc_func:InvokeServer("GETAIRESPONSE",prmpt)
+	
+	local aiTextColour = Color3.fromRGB(255,255,255)
+	if aiResponse == "ERROR405" then
+		aiResponse = "AI Services Has Been Disabled By The Game Developer(s)"
+		aiTextColour = Color3.fromRGB(255,0,0)
+	elseif aiResponse == nil then
+		aiResponse = "Failed To Get A Response"
+		aiTextColour = Color3.fromRGB(255,0,0)
+	end
+	
+	
+	
+	AIMsgCount += 1
+	
+	local newAIMsgTemplate = AI_AITemplate:Clone()
+	newAIMsgTemplate:WaitForChild("TextContent").Text = aiResponse
+	newAIMsgTemplate:WaitForChild("TextContent").TextColor = aiTextColour
+	newAIMsgTemplate.LayoutOrder = AIMsgCount
+	newAIMsgTemplate.Name = "AIResponseMsg"
+	newAIMsgTemplate.Parent = AICommList
+	
+	AI_SearchBox.Text = ""
+	AI_SearchBox.TextEditable = true
+	AIDebounce = false
+end
+
 function filterCMDS(txt:string)
 	if txt == nil then return end
 	txt = string.lower(tostring(txt))
@@ -562,6 +613,10 @@ end)
 
 cmdlogSearch:GetPropertyChangedSignal("Text"):Connect(function()
 	filterLogs(cmdlogSearch.Text,commandLogsList)
+end)
+
+AI_SearchBox.FocusLost:Connect(function()
+	newAIPrompt(AI_SearchBox.Text)
 end)
 
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
