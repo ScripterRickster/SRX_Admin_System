@@ -48,6 +48,9 @@ local joinLogsWebhook = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["WebhookLink"]
 local logInfractions = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["Enabled"]
 local infractionsWebhook = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["WebhookLink"]
 
+local logMessages = SETTINGS["WebhookSettings"]["CHAT_LOGS"]["Enabled"]
+local chatlogsWebhook = SETTINGS["WebhookSettings"]["CHAT_LOGS"]["WebhookLink"]
+
 ----------------------------------------------------------------
 
 local default_attributes = {
@@ -385,6 +388,10 @@ module.SetupPlayer = function(plr:Player)
 			
 			table.insert(chatlogs,{plr.UserId,os.time(os.date("!*t")),msg})
 			PanelCSC_Event:FireAllClients("newmsglog",{plr.UserId,os.time(os.date("!*t")),msg})
+			
+			if logMessages then
+				webhookUtil.SendLog(chatlogsWebhook,webhookUtil.FormatChatLogWebhook(plr,msg))
+			end
 		end)
 	end
 end
