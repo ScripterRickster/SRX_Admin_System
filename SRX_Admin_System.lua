@@ -140,7 +140,7 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 	end
 end
 
-CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,param5)
+CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,param5)
 	if plr then
 		param1 = string.lower(tostring(param1))
 		
@@ -174,6 +174,12 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,parm3,param4,p
 			task.defer(function()
 				serverUtilities.HandleCommandExecution(plr,param2)
 			end)
+		elseif param1 == "removeinfraction" and param2 and param3 then
+			local uid = tonumber(tostring(param2))
+			
+			if uid then
+				plrUtilities.RemovePlayerInfraction(uid,tostring(param3))
+			end
 		end
 
 	end
