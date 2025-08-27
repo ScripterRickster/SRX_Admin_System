@@ -74,6 +74,8 @@ module.RankBinds = {
 		--[asset id] = rank id
 		[0] = 0;
 	}
+
+	DefaultAdminRank = 0; -- what rank you want everybody who isn't already ranked to be at
 }
 
 
@@ -83,7 +85,7 @@ module.OverheadTags = {
 	Command = "/tag"; -- what command can be used to enable or disable the tag
 }
 
-module.DatastoreName = "SRX_DEFAULT_DS0" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
+module.DatastoreName = "SRX_DEFAULT_DS000" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
 
 module.SaveRanks = true; -- whether or not if ranks transfer from server to server (permanent rank changes)
 
@@ -109,6 +111,8 @@ module.BanSettings = { -- ban settings
 	
 	ExcludeAltsInBans = false; -- whether you want to not ban their alt accounts as well | false = ban alts | true = don't ban alts
 }
+
+module.ManageInfractionRank = 0; -- the rank required to manage other infractions (I.E. being able to delete other people's infractions if said infraction is deletable)
 
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
