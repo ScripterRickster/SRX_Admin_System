@@ -74,11 +74,12 @@ local dev_consoleWebhookEnabled = adminSettings["WebhookSettings"]["DEV_CONSOLE"
 
 
 ----------------------------------------------------------------
-local CSC_Func = events.CSC_Func -- client-server remote function
-local CSC_Event = events.CSC_Event -- client-server remote event
+local CSC_Func = events:WaitForChild("CSC_Func") -- client-server remote function
+local CSC_Event = events:WaitForChild("CSC_Event") -- client-server remote event
+local PanelCSC_Event = events:WaitForChild("PanelCSC_Event") -- client-server remote event for panel related stuff
 
-local SSC_Func = events.SSC_Func -- server-server bindable function
-local SSC_Event = events.SSC_Event -- server-server bindable event
+local SSC_Func = events:WaitForChild("SSC_Func") -- server-server bindable function
+local SSC_Event = events:WaitForChild("SSC_Event") -- server-server bindable event
 ----------------------------------------------------------------
 
 local MS = game:GetService("MessagingService")
@@ -133,8 +134,19 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			end
 			
 			local results = plrUtilities.GetPlayerInfractions(uid)
+			
 			return results
-
+			
+		elseif param1 == "getcmdlogs" then
+			local cmdLogs = serverUtilities.GetCommandLogs(plr)
+			return cmdLogs
+			
+		elseif param1 == "getmsglogs" then
+			local msgLogs = plrUtilities.GetChatLogs(plr)
+			return msgLogs
+			
+		elseif param1 == "getcmdcooldown" then
+			return adminSettings.CommandCooldown
 		end
 		
 	end
@@ -160,6 +172,7 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 							newAdminPanel.Parent = plr.PlayerGui
 							newAdminPanel.Enabled = true
 						else
+							PanelCSC_Event:FireClient(plr,"updatepanel")
 							currPanel.Enabled = true
 						end
 					end
@@ -168,7 +181,8 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 		elseif param1 == "closeadminpanel" then
 			local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
 			if currPanel then
-				currPanel:Destroy()
+				currPanel.Enabled = false
+				--currPanel:Destroy()
 			end
 		elseif param1 == "cmdactivation" then
 			task.defer(function()
@@ -176,6 +190,7 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			end)
 		elseif param1 == "removeinfraction" and param2 and param3 then
 			local uid = tonumber(tostring(param2))
+
 			if uid then
 				plrUtilities.RemovePlayerInfraction(uid,tostring(param3),plr)
 			end
