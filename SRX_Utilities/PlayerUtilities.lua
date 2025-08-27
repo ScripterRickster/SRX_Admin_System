@@ -65,6 +65,10 @@ local trackedUsers = {
 
 ----------------------------------------------------------------
 
+local chatlogs = {}
+
+----------------------------------------------------------------
+
 
 module.SetupPlayerTag = function(plr:Player)
 	if plr and SETTINGS["OverheadTags"]["Enabled"] then
@@ -378,6 +382,9 @@ module.SetupPlayer = function(plr:Player)
 				local parameters = string.split(msg," ")
 				serverUtil.HandleCommandExecution(plr,parameters)
 			end
+			
+			table.insert(chatlogs,{plr.UserId,os.time(os.date("!*t")),msg})
+			PanelCSC_Event:FireAllClients("newmsglog",{plr.UserId,os.time(os.date("!*t")),msg})
 		end)
 	end
 end
@@ -462,14 +469,41 @@ end
 module.SetPlayerRank = function(plr:Player,rank_id:number)
 	if plr then
 		
-		local rank_name,rank_id,rank_colour = serverUtil.FindRank(rank_id,nil)
+		local rank_name,rank_id,rank_colour,can_use_panel = serverUtil.FindRank(rank_id,nil)
 		if rank_id ~= nil and rank_name ~= nil then
 			plr:SetAttribute("SRX_RANKID",rank_id)
 			plr:SetAttribute("SRX_RANKNAME",rank_name)
 			plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
+			plr:SetAttribute("SRX_CANUSEPANEL",can_use_panel)
+			
+			
 			
 			CSC_Event:FireClient(plr,"notification","RANK UPDATE","Your rank has been updated to: "..tostring(rank_name))
 			PanelCSC_Event:FireClient(plr,"updatepanel")
+			
+			if can_use_panel ~= true then
+				local pTool = plr.Backpack:FindFirstChild("SRXAdminTool")
+				local char = plr.Character or plr.CharacterAdded:Wait()
+				
+				local cTool = char:FindFirstChild("SRXAdminTool")
+				
+				if pTool then pTool:Destroy() end
+				if cTool then cTool:Destroy() end
+				
+				local panelUI = plr.PlayerGui:FindFirstChild("SRXPanelUI")
+				if panelUI then panelUI:Destroy() end
+				
+			else
+				local pTool = plr.Backpack:FindFirstChild("SRXAdminTool")
+				local char = plr.Character or plr.CharacterAdded:Wait()
+				local cTool = char:FindFirstChild("SRXAdminTool")
+				
+				if pTool == nil and cTool == nil then
+					ASSETS:WaitForChild("SRXAdminTool"):Clone().Parent = plr.Backpack
+				end
+				
+			end
+			
 			
 			task.defer(function()
 				module.SetupPlayerTag(plr)
@@ -615,6 +649,14 @@ module.UntrackPlayer = function(p1:Player,p2:Player)
 	end
 end
 
+----------------------------------------------------------------
+module.GetChatLogs = function(plr:Player)
+	if plr:GetAttribute("SRX_CANUSEPANEL") then
+		return chatlogs
+	else
+		return nil
+	end
+end
 ----------------------------------------------------------------
 
 
