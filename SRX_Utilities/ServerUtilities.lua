@@ -20,6 +20,8 @@ local HTTP = game:GetService("HttpService")
 
 
 local OpenCloudAPI_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
+local AI_Model = SETTINGS["AI_Services"]["AI_Model"]
+local AI_Max_Tokens = SETTINGS["AI_Services"]["Max_Tokens"]
 
 ----------------------------------------------------------------
 local CSC_Func = EVENTS:WaitForChild("CSC_Func")
@@ -412,7 +414,7 @@ end
 
 module.GetAIResponse = function(plr:Player,prompt:string)
 	if not SETTINGS["AI_Services"]["Enabled"] then return "ERROR405" end
-	if OpenCloudAPI_Key == nil then return nil end
+	if OpenCloudAPI_Key == nil or OpenCloudAPI_Key == "" or AI_Model == nil or AI_Model == "" or tonumber(tostring(AI_Max_Tokens)) == nil then return nil end
 	if plr:GetAttribute("SRX_RANKID") < SETTINGS["AI_Services"]["MinRank"] then return nil end
 
 	
@@ -424,10 +426,10 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 
 	
 	local body: body = {
-		["model"] = "deepseek/deepseek-r1-0528-qwen3-8b:free",
+		["model"] = tostring(AI_Model),
 		["prompt"] = prompt,
 		["temperature"] = 0.5,
-		["max_tokens"] = 60,
+		["max_tokens"] = tonumber(tostring(AI_Max_Tokens)),
 		["top_p"] = 1,
 		["frequency_penalty"] = 0.5,
 		["presence_penalty"] = 0.0
