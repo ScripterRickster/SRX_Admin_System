@@ -176,9 +176,8 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			end)
 		elseif param1 == "removeinfraction" and param2 and param3 then
 			local uid = tonumber(tostring(param2))
-			
 			if uid then
-				plrUtilities.RemovePlayerInfraction(uid,tostring(param3))
+				plrUtilities.RemovePlayerInfraction(uid,tostring(param3),plr)
 			end
 		end
 
