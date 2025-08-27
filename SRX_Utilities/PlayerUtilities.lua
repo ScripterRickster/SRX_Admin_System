@@ -548,7 +548,7 @@ end
 
 module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 	local isValidPlayer,plrID,plrObject = module.FindPlayer(nil,userid)
-
+	
 	if isValidPlayer and infracID and staffMem then
 		
 		local staffRankID = staffMem:GetAttribute("SRX_RANKID")
@@ -556,7 +556,8 @@ module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
 			currInfractions = HTTPS:JSONDecode(currInfractions)
 			if currInfractions[infracID] then
-				local canDelete = currInfractions[infracID]["Deletable"]
+				local canDelete = currInfractions[infracID]["CanDelete"]
+
 				if canDelete then
 					if logInfractions then
 						task.defer(function()
@@ -564,7 +565,9 @@ module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 						end)
 					end
 					currInfractions[infracID] = nil
-					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
+					task.defer(function()
+						serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
+					end)
 				end
 			end
 		end
@@ -577,6 +580,7 @@ module.GetPlayerInfractions = function(userid:number)
 	if isValidPlayer then
 		local plrInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
 		
+		if plrInfractions == nil then return nil end
 		local allInfracs = HTTPS:JSONDecode(plrInfractions)
 		
 		return allInfracs
