@@ -114,6 +114,8 @@ module.BanSettings = { -- ban settings
 
 module.ManageInfractionRank = 0; -- the rank required to manage other infractions (I.E. being able to delete other people's infractions if said infraction is deletable)
 
+module.CommandCooldown = 5; -- how long the cooldown is in-between each command execution
+
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
 	ServerOwnerRankId = 0; -- rank id for vip server owners
