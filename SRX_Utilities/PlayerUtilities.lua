@@ -546,20 +546,27 @@ module.RecordPlayerInfraction = function(userid:number,infracData:table)
 	end
 end
 
-module.RemovePlayerInfraction = function(userid:number,infracID)
+module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 	local isValidPlayer,plrID,plrObject = module.FindPlayer(nil,userid)
 
-	if isValidPlayer and infracID then
-		local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
-		currInfractions = HTTPS:JSONDecode(currInfractions)
-		if currInfractions[infracID] then
-			if logInfractions then
-				task.defer(function()
-					webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,currInfractions[infracID],"DELETE"))
-				end)
+	if isValidPlayer and infracID and staffMem then
+		
+		local staffRankID = staffMem:GetAttribute("SRX_RANKID")
+		if tonumber(tostring(staffRankID)) >= SETTINGS.ManageInfractionRank then
+			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
+			currInfractions = HTTPS:JSONDecode(currInfractions)
+			if currInfractions[infracID] then
+				local canDelete = currInfractions[infracID]["Deletable"]
+				if canDelete then
+					if logInfractions then
+						task.defer(function()
+							webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,currInfractions[infracID],"DELETE"))
+						end)
+					end
+					currInfractions[infracID] = nil
+					serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
+				end
 			end
-			currInfractions[infracID] = nil
-			serverUtil.SaveDataToDDS(tostring(userid),InfractionDDS,HTTPS:JSONEncode(currInfractions))
 		end
 	end
 end
