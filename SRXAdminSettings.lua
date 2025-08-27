@@ -125,6 +125,8 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 	Enabled = false; -- whether this feature is enabled
 	OpenCloudAPI_Key = ""; -- put your OpenRouter API key here
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
+	AI_Model = "deepseek/deepseek-r1-0528-qwen3-8b:free"; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-r1-0528-qwen3-8b:free"
+	Max_Tokens = 60; -- how long the response is based on tokens || higher the token amount, the longer the response and vice versa
 }
 
 module.ToolLocations = { -- locations of where the tools are at in the game
