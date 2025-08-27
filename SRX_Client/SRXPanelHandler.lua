@@ -345,7 +345,8 @@ function newAIPrompt(prmpt:string)
 	if prmpt == "" or prmpt == nil or AIDebounce then return end
 	
 	AI_SearchBox.TextEditable = false
-	AI_SearchBox.Text = "Waiting For A Reponse......."
+	AI_SearchBox.Text = ""
+	AI_SearchBox.PlaceholderText = "WAITING FOR A RESPONSE......."
 	
 	AIDebounce = true
 	
@@ -382,7 +383,7 @@ function newAIPrompt(prmpt:string)
 	newAIMsgTemplate.Visible = true
 	newAIMsgTemplate.Parent = AICommList
 	
-	AI_SearchBox.Text = ""
+	AI_SearchBox.PlaceholderText = "ASK SOMETHING......."
 	AI_SearchBox.TextEditable = true
 	AIDebounce = false
 end
