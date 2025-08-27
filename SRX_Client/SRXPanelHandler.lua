@@ -32,7 +32,6 @@ closeBttn.Visible = true
 
 
 
-
 -- home page
 local H_Options = home:WaitForChild("MainOptions")
 local MainButtons = {
@@ -77,6 +76,17 @@ local infracUserSearch = infractions:WaitForChild("UserSearch"):WaitForChild("Se
 local infractionList = infractions:WaitForChild("InfractionFrame"):WaitForChild("InfractionList")
 local infractionTemplate = infractionList:WaitForChild("Template")
 
+-- logs page
+
+local chatLogsList = logs:WaitForChild("LogFrame"):WaitForChild("ChatLogList")
+local commandLogsList = logs:WaitForChild("LogFrame"):WaitForChild("CMDLogList")
+
+local chatlogTemplate = chatLogsList:WaitForChild("Template")
+local cmdlogTemplate = commandLogsList:WaitForChild("Template")
+
+local cmdlogSearch = logs:WaitForChild("SearchAreas"):WaitForChild("CMDLogSearchBox")
+local chatlogSearch = logs:WaitForChild("SearchAreas"):WaitForChild("ChatLogSearchBox")
+
 -- other
 local pageHistory = {
 	home,
@@ -108,6 +118,7 @@ function setupGeneralInfo()
 	serverIDText.Text = tostring(sID)
 	
 	task.defer(loadUserCommands)
+	task.defer(loadLogs)
 end
 
 function loadCMDPanel(cmd,cmdParams)
@@ -222,7 +233,9 @@ function loadUserInfractions(targUID)
 					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Delete").Visible = true
 					newInfractionTemplate:WaitForChild("InternalFrame"):WaitForChild("Delete").Activated:Connect(function()
 						csc_event:FireServer("REMOVEINFRACTION",targUID,infracID)
-						loadUserInfractions(targUID)
+						task.delay(1,function()
+							loadUserInfractions(targUID)
+						end)
 					end)
 				else
 					newInfractionTemplate:WaitForChild('InternalFrame'):WaitForChild("Delete").Visible = false
@@ -231,6 +244,74 @@ function loadUserInfractions(targUID)
 				newInfractionTemplate.Visible = true
 			end
 		end
+	end
+end
+
+function loadLogs()
+	local msgLogs = csc_func:InvokeServer("GETMSGLOGS")
+	local cmdLogs = csc_func:InvokeServer("GETCMDLOGS")
+	
+	if msgLogs ~= nil then
+		for _,v in pairs(msgLogs) do
+			task.defer(function()
+				createLog("msg",v)
+			end)
+		end
+	end
+	
+	if cmdLogs ~= nil then
+		for _,v in pairs(cmdLogs) do
+			task.defer(function()
+				createLog("cmd",v)
+			end)
+		end
+	end
+end
+
+function createLog(logType:string,logInfo:table)
+	if logType == nil or logType == "" then return end
+	local newLog = nil
+	logType = string.lower(tostring(logType))
+	if logType == "cmd" then
+		newLog = cmdlogTemplate:Clone()
+		newLog.Visible = false
+		newLog.Parent = commandLogsList
+	elseif logType == "msg" then
+		newLog = chatlogTemplate:Clone()
+		newLog.Visible = false
+		newLog.Parent = chatLogsList
+	end
+	
+	local utcTime = os.date("*t",tonumber(tostring(logInfo[2])))
+	local staffMemID = tonumber(tostring(logInfo[1]))
+	local txtcontent = tostring(logInfo[3])
+	
+	local plrName,plrImage = "UNKNOWN",""
+	
+	if staffMemID ~= nil then
+		plrName = game.Players:GetNameFromUserIdAsync(staffMemID)
+		plrImage = game.Players:GetUserThumbnailAsync(staffMemID, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+	end
+	
+	local logTime = string.format("%02d:%02d |",
+		utcTime.hour,
+		utcTime.min
+	)
+	
+	local logDate = string.format("%02d/%02d/%04d",
+		utcTime.day,
+		utcTime.month,
+		utcTime.year
+	)
+	
+	if newLog ~= nil then
+		newLog.Name = logType.."_log"
+		newLog:WaitForChild("Username").Text = "<u>"..plrName.."</u>"
+		newLog:WaitForChild("TextContent").Text = newLog:WaitForChild("TextContent").Text..txtcontent
+		newLog:WaitForChild("Date").Text = logDate
+		newLog:WaitForChild("Time").Text = logTime
+		newLog:WaitForChild("PFP").Image = plrImage
+		newLog.Visible = true
 	end
 end
 
@@ -254,6 +335,33 @@ function filterCMDS(txt:string)
 		
 	end
 end
+
+function filterLogs(txt:string,listFrame:ScrollingFrame)
+	if txt == nil or listFrame == nil then return end
+	txt = string.lower(tostring(txt))
+	
+	for _,v in pairs(listFrame:GetChildren()) do
+		if string.lower(v.Name) ~= "template" and v:IsA("Frame") then
+			if txt == "" then
+				v.Visible = true
+			else
+				local userTxt = string.lower(v:WaitForChild("Username").Text)
+				local mainTxt = string.lower(v:WaitForChild("TextContent").Text)
+				
+				if v:WaitForChild("Username").RichText then
+					userTxt = string.sub(userTxt,4,string.len(userTxt)-4)
+				end
+				
+				if string.match(userTxt,txt) ~= nil or string.match(mainTxt,txt) ~= nil then
+					v.Visible = true
+				else
+					v.Visible = false
+				end
+			end
+		end
+	end
+end
+
 
 
 function clearInputs(dPage:Frame)
@@ -400,6 +508,14 @@ panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5
 		if param1 == "updatepanel" then
 			changePage(home)
 			task.defer(setupGeneralInfo)
+		elseif param1 == "newmsglog" and param2 then
+			task.defer(function()
+				createLog("msg",param2)
+			end)
+		elseif param1 == "newcmdlog" and param2 then
+			task.defer(function()
+				createLog("cmd",param2)
+			end)
 		end
 	end
 end)
@@ -415,7 +531,7 @@ local dragSpeed = 0.25
 local dragStart = nil
 local startPos = nil
 
-local function updateInput(input)
+function updateInput(input)
 	local delta = input.Position - dragStart
 	local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
 		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
