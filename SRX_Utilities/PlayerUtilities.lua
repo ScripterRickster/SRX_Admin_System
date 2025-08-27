@@ -518,17 +518,18 @@ end
 module.GetPlayerRankInfo = function(username:string,userid:number)
 	local isValidPlayer,plrID,plrObject = module.FindPlayer(username,userid)
 	
-	local rank_id,rank_name,rank_colour = nil,nil,nil
+	local rank_id,rank_name,rank_colour,can_use_panel = nil,nil,nil,nil
 	
 	if isValidPlayer and plrObject then
 		rank_id = plrObject:GetAttribute("SRX_RANKID")
 		rank_name = plrObject:GetAttribute("SRX_RANKNAME")
 		rank_colour = plrObject:GetAttribute("SRX_RANKCOLOUR")
+		can_use_panel = plrObject:GetAttribute("SRX_CANUSEPANEL")
 		
 	end
 	
 	
-	return rank_id,rank_name,rank_colour
+	return rank_id,rank_name,rank_colour,can_use_panel
 	
 	
 	
