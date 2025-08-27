@@ -560,8 +560,9 @@ module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 
 				if canDelete then
 					if logInfractions then
+						local tempInfracInfo = table.clone(currInfractions[infracID])
 						task.defer(function()
-							webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,currInfractions[infracID],"DELETE"))
+							webhookUtil.SendLog(infractionsWebhook,webhookUtil.FormatInfractionLogWebhook(plrID,tempInfracInfo,"DELETE"))
 						end)
 					end
 					currInfractions[infracID] = nil
