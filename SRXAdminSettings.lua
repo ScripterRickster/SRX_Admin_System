@@ -162,6 +162,11 @@ module.WebhookSettings = {
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	};
+	["CHAT_LOGS"] = {
+		Enabled = false; -- whether or not if the system sends a log every time a user sends a message || HEAVILY NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
+		EmbedColour = Color3.fromRGB(255,255,255);
+		WebhookLink = ""; -- webhook link
+	}
 }
 
 
