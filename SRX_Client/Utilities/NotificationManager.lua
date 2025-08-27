@@ -147,7 +147,7 @@ module.CreateWarning = function(posterID:number,text:string)
 	end)
 end
 
-module.CreateNotification = function(notifName:string,notifMessage:text)
+module.CreateNotification = function(notifName:string,notifMessage:text,manualDelete:boolean)
 	if notifName == nil or notifMessage == nil then return end
 	
 	local newNotif = notification_template:Clone()
@@ -163,11 +163,13 @@ module.CreateNotification = function(notifName:string,notifMessage:text)
 	local tween = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
 	local tween2 = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
 	
+	newNotif.Parent = plr.PlayerGui
+	
 	tween:Play()
 	
 	tween.Completed:Connect(function()
 		local closed = false
-		local function close()
+		local function closeNotif()
 			if closed then return end
 			close.Active = false
 			closed = true
@@ -178,10 +180,13 @@ module.CreateNotification = function(notifName:string,notifMessage:text)
 		end
 		
 		close.Activated:Connect(function()
-			task.defer(close)
+			task.defer(closeNotif)
 		end)
 		
-		task.delay(10,close)
+		if manualDelete ~= true then
+			task.delay(10,closeNotif)
+		end
+		
 	end)
 	
 end
