@@ -120,6 +120,8 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 			
 			if tonumber(tostring(rID)) == nil or tonumber(tostring(minAIRankID)) == nil then return false end
+			
+			if adminSettings["AI_Services"]["Enabled"] ~= true then return false end
 			return tonumber(tostring(rID)) >= tonumber(tostring(minAIRankID))
 		elseif param1 == "getplayercmds" then
 			return serverUtilities.GetAllPlayerUsableCommands(plr)
@@ -147,6 +149,10 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			
 		elseif param1 == "getcmdcooldown" then
 			return adminSettings.CommandCooldown
+			
+		elseif param1 == "getairesponse" and param2 then
+			local result = serverUtilities.GetAIResponse(plr,param2)
+			return result
 		end
 		
 	end
