@@ -355,6 +355,7 @@ function newAIPrompt(prmpt:string)
 	newUserMsgTemplate:WaitForChild("TextContent").Text = prmpt
 	newUserMsgTemplate.LayoutOrder = AIMsgCount
 	newUserMsgTemplate.Name = "UserPromptMsg"
+	newUserMsgTemplate.Visible = true
 	newUserMsgTemplate.Parent = AICommList
 	
 	
@@ -375,9 +376,10 @@ function newAIPrompt(prmpt:string)
 	
 	local newAIMsgTemplate = AI_AITemplate:Clone()
 	newAIMsgTemplate:WaitForChild("TextContent").Text = aiResponse
-	newAIMsgTemplate:WaitForChild("TextContent").TextColor = aiTextColour
+	newAIMsgTemplate:WaitForChild("TextContent").TextColor3 = aiTextColour
 	newAIMsgTemplate.LayoutOrder = AIMsgCount
 	newAIMsgTemplate.Name = "AIResponseMsg"
+	newAIMsgTemplate.Visible = true
 	newAIMsgTemplate.Parent = AICommList
 	
 	AI_SearchBox.Text = ""
