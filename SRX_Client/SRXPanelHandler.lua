@@ -91,6 +91,8 @@ local chatlogSearch = logs:WaitForChild("SearchAreas"):WaitForChild("ChatLogSear
 local pageHistory = {
 	home,
 }
+
+local cmdCooldown,onCMDCooldown = math.huge,false
 -------------------------------------------------------------------------------------
 
 function setupGeneralInfo()
@@ -113,6 +115,10 @@ function setupGeneralInfo()
 	else
 		userRankDisplay.TextColor3 = Color3.fromRGB(255,255,255)
 	end
+	
+	cmdCooldown = tonumber(csc_func:InvokeServer("GETCMDCOOLDOWN"))
+	if cmdCooldown == nil then cmdCooldown = math.huge warn("SRX | Failed to get command cooldown") end
+	
 	
 	adminVersionText.Text = "VERSION: "..tostring(adminV)
 	serverIDText.Text = tostring(sID)
@@ -251,7 +257,20 @@ function loadLogs()
 	local msgLogs = csc_func:InvokeServer("GETMSGLOGS")
 	local cmdLogs = csc_func:InvokeServer("GETCMDLOGS")
 	
+	for _,v in pairs(commandLogsList:GetChildren()) do
+		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+			v:Destroy()
+		end
+	end
+	
+	for _,v in pairs(chatLogsList:GetChildren()) do
+		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+			v:Destroy()
+		end
+	end
+	
 	if msgLogs ~= nil then
+		
 		for _,v in pairs(msgLogs) do
 			task.defer(function()
 				createLog("msg",v)
@@ -412,6 +431,22 @@ function changePage(dPage:Frame,returning:boolean)
 	end
 end
 
+function updateClientTime()
+	local currTime = os.date("*t")
+	local cHour,cMin = currTime.hour,currTime.min
+	
+	local AM_PM = "AM"
+	if cHour >= 12 then
+		AM_PM = "PM"
+		
+		if cHour > 12 then
+			cHour -= 12
+		end
+	end
+	
+	timeText.Text = tostring(cHour)..":"..tostring(cMin).." "..AM_PM
+end
+
 
 for _,v in pairs(MainButtons) do
 	local pBttn = v.TButton
@@ -443,7 +478,10 @@ end)
 
 cmdActivateBttn.Activated:Connect(function()
 	local currPage = pageHistory[#pageHistory]
-	if currPage == cmdPanel then
+	if currPage == cmdPanel and not onCMDCooldown then
+		onCMDCooldown = true
+		
+		
 		local dParams = cmdParameterList:GetChildren()
 		local allParams = {}
 		
@@ -481,7 +519,25 @@ cmdActivateBttn.Activated:Connect(function()
 			task.defer(function()
 				clearInputs(cmdPanel)
 			end)
+			
+			cmdActivateBttn.TextTransparency = 0.5
+
+			local uistroke = cmdActivateBttn:FindFirstChildOfClass("UIStroke")
+			if uistroke then
+				uistroke.Transparency = 0.5
+			end
+			
+			task.wait(cmdCooldown)
 		end
+		
+		cmdActivateBttn.TextTransparency = 0
+
+		local uistroke = cmdActivateBttn:FindFirstChildOfClass("UIStroke")
+		if uistroke then
+			uistroke.Transparency = 0
+		end
+		
+		onCMDCooldown = false
 		
 	end
 end)
@@ -520,6 +576,10 @@ panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5
 	end
 end)
 
+game:GetService("RunService").RenderStepped:Connect(function()
+	task.defer(updateClientTime)
+end)
+
 task.defer(setupGeneralInfo)
 
 ---------------------
@@ -531,7 +591,7 @@ local dragSpeed = 0.25
 local dragStart = nil
 local startPos = nil
 
-function updateInput(input)
+function updateDragInput(input)
 	local delta = input.Position - dragStart
 	local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
 		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -554,7 +614,7 @@ end)
 UIS.InputChanged:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 		if dragToggle then
-			updateInput(input)
+			updateDragInput(input)
 		end
 	end
 end)
