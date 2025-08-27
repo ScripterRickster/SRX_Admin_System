@@ -121,9 +121,9 @@ module.VIPServerSettings = { -- settings for VIP servers
 	ServerOwnerRankId = 0; -- rank id for vip server owners
 }
 
-module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel
+module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel || THIS SERVICE USES OPENROUTER: https://openrouter.ai/
 	Enabled = false; -- whether this feature is enabled
-	OpenCloudAPI_Key = ""; -- since this uses OpenAI's Open-Cloud API's, a key is required from them in order to use it
+	OpenCloudAPI_Key = ""; -- put your OpenRouter API key here
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
 }
 
