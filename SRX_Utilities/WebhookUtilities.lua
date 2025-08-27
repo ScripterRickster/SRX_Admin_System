@@ -348,7 +348,7 @@ module.FormatChatLogWebhook = function(plr:Player,msg:string)
 
 			["content"] = "",
 			["embeds"] = {{
-				["title"] = "Chat Log",
+				["title"] = "Message Log",
 				["description"] = "More Information Below: ",
 				["type"] = "rich",
 				["color"] = tonumber(join_logEmbedColour:ToHex(),16),
