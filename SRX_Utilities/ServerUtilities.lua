@@ -22,11 +22,12 @@ local HTTP = game:GetService("HttpService")
 local OpenAICloud_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
 
 ----------------------------------------------------------------
-local CSC_Func = EVENTS.CSC_Func
-local CSC_Event = EVENTS.CSC_Event
+local CSC_Func = EVENTS:WaitForChild("CSC_Func")
+local CSC_Event = EVENTS:WaitForChild("CSC_Event")
+local PanelCSC_Event = EVENTS:WaitForChild("PanelCSC_Event")
 
-local SSC_Func = EVENTS.SSC_Func
-local SSC_Event = EVENTS.SSC_Event
+local SSC_Func = EVENTS:WaitForChild("SSC_Func")
+local SSC_Event = EVENTS:WaitForChild("SSC_Event")
 ----------------------------------------------------------------
 local allCMDS = {}
 
@@ -36,6 +37,8 @@ end
 
 ----------------------------------------------------------------
 local toolLocations = SETTINGS["ToolLocations"]
+----------------------------------------------------------------
+local cmdLogs = {}
 ----------------------------------------------------------------
 module.IsAlpha = function(s:string)
 	return s:match("^%a+$") ~= nil
@@ -194,6 +197,9 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 					c_cmd.Execute(newParameters)
 				end)
 			end
+			
+			table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
+			PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
 		end
 	end
 end
@@ -405,7 +411,7 @@ end
 -----------------------------------------------------------------------------------
 
 module.GetAIResponse = function(plr:Player,prompt:string)
-	if not SETTINGS["AI_Services"]["Enabled"] then return nil end
+	if not SETTINGS["AI_Services"]["Enabled"] then return "ERROR405" end
 	if OpenAICloud_Key == nil then return nil end
 	if plr:GetAttribute("SRX_RANKID") < SETTINGS["AI_Services"]["MinRank"] then return nil end
 
@@ -434,7 +440,7 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 		})
 	end)
 	
-	if succ then return module.FilterMessage(plr,response.choices[1].text,true) else return "FAILED TO GET A RESPONSE" end
+	if succ then return module.FilterMessage(plr,response.choices[1].text,true) else return nil end
 	
 end
 -----------------------------------------------------------------------------------
@@ -466,5 +472,12 @@ end
 
 -----------------------------------------------------------------------------------
 
+module.GetCommandLogs = function(plr:Player)
+	if plr:GetAttribute("SRX_CANUSEPANEL") then
+		return cmdLogs
+	else
+		return nil
+	end
+end
 
 return module
