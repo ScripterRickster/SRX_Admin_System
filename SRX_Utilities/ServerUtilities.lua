@@ -19,7 +19,7 @@ local DDS = game:GetService("DataStoreService")
 local HTTP = game:GetService("HttpService")
 
 
-local OpenAICloud_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
+local OpenCloudAPI_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
 
 ----------------------------------------------------------------
 local CSC_Func = EVENTS:WaitForChild("CSC_Func")
@@ -412,35 +412,50 @@ end
 
 module.GetAIResponse = function(plr:Player,prompt:string)
 	if not SETTINGS["AI_Services"]["Enabled"] then return "ERROR405" end
-	if OpenAICloud_Key == nil then return nil end
+	if OpenCloudAPI_Key == nil then return nil end
 	if plr:GetAttribute("SRX_RANKID") < SETTINGS["AI_Services"]["MinRank"] then return nil end
 
+	
 	local headers: headers = {
 		["Content-Type"] = "application/json",
-		["Authorization"] = `Bearer {OpenAICloud_Key}`
+		["Authorization"] = `Bearer {OpenCloudAPI_Key}`
 	}
+	
 
+	
 	local body: body = {
-		["model"] = "text-davinci-003",
+		["model"] = "deepseek/deepseek-r1-0528-qwen3-8b:free",
 		["prompt"] = prompt,
 		["temperature"] = 0.5,
-		["max_tokens"] = 2048,
+		["max_tokens"] = 60,
 		["top_p"] = 1,
 		["frequency_penalty"] = 0.5,
 		["presence_penalty"] = 0.0
 	}
-	
-	
+
+
 	local succ,response = pcall(function()
 		return HTTP:RequestAsync({
-			["Url"] = "https://api.openai.com/v1/completions",
+			["Url"] = "https://openrouter.ai/api/v1/completions",
 			["Method"] = "POST",
 			["Headers"] = headers,
 			["Body"] = HTTP:JSONEncode(body)
 		})
 	end)
+
+	if succ then
+		
+		if response["Success"] then
+			local data = HTTP:JSONDecode(response["Body"])
+			
+			local aiResponse = data.choices[1].text
+			return module.FilterMessage(plr,aiResponse,true)
+		end
+	end
 	
-	if succ then return module.FilterMessage(plr,response.choices[1].text,true) else return nil end
+	
+	return nil
+
 	
 end
 -----------------------------------------------------------------------------------
