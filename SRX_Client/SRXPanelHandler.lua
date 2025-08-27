@@ -556,6 +556,13 @@ infracUserSearch.FocusLost:Connect(function()
 	loadUserInfractions(targUID)
 end)
 
+chatlogSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	filterLogs(chatlogSearch.Text,chatLogsList)
+end)
+
+cmdlogSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	filterLogs(cmdlogSearch.Text,commandLogsList)
+end)
 
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 	if param1 then
