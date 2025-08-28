@@ -22,7 +22,7 @@ local HTTP = game:GetService("HttpService")
 local OpenCloudAPI_Key = SETTINGS["AI_Services"]["OpenCloudAPI_Key"]
 local AI_Model = SETTINGS["AI_Services"]["AI_Model"]
 local AI_Max_Tokens = SETTINGS["AI_Services"]["Max_Tokens"]
-
+local AI_Filter_Messages = SETTINGS["AI_Services"]["FilterAIMessages"]
 ----------------------------------------------------------------
 local CSC_Func = EVENTS:WaitForChild("CSC_Func")
 local CSC_Event = EVENTS:WaitForChild("CSC_Event")
@@ -427,18 +427,21 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 	
 	local body: body = {
 		["model"] = tostring(AI_Model),
-		["prompt"] = prompt,
+		["messages"] = {
+			{["role"] = "user", ["content"] = prompt}
+		},
 		["temperature"] = 0.5,
 		["max_tokens"] = tonumber(tostring(AI_Max_Tokens)),
 		["top_p"] = 1,
 		["frequency_penalty"] = 0.5,
 		["presence_penalty"] = 0.0
 	}
+	
 
 
 	local succ,response = pcall(function()
 		return HTTP:RequestAsync({
-			["Url"] = "https://openrouter.ai/api/v1/completions",
+			["Url"] = "https://openrouter.ai/api/v1/chat/completions",
 			["Method"] = "POST",
 			["Headers"] = headers,
 			["Body"] = HTTP:JSONEncode(body)
@@ -450,8 +453,13 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 		if response["Success"] then
 			local data = HTTP:JSONDecode(response["Body"])
 			
-			local aiResponse = data.choices[1].text
-			return module.FilterMessage(plr,aiResponse,true)
+			local aiResponse = data.choices[1].message.content
+			
+			if AI_Filter_Messages then
+				aiResponse = module.FilterMessage(plr,aiResponse,true)
+			end
+			
+			return aiResponse
 		end
 	end
 	
