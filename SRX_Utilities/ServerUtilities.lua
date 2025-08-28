@@ -66,7 +66,7 @@ module.ConvertToDHMS = function(seconds:number) -- DHMS = Days Hours Minutes Sec
 end
 ----------------------------------------------------------------
 
-module.FilterMessage = function(plr,msg:string,forClient:boolean)
+module.FilterMessage = function(plr:Player,msg:string,forClient:boolean)
 	if msg == nil or msg == "" then return msg end
 	
 	local filteredRes = TS:FilterStringAsync(msg,plr.UserId)
@@ -131,65 +131,93 @@ end
 
 ----------------------------------------------------------------
 
-module.HandleCommandExecution = function(plr:Player,params:table)
+module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boolean)
 	if plr and params then
-		local totalParams = #params
-		if totalParams == 0 then return end
 		
-		local s_idx = 2
+		local cmd,cmd_Module = nil,nil
 		
-		if module.IsAlpha(string.sub(params[1],1,1)) then
-			s_idx = 1
+		local newParameters = {}
+		newParameters["EXECUTOR"] = plr;
+		
+		local applyToAllUsers,userParams = false,{}
+
+		if fromPanel ~= true then
+			local totalParams = #params
+			if totalParams == 0 then return end
+			
+			local s_idx = 2
+
+			if module.IsAlpha(string.sub(params[1],1,1)) then
+				s_idx = 1
+			end
+
+			cmd = string.sub(params[1],s_idx,string.len(params[1]))
+
+			cmd_Module = module.FindCommand(cmd)
+			if cmd_Module then
+				
+				local c_cmd = require(cmd_Module)
+				local c_params = c_cmd.Parameters
+
+
+				local ct,lastParam = 2,nil
+				for par,k in pairs(c_params) do
+
+					if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
+						applyToAllUsers = true
+
+						table.insert(userParams,par)
+					end
+					newParameters[par] = params[ct]
+					lastParam = par
+
+					ct += 1
+				end
+
+				local endString = params[ct-1]
+
+				for ms=ct,totalParams do
+					endString = endString.." "..tostring(params[ms])
+				end
+
+				newParameters[lastParam] = endString
+
+			end
+		else
+			cmd = params["D_CMD"]
+			
+			cmd_Module = module.FindCommand(cmd)
+
+			
+			if cmd_Module then
+
+				local c_cmd = require(cmd_Module)
+				local c_params = c_cmd.Parameters
+				
+				for par,k in pairs(c_params) do
+					newParameters[par] = params[par]
+					
+					
+					if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[par])) == "all" then
+						applyToAllUsers = true
+
+						table.insert(userParams,par)
+					end
+				end
+			end
+			
 		end
 		
-		local cmd = string.sub(params[1],s_idx,string.len(params[1]))
-		
-		local cmd_Module = module.FindCommand(cmd)
-		if cmd_Module then
-			local newParameters = {
-				EXECUTOR = plr;
-			}
-
+		if cmd and cmd_Module then
 			local c_cmd = require(cmd_Module)
-			local c_params = c_cmd.Parameters
-			
-			local applyToAllUsers,userParams = false,{}
-			
-
-			local ct,lastParam = 2,nil
-			for par,k in pairs(c_params) do
-				
-				if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
-					applyToAllUsers = true
-					
-					table.insert(userParams,par)
-				end
-				newParameters[par] = params[ct]
-				lastParam = par
-				
-				ct += 1
-			end
-			
-			local endString = params[ct-1]
-			
-			for ms=ct,totalParams do
-				endString = endString.." "..tostring(params[ms])
-			end
-			
-			newParameters[lastParam] = endString
-			
-			
-			
-			
-			
 			if applyToAllUsers then
 				for _,p in pairs(game.Players:GetChildren()) do
 					local paramClone = table.clone(newParameters)
-					
+
 					for _,newP in pairs(userParams) do
 						paramClone[newP] = p
 					end
-					
+
 					task.defer(function()
 						c_cmd.Execute(paramClone)
 					end)
@@ -203,6 +231,7 @@ module.HandleCommandExecution = function(plr:Player,params:table)
 			table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
 			PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
 		end
+		
 	end
 end
 
