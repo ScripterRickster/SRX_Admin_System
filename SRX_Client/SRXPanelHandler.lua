@@ -505,8 +505,8 @@ function updateClientTime()
 		
 	end
 	
-	if cMin == 0 then
-		cMin = "00"
+	if cMin >= 0 and cMin <= 9 then
+		cMin = "0"..tostring(cMin)
 	end
 	
 	timeText.Text = tostring(cHour)..":"..tostring(cMin).." "..AM_PM
