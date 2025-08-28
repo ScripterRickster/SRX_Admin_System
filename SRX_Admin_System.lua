@@ -191,11 +191,10 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
 			if currPanel then
 				currPanel.Enabled = false
-				--currPanel:Destroy()
 			end
-		elseif param1 == "cmdactivation" then
+		elseif param1 == "cmdactivation" and param2  then
 			task.defer(function()
-				serverUtilities.HandleCommandExecution(plr,param2)
+				serverUtilities.HandleCommandExecution(plr,param2,true)
 			end)
 		elseif param1 == "removeinfraction" and param2 and param3 then
 			local uid = tonumber(tostring(param2))
