@@ -127,6 +127,7 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
 	AI_Model = "deepseek/deepseek-r1-0528-qwen3-8b:free"; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-r1-0528-qwen3-8b:free"
 	Max_Tokens = 2048; -- how long the response is based on tokens || higher the token amount, the longer the response and vice versa
+	FilterAIMessages = true; -- whether to filter AI messages or not through Roblox's Filtering System
 }
 
 module.ToolLocations = { -- locations of where the tools are at in the game
