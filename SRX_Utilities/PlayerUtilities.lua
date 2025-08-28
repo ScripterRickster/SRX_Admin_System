@@ -194,6 +194,7 @@ module.SetupPlayer = function(plr:Player)
 			local DRN,DRID,DRC,DCUP = nil,nil,nil,nil
 			-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
 			
+			
 			if game.CreatorType ~= Enum.CreatorType.Group then
 				-- SERVER OWNER
 				-------------------------------
@@ -213,6 +214,7 @@ module.SetupPlayer = function(plr:Player)
 					userRanked = true
 				end
 			end
+			
 			
 			-------------------------------
 			-- USERS
@@ -280,16 +282,20 @@ module.SetupPlayer = function(plr:Player)
 				if result ~= nil then
 					result = HTTPS:JSONDecode(result)
 					DRN,DRID,DRC,DCUP = result[1],result[2],result[3],result[4]
+					userRanked = true
 				end
 			end
 			
 			-------------------------------
 			
 			-- PLAYER W/ NO RANK
+		
 			
 			if not userRanked then
 				
+				
 				local defaultRank = SETTINGS.RankBinds.DefaultAdminRank
+
 				if defaultRank and tonumber(tostring(defaultRank)) ~= nil then
 					defaultRank = tonumber(tostring(defaultRank))
 					
@@ -383,7 +389,9 @@ module.SetupPlayer = function(plr:Player)
 			if fl == SETTINGS.Prefix then
 				msg = string.sub(msg,2,string.len(msg))
 				local parameters = string.split(msg," ")
-				serverUtil.HandleCommandExecution(plr,parameters)
+				task.defer(function()
+					serverUtil.HandleCommandExecution(plr,parameters)
+				end)
 			end
 			
 			table.insert(chatlogs,{plr.UserId,os.time(os.date("!*t")),msg})
