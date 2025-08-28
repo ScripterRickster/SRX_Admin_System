@@ -153,6 +153,9 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "getairesponse" and param2 then
 			local result = serverUtilities.GetAIResponse(plr,param2)
 			return result
+		elseif param1 == "filterclientmsg" and param2 then
+			local result = serverUtilities.FilterMessage(plr,param2,true)
+			return result
 		end
 		
 	end
