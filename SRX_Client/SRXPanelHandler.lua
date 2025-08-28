@@ -344,6 +344,7 @@ end
 function newAIPrompt(prmpt:string)
 	if prmpt == "" or prmpt == nil or AIDebounce then return end
 	
+	prmpt = csc_func:InvokeServer("filterclientmsg",prmpt)
 	AI_SearchBox.TextEditable = false
 	AI_SearchBox.Text = ""
 	AI_SearchBox.PlaceholderText = "WAITING FOR A RESPONSE......."
@@ -501,6 +502,11 @@ function updateClientTime()
 		if cHour > 12 then
 			cHour -= 12
 		end
+		
+	end
+	
+	if cMin == 0 then
+		cMin = "00"
 	end
 	
 	timeText.Text = tostring(cHour)..":"..tostring(cMin).." "..AM_PM
