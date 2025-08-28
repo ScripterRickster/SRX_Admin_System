@@ -369,11 +369,16 @@ function newAIPrompt(prmpt:string)
 	elseif aiResponse == nil then
 		aiResponse = "Failed To Get A Response"
 		aiTextColour = Color3.fromRGB(255,0,0)
+	elseif aiResponse == "" then
+		aiResponse = "A.I. System Returned A Blank Message"
+		aiTextColour = Color3.fromRGB(255, 170, 0)
 	end
 	
 	
 	
 	AIMsgCount += 1
+	
+	
 	
 	local newAIMsgTemplate = AI_AITemplate:Clone()
 	newAIMsgTemplate:WaitForChild("TextContent").Text = aiResponse
