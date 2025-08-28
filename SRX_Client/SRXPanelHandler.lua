@@ -100,6 +100,7 @@ local pageHistory = {
 }
 
 local cmdCooldown,onCMDCooldown = math.huge,false
+
 -------------------------------------------------------------------------------------
 
 function setupGeneralInfo()
@@ -139,6 +140,7 @@ function loadCMDPanel(cmd,cmdParams)
 		for _,v in pairs(cmdParameterList:GetChildren()) do
 			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then v:Destroy() end
 		end
+		local idx = 1
 		currCMDNameText.Text = tostring(cmd)
 		for pName,v in pairs(cmdParams) do
 			local newParamTemplate = cmdParameterTemplate:Clone()
@@ -157,7 +159,10 @@ function loadCMDPanel(cmd,cmdParams)
 			newParamTemplate.Name = pName
 			
 			newParamTemplate.Parent = cmdParameterList
+			newParamTemplate.LayoutOrder = idx
 			newParamTemplate.Visible = true
+			
+			idx += 1
 		end
 		
 	end
@@ -551,7 +556,7 @@ cmdActivateBttn.Activated:Connect(function()
 		local allParams = {}
 		
 		local c_cmd = currCMDNameText.Text
-		table.insert(allParams,c_cmd)
+		allParams["D_CMD"] = c_cmd
 		
 		local succ = true
 		
@@ -570,11 +575,10 @@ cmdActivateBttn.Activated:Connect(function()
 					end
 				end
 				
-				table.insert(allParams,txt)
+				allParams[paramName] = txt
 			end
 			
 		end
-		
 		
 		if succ then
 			csc_event:FireServer("CMDACTIVATION",allParams)
