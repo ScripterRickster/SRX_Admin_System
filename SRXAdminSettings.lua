@@ -55,25 +55,26 @@ module.Ranks = { -- ranks for the admin system to use
 module.RankBinds = {
 	Users = {
 		--{user_id OR username, rank id}
-		{"Scripter_Rickster",0};
-		{3422141408,0};
+		--{"Scripter_Rickster",0};
+		--{3422141408,0};
 	};
 	Groups = {
 		--[group_id]  = {min_rank, rank id}
-		
+		--[[
 		[0] = {
 			Min_Group_Rank = 0;
 			RankId = 0;
 		}
+		]]
 	};
 	Gamepasses = {
 		--[gamepass id] = rank id
-		[0] = 0;
+		--[0] = 0;
 	};
 	OtherAssets = {
 		--[asset id] = rank id
-		[0] = 0;
-	}
+		--[0] = 0;
+	};
 
 	DefaultAdminRank = 0; -- what rank you want everybody who isn't already ranked to be at
 }
