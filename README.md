@@ -11,11 +11,11 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 Devforum Post: N/A
 --------------------------------------------------------
 Version 1.0.0 Progress:
-- Basic framework (98% Done)
+- Basic framework (100% Done)
 - Pre-made commands (100% Done)
-- Panel UI (70% Done)
-- UI Framework (80% Done)
-
+- Panel UI (100% Done)
+- UI Framework (100% Done)
+- Testing Phase (20% Complete)
 --------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
