@@ -3,7 +3,7 @@ local module = {}
 module.Prefix = "!"
 
 module.Ranks = { -- ranks for the admin system to use
-	
+
 	--[[
 	
 	[rank_name] = { -- rank name
@@ -13,13 +13,14 @@ module.Ranks = { -- ranks for the admin system to use
 	}
 	
 	]]
-	
+
 	["Owner"] = { 
 		RankId = 5;
 		RankColour = Color3.fromRGB(0, 120, 180);
 		CanUsePanel = true;
-		
+
 	};
+
 	["Head Administrator"] = { 
 		RankId = 4;
 		RankColour = Color3.fromRGB(85, 255, 0);
@@ -49,7 +50,7 @@ module.Ranks = { -- ranks for the admin system to use
 		CanUsePanel = false;
 
 	};
-	
+
 }
 
 module.RankBinds = {
@@ -80,17 +81,17 @@ module.RankBinds = {
 }
 
 
-module.ChatTags = true; -- whether or not if chat  tags should appear for each staff rank (any rank with an id > 0)
+module.ChatTags = false; -- whether or not if chat  tags should appear for each staff rank (any rank with an id > 0)
 module.OverheadTags = {
-	Enabled = true; -- whether or not if there should be a tag over the player's head (any rank with an id > 0)
+	Enabled = false; -- whether or not if there should be a tag over the player's head (any rank with an id > 0)
 	Command = "/tag"; -- what command can be used to enable or disable the tag
 }
 
-module.DatastoreName = "SRX_DEFAULT_DS000" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
+module.DatastoreName = "SRX_DEFAULT_DS0000" -- !! CHANGE THIS TO WHATEVER YOU NEED IT TO BE || DO NOT LEAVE THE DATASTORE NAME AS IT CURRENTLY IS !!
 
-module.SaveRanks = true; -- whether or not if ranks transfer from server to server (permanent rank changes)
+module.SaveRanks = false; -- whether or not if ranks transfer from server to server (permanent rank changes) || PRIVATE SERVER RANKS WILL NOT SAVE
 
-module.IncludeChatSlashCommands = true; -- whether or not if you want to include the "/" commands in the chat instead of relying just on the prefix (these slash commands also don't appear in the chat)
+module.IncludeChatSlashCommands = false; -- whether or not if you want to include the "/" commands in the chat instead of relying just on the prefix (these slash commands also don't appear in the chat)
 
 module.BanSettings = { -- ban settings
 	BannedUsers = { -- who you want to manually perm-ban from your game (THIS DOES NOT GET RUN THROUGH ROBLOX'S BAN API
@@ -105,11 +106,10 @@ module.BanSettings = { -- ban settings
 		[3422141408] = "banned because why not";
 		
 		]]
-		
-		
-	
+
+
 	};
-	
+
 	ExcludeAltsInBans = false; -- whether you want to not ban their alt accounts as well | false = ban alts | true = don't ban alts
 }
 
@@ -126,7 +126,7 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 	Enabled = false; -- whether this feature is enabled
 	OpenCloudAPI_Key = ""; -- put your OpenRouter API key here
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
-	AI_Model = "deepseek/deepseek-r1-0528-qwen3-8b:free"; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-r1-0528-qwen3-8b:free"
+	AI_Model = ""; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-chat-v3.1:free"
 	Max_Tokens = 2048; -- how long the response is based on tokens || higher the token amount, the longer the response and vice versa
 	FilterAIMessages = true; -- whether to filter AI messages or not through Roblox's Filtering System
 }
@@ -136,7 +136,7 @@ module.ToolLocations = { -- locations of where the tools are at in the game
 	game.ServerStorage,
 }
 
-module.ClientThemes = { -- themes that can be switched to for each client
+module.ClientThemes = { -- themes that can be switched to for each client || available in Version 1.0.1 and onwards
 	--[[
 	["TEMPLATE"] = { -- theme name
 		ThemeID = ""; -- asset id of this theme
@@ -155,26 +155,23 @@ module.WebhookSettings = {
 		Enabled = false; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
-	}
+	};
 	["INFRACTION_LOGS"] = { 
 		Enabled = false; -- whether or not if the system sends a log every time an infraction is created or removed
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	};
 	["JOIN_LOGS"] = { 
-		Enabled = false; -- whether or not if the system sends a log every time a user joins / leaves || NOT RECOMMENDED TO HAVE ENABLED
+		Enabled = false; -- whether or not if the system sends a log every time a user joins / leaves || NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 	};
 	["CHAT_LOGS"] = {
 		Enabled = false; -- whether or not if the system sends a log every time a user sends a message || HEAVILY NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
 		EmbedColour = Color3.fromRGB(255,255,255);
-		WebhookLink = ""; -- webhook link
+		WebhookLink = "";
 	}
 }
-
-
-module.Version = "1.0.0"; -- !! DO NOT DELETE OR MODIFY || THIS IS USED TO KEEP TRACK OF THE VERSION THE ADMIN SYSTEM IS RUNNING ON !! | if the version includes a "C" at the end, like "1.0.0C" then it means it is on the canary version
 
 
 return module
