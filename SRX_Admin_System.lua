@@ -110,7 +110,7 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "getrankinfo" then
 			return plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 		elseif param1 == "getadminversion" then
-			return adminSettings.Version
+			return script:GetAttribute("ADMIN_VERSION")
 		elseif param1 == "getserverid" then
 			local sType,sID,sOwner = webhookUtilities.getServerInfo()
 			return sID
