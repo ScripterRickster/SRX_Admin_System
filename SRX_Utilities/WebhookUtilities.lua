@@ -14,7 +14,7 @@ local ASSETS = _G.SRX_ASSETS
 
 local module = {
 
-	NoLogCMDS = {}; -- the names of the commands that are not to be logged if executed
+	--NoLogCMDS = {}; -- the names of the commands that are not to be logged if executed
 }
 
 
@@ -59,6 +59,7 @@ end
 ----------------------------------------------------------------
 
 
+--[[
 module.CheckIfNoLog = function(command:string)
 	if command == nil then return true end
 	command = tostring(command)
@@ -70,6 +71,7 @@ module.CheckIfNoLog = function(command:string)
 	end
 	return false
 end
+]]
 
 ----------------------------------------------------------------
 
