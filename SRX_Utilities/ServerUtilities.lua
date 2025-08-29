@@ -221,25 +221,26 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 					task.defer(function()
 						execSuccess = c_cmd.Execute(paramClone)
+						
+						if c_cmd.SendLog and execSuccess then
+							task.defer(function() -- notifies the server to log this command being run
+								module.LogCommand(cmd_Module,paramClone)
+							end)
+						end
 					end)
-					
-					if c_cmd.SendLog and execSuccess then
-						task.defer(function() -- notifies the server to log this command being run
-							module.LogCommand(cmd_Module,paramClone)
-						end)
-					end
-					
 				end
 			else
 				task.defer(function()
 					execSuccess = c_cmd.Execute(newParameters)
+					
+					if c_cmd.SendLog and execSuccess then
+						task.defer(function() -- notifies the server to log this command being run
+							module.LogCommand(cmd_Module,newParameters)
+						end)
+					end
 				end)
 				
-				if c_cmd.SendLog and execSuccess then
-					task.defer(function() -- notifies the server to log this command being run
-						module.LogCommand(cmd_Module,newParameters)
-					end)
-				end
+				
 			end
 			
 			if c_cmd.SendLog then
@@ -254,12 +255,12 @@ end
 module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 	if cmdModule and given_params ~= nil then
 		if SETTINGS["WebhookSettings"]["COMMANDS"]["Enabled"] then
-			if not webhookUtilities.CheckIfNoLog(cmdModule.Name) then
+			--if not webhookUtilities.CheckIfNoLog(cmdModule.Name) then
 				task.defer(function()
 					local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
 					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule,given_params))
 				end)
-			end
+			--end
 		end
 	end
 end
