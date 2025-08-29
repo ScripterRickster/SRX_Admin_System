@@ -210,6 +210,7 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 		
 		if cmd and cmd_Module then
 			local c_cmd = require(cmd_Module)
+			local execSuccess = false
 			if applyToAllUsers then
 				for _,p in pairs(game.Players:GetChildren()) do
 					local paramClone = table.clone(newParameters)
@@ -219,19 +220,34 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					end
 
 					task.defer(function()
-						c_cmd.Execute(paramClone)
+						execSuccess = c_cmd.Execute(paramClone)
 					end)
+					
+					if c_cmd.SendLog and execSuccess then
+						task.defer(function() -- notifies the server to log this command being run
+							module.LogCommand(cmd_Module,paramClone)
+						end)
+					end
+					
 				end
 			else
 				task.defer(function()
-					c_cmd.Execute(newParameters)
+					execSuccess = c_cmd.Execute(newParameters)
 				end)
+				
+				if c_cmd.SendLog and execSuccess then
+					task.defer(function() -- notifies the server to log this command being run
+						module.LogCommand(cmd_Module,newParameters)
+					end)
+				end
 			end
 			
-			table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
-			PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
+			if c_cmd.SendLog then
+				table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
+				PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
+			end
+			
 		end
-		
 	end
 end
 
