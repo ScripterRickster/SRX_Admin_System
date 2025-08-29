@@ -47,11 +47,14 @@ module.Aliases = { -- other names that tie it to this command
 	"anchor";
 }
 
+module.SendLog = true -- whether the command is logged or not
+
 local frozenTag = ASSETS:WaitForChild("SRX_FROZENTAG")
 
 module.Execute = function(parameters:table)
 	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
 	
+	local execSuccess = false
 	local meetsRequirements = serverUtil.CheckCommandRequirements(module.Parameters,parameters)
 	
 	if meetsRequirements then
@@ -77,15 +80,15 @@ module.Execute = function(parameters:table)
 						frozenTag:Clone().Parent = char:WaitForChild("Head")
 						
 						
-						task.defer(function() -- notifies the server to log this command being run
-							serverUtil.LogCommand(script,parameters)
-						end)
+						execSuccess = true
 					end
 				end
 			end
 
 		end
 	end
+	
+	return execSuccess
 	
 end
 
