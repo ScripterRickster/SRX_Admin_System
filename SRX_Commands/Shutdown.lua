@@ -47,12 +47,15 @@ module.Aliases = { -- other names that tie it to this command
 	-- "alias_name1";
 }
 
+module.SendLog = true -- whether the command is logged or not
+
 local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
 
 
 module.Execute = function(parameters:table)
 	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
 	
+	local execSuccess = false
 	local meetsRequirements = serverUtil.CheckCommandRequirements(module.Parameters,parameters)
 	
 	if meetsRequirements then
@@ -62,9 +65,7 @@ module.Execute = function(parameters:table)
 		local sd_reason = serverUtil.FilterMessage(executor,parameters["REASON"])
 		if sd_reason == nil or sd_reason == "" then sd_reason = "No Reason" end
 		if serverUtil.PlayerCanUseCommand(executor,script) then
-			task.defer(function() -- notifies the server to log this command being run
-				serverUtil.LogCommand(script,parameters)
-			end)
+			execSuccess = true
 			
 			for _,v in pairs(game.Players:GetChildren()) do
 				v:Kick("SERVER SHUTDOWN | "..tostring(sd_reason))
@@ -72,6 +73,8 @@ module.Execute = function(parameters:table)
 
 		end
 	end
+	
+	return execSuccess
 	
 end
 
