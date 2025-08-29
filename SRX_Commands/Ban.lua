@@ -19,7 +19,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 
 ----------------------------------------------------------------
 
-module.ExecutableCommand = false; -- whether you can actually even use this command or not || this parameter is not required
+module.ExecutableCommand = true; -- whether you can actually even use this command or not || this parameter is not required
 module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
 
@@ -59,10 +59,12 @@ module.Aliases = { -- other names that tie it to this command
 
 local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
 
+module.SendLog = true -- whether the command is logged or not
 
 module.Execute = function(parameters:table)
 	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
 	
+	local execSuccess = false
 	local meetsRequirements = serverUtil.CheckCommandRequirements(module.Parameters,parameters)
 	
 	if meetsRequirements then
@@ -113,9 +115,7 @@ module.Execute = function(parameters:table)
 					if not succ and err then
 						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
 					elseif succ then
-						task.defer(function() -- notifies the server to log this command being run
-							serverUtil.LogCommand(script,parameters)
-						end)
+						execSuccess = true
 					end
 				end
 				
@@ -124,6 +124,8 @@ module.Execute = function(parameters:table)
 			end
 		end
 	end
+	
+	return execSuccess
 	
 end
 
