@@ -54,6 +54,8 @@ module.Aliases = { -- other names that tie it to this command
 	-- "alias_name1";
 }
 
+module.SendLog = true -- whether the command is logged or not
+
 local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
 
 function isUserBanned(userid:number)
@@ -112,6 +114,7 @@ end
 module.Execute = function(parameters:table)
 	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
 	
+	local execSuccess = false
 	local meetsRequirements = serverUtil.CheckCommandRequirements(module.Parameters,parameters)
 	
 	if meetsRequirements then
@@ -155,14 +158,14 @@ module.Execute = function(parameters:table)
 							}
 							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
 						end)
-						task.defer(function() -- notifies the server to log this command being run
-							serverUtil.LogCommand(script,parameters)
-						end)
+						execSuccess = true
 					end
 				end
 			end
 		end
 	end
+	
+	return execSuccess
 	
 end
 
