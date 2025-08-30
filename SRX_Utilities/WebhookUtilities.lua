@@ -39,10 +39,18 @@ if game.PrivateServerId ~= "" then
 	serverOwner = game.PrivateServerOwnerId
 end
 
-local sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
-if game.CreatorType == Enum.CreatorType.Group then
-	sOwner = "["..game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId).Name.."](https://www.roblox.com/groups/"..game.CreatorId..")"
+
+
+local sOwner = "UNKNOWN"
+
+if sOwner ~= 0 then
+	if game.CreatorType == Enum.CreatorType.Group then
+		sOwner = "["..game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId).Name.."](https://www.roblox.com/groups/"..game.CreatorId..")"
+	else
+		sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
+	end
 end
+
 
 module.getServerInfo = function()
 	return serverType,serverID,sOwner
