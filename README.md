@@ -17,7 +17,7 @@ Version 1.0.0 Progress:
 - Pre-made commands (100% Done)
 - Panel UI (100% Done)
 - UI Framework (100% Done)
-- Testing Phase (60% Complete)
+- Testing Phase (90% Complete)
 --------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
