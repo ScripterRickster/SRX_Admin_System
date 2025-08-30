@@ -168,6 +168,12 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 						table.insert(userParams,par)
 					end
+						
+					if string.lower(tostring(k["Class"]))  == "user" and params[ct] == nil and not applyToAllUsers then
+						params[ct] = plr
+					end
+					
+					
 					newParameters[par] = params[ct]
 					lastParam = par
 
