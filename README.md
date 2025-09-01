@@ -8,7 +8,7 @@ Developed By: Scripter_Rickster
 
 Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 
-### Devforum Post: N/A
+### [Devforum Post](https://devforum.roblox.com/t/srx-admin-system-a-modular-unobfuscated-simple-admin-system/3912026)
 
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
