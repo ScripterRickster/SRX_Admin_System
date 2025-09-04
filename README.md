@@ -11,11 +11,7 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
 Version 1.0.0 Progress:
-- Basic framework (100% Done)
-- Pre-made commands (100% Done)
-- Panel UI (100% Done)
-- UI Framework (100% Done)
-- Testing Phase (90% Complete)
+- RELEASED
 --------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
