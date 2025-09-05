@@ -19,7 +19,8 @@ Other features are listed in the devforum post
 
 Made to replace the old SR Admin System
 ----------------------------------------------------------------
-Devforum Post: 
+GITHUB Repository: https://github.com/ScripterRickster/SRX_Admin_System
+DEVFORUM Post: https://devforum.roblox.com/t/srx-admin-system-a-modular-unobfuscated-simple-admin-system/3912026
 ----------------------------------------------------------------
 Licensed Under:
 MIT LICENSE
@@ -156,6 +157,10 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "filterclientmsg" and param2 then
 			local result = serverUtilities.FilterMessage(plr,param2,true)
 			return result
+		elseif param1 == "getplayertheme" then
+			return plr:GetAttribute("SRX_THEME")
+		elseif param1 == "getplayerprefix" then
+			return plr:GetAttribute("SRX_PREFIX")
 		end
 		
 	end
