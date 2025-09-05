@@ -158,36 +158,37 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 				
 				local c_cmd = require(cmd_Module)
 				local c_params = c_cmd.Parameters
+				
+				if c_params ~= nil and #c_params > 0 then
+					local ct,lastParam = 2,nil
+					for par,k in pairs(c_params) do
+
+						if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
+							applyToAllUsers = true
+
+							table.insert(userParams,par)
+						end
+
+						if string.lower(tostring(k["Class"]))  == "user" and params[ct] == nil and not applyToAllUsers then
+							params[ct] = plr
+						end
 
 
-				local ct,lastParam = 2,nil
-				for par,k in pairs(c_params) do
+						newParameters[par] = params[ct]
+						lastParam = par
 
-					if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[ct])) == "all" then
-						applyToAllUsers = true
-
-						table.insert(userParams,par)
+						ct += 1
 					end
-						
-					if string.lower(tostring(k["Class"]))  == "user" and params[ct] == nil and not applyToAllUsers then
-						params[ct] = plr
+
+					local endString = params[ct-1]
+
+					for ms=ct,totalParams do
+						endString = endString.." "..tostring(params[ms])
 					end
-					
-					
-					newParameters[par] = params[ct]
-					lastParam = par
 
-					ct += 1
+					newParameters[lastParam] = endString
 				end
-
-				local endString = params[ct-1]
-
-				for ms=ct,totalParams do
-					endString = endString.." "..tostring(params[ms])
-				end
-
-				newParameters[lastParam] = endString
-
+				
 			end
 		else
 			cmd = params["D_CMD"]
