@@ -715,12 +715,14 @@ end
 module.SetPlayerPrefix = function(plr:Player,prefix:string)
 	if plr and prefix then
 		plr:SetAttribute("SRX_PREFIX",prefix)
+		PanelCSC_Event:FireClient(plr,"UPDATEPREFIXDISPLAY",tostring(prefix))
 	end
 end
 
 module.SetPlayerTheme = function(plr:Player,theme:string)
 	if plr and theme then
 		plr:SetAttribute("SRX_THEME",theme)
+		PanelCSC_Event:FireClient(plr,"UPDATEPANELTHEME",tostring(theme))
 	end
 end
 
