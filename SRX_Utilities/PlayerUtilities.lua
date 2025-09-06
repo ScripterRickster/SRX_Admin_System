@@ -419,7 +419,12 @@ module.SetupPlayer = function(plr:Player)
 			end
 			
 			local fl = string.sub(msg,1,1)
-			if fl == SETTINGS.Prefix then
+			
+			local plrCMDPrefix = plr:GetAttribute("SRX_PREFIX")
+			if plrCMDPrefix == nil then plrCMDPrefix = SETTINGS.Prefix end
+			plrCMDPrefix = tostring(plrCMDPrefix)
+			
+			if fl == plrCMDPrefix then
 				msg = string.sub(msg,2,string.len(msg))
 				local parameters = string.split(msg," ")
 				task.defer(function()
