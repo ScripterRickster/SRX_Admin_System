@@ -17,6 +17,8 @@ local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
 
+local panelTheme = main:WaitForChild("UserTheme")
+
 -- general info
 local generalInfo = main:WaitForChild("GeneralInfo")
 local adminVersionText = generalInfo:WaitForChild("AdminVersion"):WaitForChild("VersionText")
@@ -108,6 +110,9 @@ function setupGeneralInfo()
 	local adminV = csc_func:InvokeServer("GETADMINVERSION")
 	local sID = csc_func:InvokeServer("GETSERVERID")
 	local canUseAI = csc_func:InvokeServer("CANUSEAI")
+	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
+	
+	panelTheme.Image = currUserTheme
 	
 	userPFPDisplay.Image = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 	
@@ -652,6 +657,12 @@ panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5
 			task.defer(function()
 				createLog("cmd",param2)
 			end)
+		elseif param1 == "updatedisplayprefix" and param2 then
+			-- change prefix display here later when you finish the settings page
+		elseif param1 == "updatepaneltheme" and param2 then
+			panelTheme.Image = param2
+			
+			-- change theme name display here later when you finish the settings page
 		end
 	end
 end)
