@@ -144,6 +144,10 @@ module.ClientThemes = { -- themes that can be switched to for each client || ava
 	}
 	]]
 
+	["NO THEME"] = {
+		ThemeID = "";
+	};
+	
 	["SRX THEME"] = {
 		ThemeID = "rbxassetid://117504597000768";
 	}
