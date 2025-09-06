@@ -1,3 +1,7 @@
+-- services
+local UIS = game:GetService('UserInputService')
+
+-- core
 local events = game.ReplicatedStorage:WaitForChild("SRX_Events")
 local csc_event = events:WaitForChild("CSC_Event")
 local csc_func = events:WaitForChild("CSC_Func")
@@ -16,6 +20,7 @@ local cmdPanel = main:WaitForChild("CMDPanel")
 local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
+local settingsPage = main:WaitForChild("Settings")
 
 local panelTheme = main:WaitForChild("UserTheme")
 
@@ -55,7 +60,7 @@ local MainButtons = {
 	};
 	["SettingsBttn"] = {
 		TButton = H_Options:WaitForChild("Settings"):WaitForChild("Enter");
-		DesiredPage = nil;
+		DesiredPage = settingsPage;
 	};
 
 
@@ -96,6 +101,15 @@ local AI_AITemplate = AICommList:WaitForChild("AITemplate")
 local AI_SearchBox = aiPage:WaitForChild("SearchArea"):WaitForChild("SearchBox")
 local AIMsgCount,AIDebounce = 0,false
 
+
+-- settings page
+local SettingsList = settingsPage:WaitForChild("MainFrame"):WaitForChild("SettingsList")
+local PrefixSetting = SettingsList:WaitForChild("Prefix")
+local PrefixButton = PrefixSetting:WaitForChild("PrefixButton")
+local PrefixMsg = PrefixSetting:WaitForChild("Message")
+
+local prefixChanging = false
+
 -- other
 local pageHistory = {
 	home,
@@ -111,8 +125,12 @@ function setupGeneralInfo()
 	local sID = csc_func:InvokeServer("GETSERVERID")
 	local canUseAI = csc_func:InvokeServer("CANUSEAI")
 	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
+	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
+	
+	local allThemes = csc_func:InvokeServer("GETALLTHEMES")
 	
 	panelTheme.Image = currUserTheme
+	PrefixButton.Text = currUserPrefix
 	
 	userPFPDisplay.Image = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 	
@@ -476,6 +494,10 @@ end
 
 function changePage(dPage:Frame,returning:boolean)
 	if dPage then
+		if prefixChanging then 
+			PrefixMsg.Visible = false 
+			prefixChanging = false 
+		end
 		local currPage = pageHistory[#pageHistory]
 		
 		if currPage then currPage.Visible = false end
@@ -616,6 +638,11 @@ cmdActivateBttn.Activated:Connect(function()
 	end
 end)
 
+PrefixButton.Activated:Connect(function()
+	if prefixChanging then return end
+	prefixChanging = true
+	PrefixMsg.Visible = true
+end)
 
 cmdSearch:GetPropertyChangedSignal("Text"):Connect(function()
 	filterCMDS(cmdSearch.Text)
@@ -671,12 +698,24 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	task.defer(updateClientTime)
 end)
 
+UIS.InputBegan:Connect(function(inp,gip)
+	if gip then return end
+	
+	if prefixChanging then
+		prefixChanging = false
+		local n_prefix = inp.KeyCode.Name
+		csc_event:FireServer("changeprefix",n_prefix)
+		PrefixButton.Text = n_prefix
+		PrefixMsg.Visible = false
+	end
+	
+end)
+
 task.defer(setupGeneralInfo)
 
 ---------------------
 -- Draggable UI Stuff
 
-local UIS = game:GetService('UserInputService')
 local dragToggle = nil
 local dragSpeed = 0.25
 local dragStart = nil
