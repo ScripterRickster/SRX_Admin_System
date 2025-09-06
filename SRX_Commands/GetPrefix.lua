@@ -58,7 +58,8 @@ module.Execute = function(parameters:table)
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local plr_prefix = executor:GetAttribute("SRX_PREFIX")
-			if plr_prefix == nil or "" then
+
+			if plr_prefix == nil or plr_prefix == "" then
 				plr_prefix = SETTINGS.Prefix
 			end
 			
