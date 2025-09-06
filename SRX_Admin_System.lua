@@ -161,6 +161,8 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return plr:GetAttribute("SRX_THEME")
 		elseif param1 == "getplayerprefix" then
 			return plr:GetAttribute("SRX_PREFIX")
+		elseif param1 == "getallthemes" then
+			return adminSettings.ClientThemes
 		end
 		
 	end
