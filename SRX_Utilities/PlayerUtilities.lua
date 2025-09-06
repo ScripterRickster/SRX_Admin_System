@@ -424,7 +424,7 @@ module.SetupPlayer = function(plr:Player)
 			if plrCMDPrefix == nil then plrCMDPrefix = SETTINGS.Prefix end
 			plrCMDPrefix = tostring(plrCMDPrefix)
 			
-			if fl == plrCMDPrefix then
+			if string.lower(fl) == string.lower(plrCMDPrefix) then
 				msg = string.sub(msg,2,string.len(msg))
 				local parameters = string.split(msg," ")
 				task.defer(function()
