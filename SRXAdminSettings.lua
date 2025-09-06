@@ -1,6 +1,6 @@
 local module = {}
 
-module.Prefix = "!"
+module.Prefix = "!" -- default prefix for the admin system || staff members will be able to set their own prefixes
 
 module.Ranks = { -- ranks for the admin system to use
 
@@ -143,6 +143,10 @@ module.ClientThemes = { -- themes that can be switched to for each client || ava
 		
 	}
 	]]
+
+	["SRX THEME"] = {
+		ThemeID = "rbxassetid://117504597000768";
+	}
 }
 
 module.WebhookSettings = {
