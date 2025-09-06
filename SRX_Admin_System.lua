@@ -207,6 +207,14 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			if uid then
 				plrUtilities.RemovePlayerInfraction(uid,tostring(param3),plr)
 			end
+		elseif param1 == "changeprefix" and param2 then
+			task.defer(function()
+				plrUtilities.SetPlayerPrefix(plr,tostring(param2))
+			end)
+		elseif param1 == "changetheme" and param2 then
+			task.defer(function()
+				plrUtilities.SetPlayerTheme(plr,tostring(param2))
+			end)
 		end
 
 	end
