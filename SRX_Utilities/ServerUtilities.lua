@@ -231,12 +231,12 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 				cmd_notif_created = true
 				if not cmdSuccess then
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","FAILURE")
+				else
+					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
 					if c_cmd.SendLog then
 						table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
 						PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
 					end
-				else
-					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
 				end
 			end
 			
@@ -299,7 +299,7 @@ module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 		if SETTINGS["WebhookSettings"]["COMMANDS"]["Enabled"] then
 			task.defer(function()
 				local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
-					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule,given_params))
+				webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule,given_params))
 			end)
 		end
 	end
