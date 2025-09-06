@@ -224,6 +224,18 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 		
 		if cmd and cmd_Module then
 			local c_cmd = require(cmd_Module)
+			local cmd_notif_created = false
+			
+			local function sendNotif(cmdSuccess)
+				if cmd_notif_created then return end
+				cmd_notif_created = true
+				if not cmdSuccess then
+					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","FAILURE")
+				else
+					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
+				end
+			end
+			
 			local execSuccess = false
 			if applyToAllUsers then
 				for _,p in pairs(game.Players:GetChildren()) do
@@ -232,6 +244,8 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					for _,newP in pairs(userParams) do
 						paramClone[newP] = p
 					end
+					
+					
 
 					task.defer(function()
 						execSuccess = c_cmd.Execute(paramClone)
@@ -241,23 +255,36 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 								module.LogCommand(cmd_Module,paramClone)
 							end)
 						end
+						
+						task.defer(function()
+							sendNotif(execSuccess)
+						end)
 					end)
+					
+					
 				end
 			else
 				task.defer(function()
 					execSuccess = c_cmd.Execute(newParameters)
 					
 					if c_cmd.SendLog and execSuccess then
+						
 						task.defer(function() -- notifies the server to log this command being run
 							module.LogCommand(cmd_Module,newParameters)
 						end)
 					end
+					
+					task.defer(function()
+						sendNotif(execSuccess)
+					end)
+					
+
 				end)
-				
-				
 			end
 			
-			if c_cmd.SendLog then
+			
+			
+			if c_cmd.SendLog and execSuccess then
 				table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
 				PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
 			end
@@ -269,12 +296,10 @@ end
 module.LogCommand = function(cmdModule:ModuleScript,given_params:table)
 	if cmdModule and given_params ~= nil then
 		if SETTINGS["WebhookSettings"]["COMMANDS"]["Enabled"] then
-			--if not webhookUtilities.CheckIfNoLog(cmdModule.Name) then
-				task.defer(function()
-					local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
+			task.defer(function()
+				local webhookID = SETTINGS["WebhookSettings"]["COMMANDS"]["WebhookLink"]
 					webhookUtilities.SendLog(webhookID,webhookUtilities.FormatCommandWebhook(cmdModule,given_params))
-				end)
-			--end
+			end)
 		end
 	end
 end
