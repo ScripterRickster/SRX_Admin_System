@@ -104,11 +104,17 @@ local AIMsgCount,AIDebounce = 0,false
 
 -- settings page
 local SettingsList = settingsPage:WaitForChild("MainFrame"):WaitForChild("SettingsList")
+
 local PrefixSetting = SettingsList:WaitForChild("Prefix")
 local PrefixButton = PrefixSetting:WaitForChild("PrefixButton")
 local PrefixMsg = PrefixSetting:WaitForChild("Message")
 
 local prefixChanging = false
+
+local ThemeSetting = SettingsList:WaitForChild('Theme')
+local ThemeChangebutton = ThemeSetting:WaitForChild("ThemeButton")
+local ThemeList = ThemeSetting:WaitForChild("ThemesList")
+local ThemeTempate = ThemeList:WaitForChild("TEMPLATE")
 
 -- other
 local pageHistory = {
@@ -128,6 +134,30 @@ function setupGeneralInfo()
 	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
 	
 	local allThemes = csc_func:InvokeServer("GETALLTHEMES")
+	
+	for _,v in pairs(ThemeList:GetChildren()) do
+		if v:IsA("ImageButton") and string.lower(v.Name) ~= "template" then
+			v:Destroy() 
+		end
+	end
+	
+	if allThemes ~= nil and typeof(allThemes) == 'table' then
+		for tN,tID in pairs(allThemes) do
+			local nThemeBttn = ThemeTempate:Clone()
+			local themeID = tID.ThemeID
+			nThemeBttn.Image = themeID
+			nThemeBttn.Name = tN
+			nThemeBttn:WaitForChild("ThemeName").Text = tN
+			nThemeBttn.Parent = ThemeList
+			nThemeBttn.Visible = true
+			
+			nThemeBttn.Activated:Connect(function()
+				csc_event:FireServer("CHANGETHEME",themeID)
+				
+				ThemeList.Visible = false
+			end)
+		end
+	end
 	
 	panelTheme.Image = currUserTheme
 	PrefixButton.Text = currUserPrefix
@@ -498,6 +528,7 @@ function changePage(dPage:Frame,returning:boolean)
 			PrefixMsg.Visible = false 
 			prefixChanging = false 
 		end
+		ThemeList.Visible = false
 		local currPage = pageHistory[#pageHistory]
 		
 		if currPage then currPage.Visible = false end
@@ -642,6 +673,10 @@ PrefixButton.Activated:Connect(function()
 	if prefixChanging then return end
 	prefixChanging = true
 	PrefixMsg.Visible = true
+end)
+
+ThemeChangebutton.Activated:Connect(function()
+	ThemeList.Visible = not ThemeList.Visible
 end)
 
 cmdSearch:GetPropertyChangedSignal("Text"):Connect(function()
