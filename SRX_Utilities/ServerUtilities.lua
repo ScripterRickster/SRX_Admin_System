@@ -231,6 +231,10 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 				cmd_notif_created = true
 				if not cmdSuccess then
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","FAILURE")
+					if c_cmd.SendLog then
+						table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
+						PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
+					end
 				else
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
 				end
@@ -284,10 +288,7 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 			
 			
 			
-			if c_cmd.SendLog and execSuccess then
-				table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
-				PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
-			end
+			
 			
 		end
 	end
