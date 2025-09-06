@@ -29,6 +29,7 @@ local HTTPS = game:GetService("HttpService")
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
 local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
+local PlayerSettingsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERSETTINGS")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
@@ -69,6 +70,13 @@ local trackedUsers = {
 ----------------------------------------------------------------
 
 local chatlogs = {}
+
+----------------------------------------------------------------
+
+local defaultSettingsTable = {
+	["SRX_PREFIX"] = SETTINGS.Prefix;
+	["SRX_THEME"] = "";
+}
 
 ----------------------------------------------------------------
 
@@ -328,6 +336,31 @@ module.SetupPlayer = function(plr:Player)
 
 		setupPlayerRank()
 		
+		local function loadPlayerSettings()
+			
+			
+			
+			local plrSettings = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerSettingsDDS)
+			
+			if plrSettings ~= nil then
+				plrSettings = HTTPS:JSONDecode(plrSettings)
+				
+				for vName,v in pairs(plrSettings) do
+					if defaultSettingsTable[vName] ~= nil then
+						defaultSettingsTable[vName] = v
+					end
+				end
+			end
+			
+			
+			for sName,st in pairs(defaultSettingsTable) do
+				plr:SetAttribute(sName,st)
+			end
+			
+		end
+		
+		loadPlayerSettings()
+		
 		
 		task.defer(function()
 			module.SetupPlayerTag(plr)
@@ -405,6 +438,11 @@ module.SetupPlayer = function(plr:Player)
 end
 
 module.PlayerLeft = function(plr:Player)
+	
+	task.defer(function()
+		module.SavePlayerSettings(plr)
+	end)
+	
 	trackedUsers[plr.UserId] = {}
 	
 	for _,v in pairs(game.Players:GetChildren()) do
@@ -674,6 +712,36 @@ module.GetChatLogs = function(plr:Player)
 	end
 end
 ----------------------------------------------------------------
+module.SetPlayerPrefix = function(plr:Player,prefix:string)
+	if plr and prefix then
+		plr:SetAttribute("SRX_PREFIX",prefix)
+	end
+end
 
+module.SetPlayerTheme = function(plr:Player,theme:string)
+	if plr and theme then
+		plr:SetAttribute("SRX_THEME",theme)
+	end
+end
+
+module.SavePlayerSettings = function(plr:Player)
+	if plr then
+		local currPlrSettings = {}
+		
+		for sN,sV in pairs(defaultSettingsTable) do
+			if plr:GetAttribute(sN) then
+				currPlrSettings[sN] = plr:GetAttribute(sN)
+			else
+				currPlrSettings[sN] = sV
+			end
+		end
+		
+		task.defer(function()
+			serverUtil.SaveDataToDDS(tostring(plr.UserId),InfractionDDS,HTTPS:JSONEncode(currPlrSettings))
+		end)
+		
+	end
+end
+----------------------------------------------------------------
 
 return module
