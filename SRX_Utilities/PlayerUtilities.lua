@@ -337,9 +337,6 @@ module.SetupPlayer = function(plr:Player)
 		setupPlayerRank()
 		
 		local function loadPlayerSettings()
-			
-			
-			
 			local plrSettings = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerSettingsDDS)
 			
 			if plrSettings ~= nil then
@@ -744,7 +741,7 @@ module.SavePlayerSettings = function(plr:Player)
 		end
 		
 		task.defer(function()
-			serverUtil.SaveDataToDDS(tostring(plr.UserId),InfractionDDS,HTTPS:JSONEncode(currPlrSettings))
+			serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerSettingsDDS,HTTPS:JSONEncode(currPlrSettings))
 		end)
 		
 	end
