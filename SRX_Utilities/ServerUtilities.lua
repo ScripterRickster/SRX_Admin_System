@@ -159,7 +159,14 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 				local c_cmd = require(cmd_Module)
 				local c_params = c_cmd.Parameters
 				
-				if c_params ~= nil and #c_params > 0 then
+				local function countParameters()
+					local counter = 0
+					for _,v in pairs(c_params) do
+						counter += 1
+					end
+					return counter
+				end
+				if c_params ~= nil and countParameters() > 0 then
 					local ct,lastParam = 2,nil
 					for par,k in pairs(c_params) do
 
