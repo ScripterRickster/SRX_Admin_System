@@ -73,6 +73,7 @@ local MainButtons = {
 
 -- cmds page
 local cmdList = cmds:WaitForChild("CMDFrame"):WaitForChild("CMDList")
+local cmdLoadingMsg = cmds:WaitForChild("CMDFrame"):WaitForChild("LoadingCMDSMessage")
 local cmdTemplate = cmdList:WaitForChild("Template")
 local cmdSearch = cmds:WaitForChild("CMDSearch"):WaitForChild("SearchBox")
 
@@ -327,7 +328,11 @@ function loadUserCommands()
 		end
 	end
 	
+	cmdLoadingMsg.Visible = true
+	
 	local newCMDS = csc_func:InvokeServer("GETPLAYERCMDS")
+	
+	cmdLoadingMsg.Visible = false
 	
 	for _,v in pairs(newCMDS) do
 		local newCMDTemplate = cmdTemplate:Clone()
