@@ -468,7 +468,9 @@ module.PlayerLeft = function(plr:Player)
 		module.SavePlayerSettings(plr)
 	end)
 	
-	activeHelpRequests[plr.UserId] = nil
+	task.defer(function()
+		module.RemovePlayerHelpRequest(plr)
+	end)
 	
 	trackedUsers[plr.UserId] = {}
 	
