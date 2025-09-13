@@ -813,6 +813,10 @@ module.HandlePlayerHelpRequest = function(plr1:Player,plr2:Player)
 		end
 	end
 end
+
+module.GetAllHelpRequests = function()
+	return activeHelpRequests
+end
 ----------------------------------------------------------------
 
 return module
