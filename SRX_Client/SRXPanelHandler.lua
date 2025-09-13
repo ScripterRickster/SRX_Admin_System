@@ -215,6 +215,21 @@ function setupGeneralInfo()
 	local canViewHelpReq = csc_func:InvokeServer("CANVIEWHELPREQ")
 	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
 	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
+	local allHelpRequests = csc_func:InvokeServer("GETALLHELPREQUESTS")
+	
+	for _,v in pairs(HelpRequestsList:GetChildren()) do
+		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+			v:Destroy()
+		end
+	end
+	
+	for helpReqIDX,helpReqV in pairs(allHelpRequests) do
+		if helpReqV then
+			task.defer(function()
+				createHelpRequest(game.Players:GetPlayerByUserId(tonumber(helpReqIDX)))
+			end)
+		end
+	end
 	
 	local allThemes = csc_func:InvokeServer("GETALLTHEMES")
 	
@@ -485,7 +500,7 @@ end
 
 function createHelpRequest(plr:Player)
 	if plr then
-		
+		if HelpRequestsList:FindFirstChild(tostring(plr.UserId)) ~= nil then return end
 		local newHelpReqTemplate = HelpRequestTemplate:Clone()
 		newHelpReqTemplate.Name = tostring(plr.UserId)
 		newHelpReqTemplate:WaitForChild("Username").Text = "<u>"..tostring(plr.Name).."</u>"
