@@ -20,6 +20,7 @@ local cmdPanel = main:WaitForChild("CMDPanel")
 local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
+local helpReqPage = main:WaitForChild("HelpRequests")
 local settingsPage = main:WaitForChild("Settings")
 
 local panelTheme = main:WaitForChild("UserTheme")
@@ -57,6 +58,10 @@ local MainButtons = {
 	["LogsBttn"] = {
 		TButton = H_Options:WaitForChild("Logs"):WaitForChild("Enter");
 		DesiredPage = logs;
+	};
+	["HelpReqBttn"] = {
+		TButton = H_Options:WaitForChild("HelpRequests"):WaitForChild("Enter");
+		DesiredPage = helpReqPage;
 	};
 	["SettingsBttn"] = {
 		TButton = H_Options:WaitForChild("Settings"):WaitForChild("Enter");
@@ -101,6 +106,11 @@ local AI_AITemplate = AICommList:WaitForChild("AITemplate")
 local AI_SearchBox = aiPage:WaitForChild("SearchArea"):WaitForChild("SearchBox")
 local AIMsgCount,AIDebounce = 0,false
 
+-- help requests page
+local HelpRequestsList = helpReqPage:WaitForChild("HelpRequestDisplay"):WaitForChild("HelpRequestList")
+local HelpRequestTemplate = HelpRequestsList:WaitForChild("Template")
+local HelpRequestSearch = helpReqPage:WaitForChild("SearchArea"):WaitForChild("SearchBox")
+
 
 -- settings page
 local SettingsList = settingsPage:WaitForChild("MainFrame"):WaitForChild("SettingsList")
@@ -121,6 +131,78 @@ local pageHistory = {
 	home,
 }
 
+
+local validKeyCodes = {
+	["A"] = "a";
+	["B"] = "b";
+	["C"] = "c";
+	["D"] = "d";
+	["E"] = "e";
+	["F"] = "f";
+	["G"] = "g";
+	["H"] = "h";
+	["I"] = "i";
+	["J"] = "j";
+	["K"] = "k";
+	["L"] = "l";
+	["M"] = "m";
+	["N"] = "n";
+	["O"] = "o";
+	["P"] = "p";
+	["Q"] = "q";
+	["R"] = "r";
+	["S"] = "s";
+	["T"] = "t";
+	["U"] = "u";
+	["V"] = "v";
+	["W"] = "w";
+	["X"] = "x";
+	["Y"] = "y";
+	["Z"] = "z";
+	["One"] = "1";
+	["Two"] = "2";
+	["Three"] = "3";
+	["Four"] = "4";
+	["Five"] = "5";
+	["Six"] = "6";
+	["Seven"] = "7";
+	["Eight"] = "8";
+	["Nine"] = "9";
+	["Zero"] = "0";
+	["QuotedDouble"] = '"';
+	["Hash"] = "#";
+	["Dollar"] = "$";
+	["Percent"] = "%";
+	["Ampersand"] = "&";
+	["Quote"] = "'";
+	["LeftParenthesis"] = "(";
+	["RightParenthesis"] = ")";
+	["Asterisk"] = "*";
+	["Plus"] = "+";
+	["Minus"] = "-";
+	["Equals"] = "=";
+	["Comma"] = ",";
+	["Period"] = ".";
+	["Slash"] = "/";
+	["Colon"] = ":";
+	["Semicolon"] = ";";
+	["LessThan"] = "<";
+	["GreaterThan"] = ">";
+	["Question"] = "?";
+	["At"] = "@";
+	["LeftBracket"] = "[";
+	["RightBracket"] = "]";
+	["Backslash"] = '\ ';
+	["Caret"] = "^";
+	["Underscore"] = "_";
+	["Backquote"] = "`";
+	["Tilde"] = "~";
+	["LeftCurly"] = "{";
+	["RightCurly"] = "}";
+	["Pipe"] = "|";
+	
+}
+
 local cmdCooldown,onCMDCooldown = math.huge,false
 
 -------------------------------------------------------------------------------------
@@ -130,6 +212,7 @@ function setupGeneralInfo()
 	local adminV = csc_func:InvokeServer("GETADMINVERSION")
 	local sID = csc_func:InvokeServer("GETSERVERID")
 	local canUseAI = csc_func:InvokeServer("CANUSEAI")
+	local canViewHelpReq = csc_func:InvokeServer("CANVIEWHELPREQ")
 	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
 	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
 	
@@ -165,6 +248,7 @@ function setupGeneralInfo()
 	userPFPDisplay.Image = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 	
 	MainButtons["AIChatBttn"].TButton.Parent.Visible = canUseAI
+	MainButtons["HelpReqBttn"].TButton.Parent.Visible = canViewHelpReq
 	
 	rID,rName = tostring(rID),tostring(rName)
 	
@@ -399,6 +483,36 @@ function createLog(logType:string,logInfo:table)
 	end
 end
 
+function createHelpRequest(plr:Player)
+	if plr then
+		
+		local newHelpReqTemplate = HelpRequestTemplate:Clone()
+		newHelpReqTemplate.Name = tostring(plr.UserId)
+		newHelpReqTemplate:WaitForChild("Username").Text = "<u>"..tostring(plr.Name).."</u>"
+		
+		local utcTime = os.date("*t")
+		local helpReqTime = string.format("| %02d:%02d",
+			utcTime.hour,
+			utcTime.min
+		)
+		local helpReqDate = string.format("%02d/%02d/%04d",
+			utcTime.day,
+			utcTime.month,
+			utcTime.year
+		)
+		
+		newHelpReqTemplate:WaitForChild("Time").Text = helpReqTime
+		newHelpReqTemplate:WaitForChild("Date").Text = helpReqDate
+		
+		newHelpReqTemplate.Parent = HelpRequestsList
+		newHelpReqTemplate.Visible = true
+		newHelpReqTemplate:WaitForChild("TeleportButton").Activated:Connect(function()
+			csc_event:FireServer("HANDLEHELPREQ",plr)
+		end)
+		
+	end
+end
+
 function newAIPrompt(prmpt:string)
 	if prmpt == "" or prmpt == nil or AIDebounce then return end
 	
@@ -497,6 +611,30 @@ function filterLogs(txt:string,listFrame:ScrollingFrame)
 			end
 		end
 	end
+end
+
+function filterHelpRequests(txt:string)
+	if txt == nil then return end
+	txt = string.lower(tostring(txt))
+	
+	for _,v in pairs(HelpRequestsList:GetChildren()) do
+		if string.lower(v.Name) ~= "template" and v:IsA("Frame") then
+			if txt == "" then
+				v.Visible = true
+			else
+				local userTxt = string.lower(v:WaitForChild("Username").Text)
+				if v:WaitForChild("Username").RichText then
+					userTxt = string.sub(userTxt,4,string.len(userTxt)-4)
+				end
+				if string.match(userTxt,txt) ~= nil then
+					v.Visible = true
+				else
+					v.Visible = false
+				end
+			end
+		end
+	end
+	
 end
 
 
@@ -704,6 +842,10 @@ AI_SearchBox.FocusLost:Connect(function()
 	newAIPrompt(AI_SearchBox.Text)
 end)
 
+HelpRequestSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	filterHelpRequests(HelpRequestSearch.Text)
+end)
+
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 	if param1 then
 		param1 = string.lower(tostring(param1))
@@ -719,12 +861,20 @@ panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5
 			task.defer(function()
 				createLog("cmd",param2)
 			end)
-		elseif param1 == "updatedisplayprefix" and param2 then
-			-- change prefix display here later when you finish the settings page
 		elseif param1 == "updatepaneltheme" and param2 then
 			panelTheme.Image = param2
 			
-			-- change theme name display here later when you finish the settings page
+		elseif param1 == "createhelpreq" and param2 then
+			if param2:IsA("Player") then 
+				task.defer(function()
+					createHelpRequest(param2)
+				end)
+			end
+		elseif param1 == "removehelpreq" and param2 then
+			if param2:IsA("Player") then
+				local dHelpReq = HelpRequestsList:FindFirstChild(tostring(param2.UserId))
+				if dHelpReq then dHelpReq:Destroy() end
+			end
 		end
 	end
 end)
@@ -736,12 +886,22 @@ end)
 UIS.InputBegan:Connect(function(inp,gip)
 	if gip then return end
 	
+	local prefixChanged = false
 	if prefixChanging then
 		prefixChanging = false
 		local n_prefix = inp.KeyCode.Name
-		csc_event:FireServer("changeprefix",n_prefix)
-		PrefixButton.Text = n_prefix
-		PrefixMsg.Visible = false
+		
+		local inpKeyVal = validKeyCodes[n_prefix]
+		if inpKeyVal ~= nil then
+			inpKeyVal = string.sub(string.upper(tostring(inpKeyVal)),1,1)
+			csc_event:FireServer("changeprefix",inpKeyVal)
+			PrefixButton.Text = inpKeyVal
+			PrefixMsg.Visible = false
+			prefixChanged = true
+		end
+		
+		if not prefixChanged then prefixChanging = true end
+		
 	end
 	
 end)
