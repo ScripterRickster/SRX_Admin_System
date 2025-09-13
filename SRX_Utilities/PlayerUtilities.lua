@@ -778,7 +778,7 @@ module.CreatePlayerHelpRequest = function(plr:Player)
 	if plr then
 		if activeHelpRequests[plr.UserId] == nil then
 			activeHelpRequests[plr.UserId] = true
-			PanelCSC_Event:FireAllClients("CREATEHELPREQ",plr.UserId)
+			PanelCSC_Event:FireAllClients("CREATEHELPREQ",plr)
 		end
 	end
 end
@@ -787,7 +787,7 @@ module.RemovePlayerHelpRequest = function(plr:Player)
 	if plr then
 		
 		if activeHelpRequests[plr.UserId] then
-			PanelCSC_Event:FireAllClients("REMOVEHELPREQ",plr.UserId)
+			PanelCSC_Event:FireAllClients("REMOVEHELPREQ",plr)
 			activeHelpRequests[plr.UserId] = nil
 		end
 	end
@@ -797,17 +797,19 @@ module.HandlePlayerHelpRequest = function(plr1:Player,plr2:Player)
 	if plr1 and plr2 then
 		if activeHelpRequests[plr2.UserId] ~= nil then
 			
-			task.defer(function()
-				module.RemovePlayerHelpRequest(plr2)
-			end)
-			
-			local char1 = plr1.Character or plr1.CharacterAdded:Wait()
-			local hrp1 = char1:WaitForChild("HumanoidRootPart")
-			
-			local char2 = plr2.Character or plr2.CharacterAdded:Wait()
-			local hrp2 = char2:WaitForChild("HumanoidRootPart")
-			
-			hrp1.CFrame = CFrame.new(hrp2.CFrame.X,hrp2.CFrame.Y+10,hrp2.CFrame.Z)
+			if tonumber(tostring(SETTINGS["HelpCMDSettings"]["HandlerMinRank"])) <= tonumber(tostring(plr1:GetAttribute("SRX_RANKID"))) then
+				task.defer(function()
+					module.RemovePlayerHelpRequest(plr2)
+				end)
+
+				local char1 = plr1.Character or plr1.CharacterAdded:Wait()
+				local hrp1 = char1:WaitForChild("HumanoidRootPart")
+
+				local char2 = plr2.Character or plr2.CharacterAdded:Wait()
+				local hrp2 = char2:WaitForChild("HumanoidRootPart")
+
+				hrp1.CFrame = CFrame.new(hrp2.CFrame.X,hrp2.CFrame.Y+10,hrp2.CFrame.Z)
+			end
 		end
 	end
 end
