@@ -504,6 +504,7 @@ function createHelpRequest(plr:Player)
 		local newHelpReqTemplate = HelpRequestTemplate:Clone()
 		newHelpReqTemplate.Name = tostring(plr.UserId)
 		newHelpReqTemplate:WaitForChild("Username").Text = "<u>"..tostring(plr.Name).."</u>"
+		newHelpReqTemplate:WaitForChild("PFP").Image = game.Players:GetUserThumbnailAsync(plr.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 		
 		local utcTime = os.date("*t")
 		local helpReqTime = string.format("| %02d:%02d",
