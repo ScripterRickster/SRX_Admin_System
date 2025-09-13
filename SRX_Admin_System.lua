@@ -166,6 +166,8 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "canviewhelpreq" then
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 			return adminSettings["HelpCMDSettings"] ~= nil and adminSettings["HelpCMDSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["HelpCMDSettings"]["HandlerMinRank"]))
+		elseif param1 == "getallhelprequests" then
+			return plrUtilities.GetAllHelpRequests()
 		end
 	end
 end
