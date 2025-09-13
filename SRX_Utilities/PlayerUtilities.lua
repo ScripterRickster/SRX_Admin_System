@@ -73,6 +73,16 @@ local chatlogs = {}
 
 ----------------------------------------------------------------
 
+local activeHelpRequests = {
+	--[[
+	
+	[userid] = status
+	
+	]]
+}
+
+----------------------------------------------------------------
+
 local defaultSettingsTable = {
 	["SRX_PREFIX"] = SETTINGS.Prefix;
 	["SRX_THEME"] = "";
@@ -415,6 +425,19 @@ module.SetupPlayer = function(plr:Player)
 				end
 			end
 			
+			if SETTINGS.HelpCMDSettings ~= nil then
+				local helpCMDEnabled = SETTINGS.HelpCMDSettings["Enabled"]
+				local helpCMD = SETTINGS.HelpCMDSettings["Command"]
+				
+				if helpCMDEnabled then
+					if string.lower(tostring(helpCMD)) == string.lower(msg) then
+						task.defer(function()
+							module.CreatePlayerHelpRequest(plr)
+						end)
+					end
+				end
+			end
+			
 			local fl = string.sub(msg,1,1)
 			
 			local plrCMDPrefix = plr:GetAttribute("SRX_PREFIX")
@@ -444,6 +467,8 @@ module.PlayerLeft = function(plr:Player)
 	task.defer(function()
 		module.SavePlayerSettings(plr)
 	end)
+	
+	activeHelpRequests[plr.UserId] = nil
 	
 	trackedUsers[plr.UserId] = {}
 	
@@ -744,6 +769,44 @@ module.SavePlayerSettings = function(plr:Player)
 			serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerSettingsDDS,HTTPS:JSONEncode(currPlrSettings))
 		end)
 		
+	end
+end
+----------------------------------------------------------------
+
+module.CreatePlayerHelpRequest = function(plr:Player)
+	if plr then
+		if activeHelpRequests[plr.UserId] == nil then
+			activeHelpRequests[plr.UserId] = true
+		end
+	end
+end
+
+module.RemovePlayerHelpRequest = function(plr:Player)
+	if plr then
+		
+		if activeHelpRequests[plr.UserId] then
+			PanelCSC_Event:FireAllClients("REMOVEHELPREQ",plr.UserId)
+			activeHelpRequests[plr.UserId] = nil
+		end
+	end
+end
+
+module.HandlePlayerHelpRequest = function(plr1:Player,plr2:Player)
+	if plr1 and plr2 then
+		if activeHelpRequests[plr2.UserId] ~= nil then
+			
+			task.defer(function()
+				module.RemovePlayerHelpRequest(plr2)
+			end)
+			
+			local char1 = plr1.Character or plr1.CharacterAdded:Wait()
+			local hrp1 = char1:WaitForChild("HumanoidRootPart")
+			
+			local char2 = plr2.Character or plr2.CharacterAdded:Wait()
+			local hrp2 = char2:WaitForChild("HumanoidRootPart")
+			
+			hrp1.CFrame = CFrame.new(hrp2.CFrame.X,hrp2.CFrame.Y+10,hrp2.CFrame.Z)
+		end
 	end
 end
 ----------------------------------------------------------------
