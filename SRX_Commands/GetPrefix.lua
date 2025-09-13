@@ -64,6 +64,8 @@ module.Execute = function(parameters:table)
 			end
 			
 			CSC_Event:FireClient(executor,"DISPLAYPREFIX",plr_prefix)
+			
+			execSuccess = true
 
 		end
 	end
