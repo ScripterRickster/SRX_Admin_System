@@ -163,8 +163,10 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return plr:GetAttribute("SRX_PREFIX")
 		elseif param1 == "getallthemes" then
 			return adminSettings.ClientThemes
+		elseif param1 == "canviewhelpreq" then
+			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
+			return adminSettings["HelpCMDSettings"] ~= nil and adminSettings["HelpCMDSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["HelpCMDSettings"]["HandlerMinRank"]))
 		end
-		
 	end
 end
 
