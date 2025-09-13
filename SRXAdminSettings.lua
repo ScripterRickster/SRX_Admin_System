@@ -132,7 +132,7 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 }
 
 module.HelpCMDSettings = { -- settings for the help command
-	Enabled = true; -- whether this feature is enabled or not
+	Enabled = false; -- whether this feature is enabled or not
 	Command = "/help"; -- the command to use the help feature
 	HandlerMinRank = 1; -- the minimum rank to respond to help requests
 }
