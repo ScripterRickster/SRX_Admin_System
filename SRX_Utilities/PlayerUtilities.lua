@@ -744,7 +744,6 @@ end
 module.SetPlayerPrefix = function(plr:Player,prefix:string)
 	if plr and prefix then
 		plr:SetAttribute("SRX_PREFIX",prefix)
-		PanelCSC_Event:FireClient(plr,"UPDATEPREFIXDISPLAY",tostring(prefix))
 	end
 end
 
