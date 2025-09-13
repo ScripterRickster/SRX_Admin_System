@@ -219,6 +219,10 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			task.defer(function()
 				plrUtilities.SetPlayerTheme(plr,tostring(param2))
 			end)
+		elseif param1 == "handlehelpreq" and param2 then
+			task.defer(function()
+				plrUtilities.HandlePlayerHelpRequest(plr,param2)
+			end)
 		end
 
 	end
