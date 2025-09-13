@@ -779,6 +779,7 @@ module.CreatePlayerHelpRequest = function(plr:Player)
 	if plr then
 		if activeHelpRequests[plr.UserId] == nil then
 			activeHelpRequests[plr.UserId] = true
+			PanelCSC_Event:FireAllClients("CREATEHELPREQ",plr.UserId)
 		end
 	end
 end
