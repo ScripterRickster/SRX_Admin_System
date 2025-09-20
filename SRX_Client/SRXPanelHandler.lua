@@ -21,6 +21,7 @@ local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
 local helpReqPage = main:WaitForChild("HelpRequests")
+local cmdConsolePage = nil
 local settingsPage = main:WaitForChild("Settings")
 
 local panelTheme = main:WaitForChild("UserTheme")
@@ -63,6 +64,10 @@ local MainButtons = {
 		TButton = H_Options:WaitForChild("HelpRequests"):WaitForChild("Enter");
 		DesiredPage = helpReqPage;
 	};
+	["CMDConsoleBttn"] = {
+		TButton = H_Options:WaitForChild("CMDConsole"):WaitForChild("Enter");
+		DesiredPage = cmdConsolePage;
+	};
 	["SettingsBttn"] = {
 		TButton = H_Options:WaitForChild("Settings"):WaitForChild("Enter");
 		DesiredPage = settingsPage;
@@ -83,6 +88,7 @@ local currCMDNameText = cmdPanel:WaitForChild("Titles"):WaitForChild("CMDName")
 local cmdActivateBttn = cmdPanel:WaitForChild("Activate")
 local cmdParameterList = cmdPanel:WaitForChild("Parameters"):WaitForChild("List")
 local cmdParameterTemplate = cmdParameterList:WaitForChild("Template")
+local cmdNoParametersMsg = cmdPanel:WaitForChild("NoParametersMsg")
 
 -- infractions page
 local infracUserSearch = infractions:WaitForChild("UserSearch"):WaitForChild("SearchBox")
@@ -290,6 +296,7 @@ end
 
 function loadCMDPanel(cmd,cmdParams)
 	if cmd and cmdParams then
+		cmdNoParametersMsg.Visible = false
 		for _,v in pairs(cmdParameterList:GetChildren()) do
 			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then v:Destroy() end
 		end
@@ -316,6 +323,10 @@ function loadCMDPanel(cmd,cmdParams)
 			newParamTemplate.Visible = true
 			
 			idx += 1
+		end
+		
+		if idx == 1 then
+			cmdNoParametersMsg.Visible = true
 		end
 		
 	end
