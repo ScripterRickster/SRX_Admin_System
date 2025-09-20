@@ -10,7 +10,7 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
-Version 1.0.3 Progress:
+Version 1.0.4 Progress:
 - IN PROGRESS
 --------------------------------------------------------
 
@@ -18,7 +18,7 @@ Modular, configurable, and clean admin system for ROBLOX
 
 Created to replace the old SR Admin System
 
-Features (Version 1.0.2):
+Features (Version 1.0.3):
 - Clean, organized, and unobfuscated code
 - The standard pre-made commands
 - Modular system that can easily be utilized by other systems if required
