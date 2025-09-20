@@ -30,6 +30,7 @@ Features (Version 1.0.2):
 - Optional feature of having overhead tags and chat tags
 - Optional feature to include text slash commands in ROBLOX's default chat
 - Optional feature to include webhook-logging via Discord
+- Optional feature to include a console-like page to directly type commands into instead of using the default ROBLOX chat
 - and more stuff that I forgot about
 --------------------------------------------------------
 
