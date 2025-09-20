@@ -21,7 +21,7 @@ local infractions = main:WaitForChild("Infractions")
 local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
 local helpReqPage = main:WaitForChild("HelpRequests")
-local cmdConsolePage = nil
+local cmdConsolePage = main:WaitForChild("CommandConsole")
 local settingsPage = main:WaitForChild("Settings")
 
 local panelTheme = main:WaitForChild("UserTheme")
@@ -118,6 +118,14 @@ local HelpRequestsList = helpReqPage:WaitForChild("HelpRequestDisplay"):WaitForC
 local HelpRequestTemplate = HelpRequestsList:WaitForChild("Template")
 local HelpRequestSearch = helpReqPage:WaitForChild("SearchArea"):WaitForChild("SearchBox")
 
+-- command console page
+local ccCommandInput = cmdConsolePage:WaitForChild("InputAreas"):WaitForChild("CommandName")
+local ccParamInput = cmdConsolePage:WaitForChild("InputAreas"):WaitForChild("Parameters")
+local ccCommandActivate = cmdConsolePage:WaitForChild("Activate")
+local ccParameterHint = cmdConsolePage:WaitForChild("ParameterHint")
+local ccCMDNameDropdown = cmdConsolePage:WaitForChild("CMDNameDropdown")
+local ccCMDDropdownList = ccCMDNameDropdown:WaitForChild("List")
+local ccCMDTemplate = ccCMDDropdownList:WaitForChild("Template")
 
 -- settings page
 local SettingsList = settingsPage:WaitForChild("MainFrame"):WaitForChild("SettingsList")
@@ -138,6 +146,12 @@ local pageHistory = {
 	home,
 }
 
+local commandActivateButtons = {
+	cmdActivateBttn,
+	ccCommandActivate,
+}
+
+local ccInputChanged = false
 
 local validKeyCodes = {
 	["A"] = "a";
@@ -223,6 +237,7 @@ function setupGeneralInfo()
 	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
 	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
 	local allHelpRequests = csc_func:InvokeServer("GETALLHELPREQUESTS")
+	local canUseCommandConsole = csc_func:InvokeServer("CANUSECOMMANDCONSOLE")
 	
 	for _,v in pairs(HelpRequestsList:GetChildren()) do
 		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
@@ -237,6 +252,7 @@ function setupGeneralInfo()
 			end)
 		end
 	end
+	
 	
 	local allThemes = csc_func:InvokeServer("GETALLTHEMES")
 	
@@ -271,6 +287,7 @@ function setupGeneralInfo()
 	
 	MainButtons["AIChatBttn"].TButton.Parent.Visible = canUseAI
 	MainButtons["HelpReqBttn"].TButton.Parent.Visible = canViewHelpReq
+	MainButtons["CMDConsoleBttn"].TButton.Parent.Visible = canUseCommandConsole
 	
 	rID,rName = tostring(rID),tostring(rName)
 	
@@ -339,6 +356,12 @@ function loadUserCommands()
 		end
 	end
 	
+	for _,v in pairs(ccCMDDropdownList:GetChildren()) do
+		if v:IsA("TextButton") and string.lower(v.Name) ~= "template" then
+			v:Destroy()
+		end
+	end
+	
 	cmdLoadingMsg.Visible = true
 	
 	local newCMDS = csc_func:InvokeServer("GETPLAYERCMDS")
@@ -346,6 +369,7 @@ function loadUserCommands()
 	cmdLoadingMsg.Visible = false
 	
 	for _,v in pairs(newCMDS) do
+		-- regular command
 		local newCMDTemplate = cmdTemplate:Clone()
 		newCMDTemplate:WaitForChild("Title").Text = "<u>"..string.upper(tostring(v)).."</u>"
 		
@@ -362,6 +386,19 @@ function loadUserCommands()
 		newCMDTemplate:WaitForChild("Use").Activated:Connect(function()
 			loadCMDPanel(string.upper(tostring(v)),cmdParams)
 			changePage(cmdPanel)
+		end)
+		
+		-- command console command
+		
+		local new_ccCMDTemplate = ccCMDTemplate:Clone()
+		new_ccCMDTemplate.Name = string.upper(tostring(v))
+		new_ccCMDTemplate.Text = string.upper(tostring(v))
+		new_ccCMDTemplate.Visible = true
+		new_ccCMDTemplate.Parent = ccCMDDropdownList
+	
+		new_ccCMDTemplate.Activated:Connect(function()
+			ccCommandInput.Text = new_ccCMDTemplate.Text
+			ccCMDNameDropdown.Visible = false
 		end)
 	end
 end
@@ -466,6 +503,8 @@ function loadLogs()
 		end
 	end
 end
+
+
 
 function createLog(logType:string,logInfo:table)
 	if logType == nil or logType == "" then return end
@@ -669,6 +708,25 @@ function filterHelpRequests(txt:string)
 	
 end
 
+function filterConsoleCMDList(txt:string)
+	if txt == nil then return end
+	txt = string.lower(tostring(txt))
+	for _,v in pairs(ccCMDDropdownList:GetChildren()) do
+		if string.lower(v.Name) ~= "template" and v:IsA("TextButton") then
+			if txt == "" then
+				v.Visible = true
+			else
+				local userTxt = string.lower(v.Name)
+				if string.match(userTxt,txt) ~= nil then
+					v.Visible = true
+				else
+					v.Visible = false
+				end
+			end
+		end
+	end
+end
+
 
 
 function clearInputs(dPage:Frame)
@@ -724,6 +782,38 @@ function changePage(dPage:Frame,returning:boolean)
 	end
 end
 
+function commandCooldown()
+	onCMDCooldown = true
+	
+	for _,v in pairs(commandActivateButtons) do
+		if v:IsA("TextButton") then
+			v.Active = false
+			v.TextTransparency = 0.5
+			local uistroke = v:FindFirstChildOfClass("UIStroke")
+			if uistroke then
+				uistroke.Transparency = 0.5
+			end
+		end
+	end
+	
+	
+	task.wait(cmdCooldown)
+	
+	for _,v in pairs(commandActivateButtons) do
+		if v:IsA("TextButton") then
+			v.Active = true
+			v.TextTransparency = 0
+			local uistroke = v:FindFirstChildOfClass("UIStroke")
+			if uistroke then
+				uistroke.Transparency = 0
+			end
+		end
+	end
+	
+	onCMDCooldown = false
+	
+end
+
 function updateClientTime()
 	local currTime = os.date("*t")
 	local cHour,cMin = currTime.hour,currTime.min
@@ -743,6 +833,25 @@ function updateClientTime()
 	end
 	
 	timeText.Text = tostring(cHour)..":"..tostring(cMin).." "..AM_PM
+end
+
+function loadCommandConsoleParameterHint()
+	if ccCommandInput.Text == " " or ccCommandInput.Text == nil then
+		ccParameterHint.Visible = false
+	else
+		local cmdDesc,cmdParams = csc_func:InvokeServer("GETCMDINFO",ccCommandInput.Text)
+		if cmdDesc == nil and cmdParams == nil then
+			ccParameterHint.TextColor3 = Color3.fromRGB(255, 0, 0)
+			ccParameterHint.Text = "ERROR | COMMAND DOES NOT EXIST"
+		elseif cmdParams ~= nil then
+			ccParameterHint.TextColor3 = Color3.fromRGB(255,255,255)
+			ccParameterHint.Text = "PARAMETERS: "
+			for paramName,paramVal in pairs(cmdParams) do
+				ccParameterHint.Text = ccParameterHint.Text.." ["..string.upper(tostring(paramName)).."]"
+			end
+		end
+		ccParameterHint.Visible = true
+	end
 end
 
 
@@ -816,26 +925,38 @@ cmdActivateBttn.Activated:Connect(function()
 			task.defer(function()
 				clearInputs(cmdPanel)
 			end)
-			
-			cmdActivateBttn.TextTransparency = 0.5
-
-			local uistroke = cmdActivateBttn:FindFirstChildOfClass("UIStroke")
-			if uistroke then
-				uistroke.Transparency = 0.5
-			end
-			
-			task.wait(cmdCooldown)
-		end
-		
-		cmdActivateBttn.TextTransparency = 0
-
-		local uistroke = cmdActivateBttn:FindFirstChildOfClass("UIStroke")
-		if uistroke then
-			uistroke.Transparency = 0
+			commandCooldown()
 		end
 		
 		onCMDCooldown = false
 		
+	end
+end)
+
+ccCommandActivate.Activated:Connect(function()
+	local currPage = pageHistory[#pageHistory]
+	if currPage == cmdConsolePage and not onCMDCooldown and ccCommandInput.Text ~= nil and ccCommandInput.Text ~= "" and ccParamInput.Text ~= nil and ccParamInput.Text ~= "" then
+		onCMDCooldown = true
+		
+		local dParams = {}
+		dParams["D_CMD"] = ccCommandInput.Text
+		local paramString = string.split(ccParameterHint.Text," ")
+		table.remove(paramString,1)
+		table.remove(paramString,1)
+		local paramInputString = string.split(ccParamInput.Text," ")
+		local pInputIndex = 1
+		for _,v in pairs(paramString) do
+			local cc_pName = string.sub(v,2,string.len(v)-1)
+			
+
+			local cc_pInput = paramInputString[pInputIndex]
+			dParams[tostring(cc_pName)] = tostring(cc_pInput)
+			
+			pInputIndex += 1
+			
+		end
+		csc_event:FireServer("CMDACTIVATION",dParams)
+		commandCooldown()
 	end
 end)
 
@@ -876,6 +997,23 @@ end)
 
 HelpRequestSearch:GetPropertyChangedSignal("Text"):Connect(function()
 	filterHelpRequests(HelpRequestSearch.Text)
+end)
+
+ccCommandInput.Focused:Connect(function()
+	ccCMDNameDropdown.Visible = true
+end)
+
+ccCommandInput.FocusLost:Connect(function()
+	task.delay(1,function()
+		if not ccInputChanged then ccCMDNameDropdown.Visible = false end
+		loadCommandConsoleParameterHint()
+	end)
+end)
+
+ccCommandInput:GetPropertyChangedSignal("Text"):Connect(function()
+	ccInputChanged = true
+	filterConsoleCMDList(ccCommandInput.Text)
+	ccInputChanged = false
 end)
 
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
