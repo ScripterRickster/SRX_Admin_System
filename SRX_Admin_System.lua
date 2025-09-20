@@ -168,6 +168,9 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return adminSettings["HelpCMDSettings"] ~= nil and adminSettings["HelpCMDSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["HelpCMDSettings"]["HandlerMinRank"]))
 		elseif param1 == "getallhelprequests" then
 			return plrUtilities.GetAllHelpRequests()
+		elseif param1 == "canusecommandconsole" then
+			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
+			return adminSettings["CommandConsoleSettings"] ~= nil and adminSettings["CommandConsoleSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["CommandConsoleSettings"]["MinRank"]))
 		end
 	end
 end
