@@ -131,10 +131,15 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 	FilterAIMessages = true; -- whether to filter AI messages or not through Roblox's Filtering System
 }
 
-module.HelpCMDSettings = { -- settings for the help command
+module.HelpCMDSettings = { -- settings for the help requests feature
 	Enabled = false; -- whether this feature is enabled or not
 	Command = "/help"; -- the command to use the help feature
 	HandlerMinRank = 1; -- the minimum rank to respond to help requests
+}
+
+module.CommandConsoleSettings = { -- settings for the built-in command console
+	Enabled = false; -- whether this feature is enabled or not
+	MinRank = 1; -- the minimum rank to access this feature on the panel
 }
 
 module.ToolLocations = { -- locations of where the tools are at in the game
