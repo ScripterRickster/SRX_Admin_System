@@ -45,6 +45,10 @@ module.Parameters = {
 		Description = "Reason for the ban";
 		Required = false;
 	};
+	["EXTRA NOTES"] = {
+		Description = "Private information about the ban that the user can't see";
+		Required = false;
+	};
 	["DURATION"] = {
 		Description = "Duration of the ban (-1 or nil = permanent) | In Days";
 		Required = false;
@@ -78,49 +82,39 @@ module.Execute = function(parameters:table)
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
 				if tRankId < e_rID then
-					local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
+					local banReason,banDuration,banPrivateReason = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"],serverUtil.FilterMessage(executor,parameters["EXTRA NOTES"])
 					if banReason == nil then banReason = "No Reason" end
 					banDuration = tonumber(tostring(banDuration))
 					if banDuration == nil then banDuration = -1 else banDuration *= 86400 end
 
 
-
-					local banConfig = {
-						UserIds = {target.UserId},
-						Duration = banDuration,
-						DisplayReason = banReason,
-						PrivateReason = banReason,
-						ExcludeAltAccounts = excludeAlts,
-						ApplyToUniverse = true,
-					}
-
-					local succ,err = pcall(function()
-						local durationText = "Permanent"
-						if banDuration ~= -1 then
-							durationText = banDuration.." Days"
-
-						end
-						local infracData = {
-
-							StaffMemberID = executor.UserId;
-							InfractionType = "Ban";
-							Reason = banReason;
-							Duration = durationText;
-
-						}
-						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
-						game.Players:BanAsync(banConfig)
-					end)
+					local succ,err = playerUtil.BanPlayer(target.UserId,banReason,banPrivateReason,banDuration,excludeAlts)
+					
 
 					if not succ and err then
 						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
 						execSuccess = "ERROR: "..tostring(err)
 					elseif succ then
+						task.defer(function()
+							local durationText = "Permanent"
+							if banDuration ~= -1 then
+								durationText = banDuration.." Days"
+
+							end
+							local infracData = {
+
+								StaffMemberID = executor.UserId;
+								InfractionType = "Ban";
+								Reason = banReason;
+								Duration = durationText;
+
+							}
+							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
+						end)
+						
 						execSuccess = true
 					end
 				end
-				
-				
 				
 			end
 		end
