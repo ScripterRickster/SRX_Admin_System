@@ -81,13 +81,13 @@ module.Execute = function(parameters:table)
 					local banReason,banDuration = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"]
 					if banReason == nil then banReason = "No Reason" end
 					banDuration = tonumber(tostring(banDuration))
-					if banDuration == nil then banDuration = -1 end
+					if banDuration == nil then banDuration = -1 else banDuration *= 86400 end
 
 
 
 					local banConfig = {
 						UserIds = {target.UserId},
-						Duration = banDuration * 86400,
+						Duration = banDuration,
 						DisplayReason = banReason,
 						PrivateReason = banReason,
 						ExcludeAltAccounts = excludeAlts,
