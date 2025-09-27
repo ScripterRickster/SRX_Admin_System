@@ -94,6 +94,7 @@ local cmdNoParametersMsg = cmdPanel:WaitForChild("NoParametersMsg")
 local infracUserSearch = infractions:WaitForChild("UserSearch"):WaitForChild("SearchBox")
 local infractionList = infractions:WaitForChild("InfractionFrame"):WaitForChild("InfractionList")
 local infractionTemplate = infractionList:WaitForChild("Template")
+local infracMsgTL = infractions:WaitForChild("InfractionFrame"):WaitForChild("InfractionMessage")
 
 -- logs page
 
@@ -408,15 +409,32 @@ function loadUserInfractions(targUID)
 		if string.lower(v.Name) ~= "template" and v:IsA("Frame") then v:Destroy() end
 	end
 	if targUID then
+		infracMsgTL.Text = "LOADING INFRACTIONS...."
+		infracMsgTL.Visible = true
 		local uInfracs = csc_func:InvokeServer("GETPLAYERINFRACTIONS",targUID)
 		if uInfracs ~= nil then
+			local function hasInfractions()
+				for a1,b1 in pairs(uInfracs) do
+					if b1 ~= nil then return true end
+				end
+				return false
+			end
+			if hasInfractions() == false then
+				infracMsgTL.Text = "USER HAS NO INFRACTIONS"
+			else
+				infracMsgTL.Visible = false
+			end
 			for infracID,infracInfo in pairs(uInfracs) do
-
+				
+				local staffMemID = tonumber(tostring(infracInfo["StaffMemberID"]))
 				local newInfractionTemplate = infractionTemplate:Clone()
 				newInfractionTemplate.Name = tostring(infracID)
 				
 				local infracReason = tostring(infracInfo["Reason"])
-				local staffMem = game.Players:GetNameFromUserIdAsync(tonumber(infracInfo["StaffMemberID"]))
+				local staffMem = "UNKNOWN"
+				if staffMemID ~= nil then
+					staffMem = game.Players:GetNameFromUserIdAsync(staffMemID)
+				end
 				local canDelete = infracInfo["CanDelete"]
 				local infracDuration = infracInfo["Duration"]
 				local infracReason = tostring(infracInfo["Reason"])
@@ -466,7 +484,11 @@ function loadUserInfractions(targUID)
 				newInfractionTemplate.Parent = infractionList
 				newInfractionTemplate.Visible = true
 			end
+		else
+			infracMsgTL.Text = "COULD NOT GET INFRACTIONS"
 		end
+	else
+		infracMsgTL.Visible  = false
 	end
 end
 
