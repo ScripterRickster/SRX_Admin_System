@@ -23,6 +23,76 @@ local warning_template = assets:WaitForChild("WarningTemplate")
 local notification_template = assets:WaitForChild("NotificationTemplate")
 
 -----------------------------------------
+local notifCount = 0
+local lowestY = 0.923
+local notifYSpacing = 0.15
+local updatingNotifPositions = false
+local notificationStorage = {
+	--[[
+	["N#"] = {
+		Object = object; -- object reference
+		YPos = y; -- y position of the notification ui
+		ANum = 0; -- notification number
+		ToDelete = false; -- should it be deleted
+	}
+	]]
+}
+
+function updateNotificationPositions()
+	if updatingNotifPositions then return end
+	updatingNotifPositions = true
+
+
+	local activeNotifs = {}
+	for _, v in pairs(notificationStorage) do
+		if v ~= nil and v.Object ~= nil and not v.ToDelete then
+			table.insert(activeNotifs, v)
+		end
+	end
+
+	table.sort(activeNotifs, function(a,b)
+		return a.ANum < b.ANum
+	end)
+
+
+	for i, notif in ipairs(activeNotifs) do
+		local targetY = lowestY - ((i-1) * notifYSpacing)
+		notif.YPos = targetY
+
+		local vMain = notif.Object:WaitForChild("Main")
+		local tweenGoal = UDim2.new(0.91,0,targetY,0)
+		local tweenInfo = TweenInfo.new(0.5)
+		TWS:Create(vMain, tweenInfo, {Position = tweenGoal}):Play()
+	end
+
+	for idx, v in pairs(notificationStorage) do
+		if v.ToDelete and v.Object and v.Object:FindFirstChild("Main") then
+			local vMain = v.Object.Main
+			local tweenGoal = UDim2.new(2,0,v.YPos,0)
+			local tweenInfo = TweenInfo.new(0.5)
+			local tween = TWS:Create(vMain, tweenInfo, {Position = tweenGoal})
+			tween:Play()
+			tween.Completed:Once(function()
+				if vMain.Parent then vMain.Parent:Destroy() end
+				notificationStorage[idx] = nil
+			end)
+		end
+	end
+
+	updatingNotifPositions = false
+end
+
+
+function getCurrentNotificationCount()
+	local c = 0
+	for _,v in pairs(notificationStorage) do
+		if v ~= nil then
+			c += 1
+		end
+	end
+	return c
+end
+-----------------------------------------
 
 module.CreateAnnouncement = function(posterID:number,text:string)
 	if text == nil or posterID == nil or tonumber(tostring(posterID)) == nil then return end
@@ -122,7 +192,6 @@ module.CreateWarning = function(posterID:number,text:string)
 
 
 
-
 	local tween = TWS:Create(newWarning:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
 	local tween2 = TWS:Create(newWarning:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
 
@@ -150,18 +219,33 @@ end
 module.CreateNotification = function(notifName:string,notifMessage:text,manualDelete:boolean)
 	if notifName == nil or notifMessage == nil then return end
 	
+	notifCount += 1
 	local newNotif = notification_template:Clone()
 	newNotif:WaitForChild("Main"):WaitForChild("Title").Text = "<u>"..string.upper(tostring(notifName)).."</u>"
 	newNotif:WaitForChild("Main"):WaitForChild("Message").Text = tostring(notifMessage)
 	
+	local cNotifCount = notifCount
+	newNotif:SetAttribute("NOTIFNUM",cNotifCount)
+	
 	local close = newNotif:WaitForChild("Main"):WaitForChild("Close")
 	
-	local tweenGoal = UDim2.new(0.91,0,0.923,0)
-	local tweenGoal2 = UDim2.new(2,0,0.923,0)
+	local currY = 0.923 - (notifYSpacing * getCurrentNotificationCount())
+	newNotif:WaitForChild("Main").Position = UDim2.new(2,0,currY,0)
+	
+	local tweenGoal = UDim2.new(0.91,0,currY,0)
+	--local tweenGoal2 = UDim2.new(2,0,0.923,0)
 	local tweenInfo = TweenInfo.new(1)
 	
 	local tween = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal})
-	local tween2 = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+	--local tween2 = TWS:Create(newNotif:WaitForChild("Main"),tweenInfo,{Position = tweenGoal2})
+	
+	notificationStorage["N"..tostring(cNotifCount)] = {
+		Object = newNotif;
+		YPos = currY;
+		ANum = cNotifCount;
+		ToDelete = false;
+		
+	}
 	
 	newNotif.Parent = plr.PlayerGui
 	
@@ -173,10 +257,11 @@ module.CreateNotification = function(notifName:string,notifMessage:text,manualDe
 			if closed then return end
 			close.Active = false
 			closed = true
-			tween2:Play()
-			tween2.Completed:Connect(function()
-				newNotif:Destroy()
-			end)
+			
+			notificationStorage["N"..tostring(cNotifCount)]["ToDelete"] = true
+			repeat task.wait() until not updatingNotifPositions
+			updateNotificationPositions()
+			
 		end
 		
 		close.Activated:Connect(function()
@@ -184,7 +269,7 @@ module.CreateNotification = function(notifName:string,notifMessage:text,manualDe
 		end)
 		
 		if manualDelete ~= true then
-			task.delay(10,closeNotif)
+			task.delay(20,closeNotif) -- change back to 10
 		end
 		
 	end)
