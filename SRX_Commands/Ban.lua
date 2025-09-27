@@ -114,6 +114,7 @@ module.Execute = function(parameters:table)
 
 					if not succ and err then
 						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
+						execSuccess = "ERROR: "..tostring(err)
 					elseif succ then
 						execSuccess = true
 					end
