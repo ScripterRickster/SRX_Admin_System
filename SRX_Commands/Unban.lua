@@ -144,6 +144,7 @@ module.Execute = function(parameters:table)
 
 					if not succ and err then
 						warn("Failed to unban:",tostring(userID),"| Error: "..tostring(err))
+						execSuccess = "ERROR: "..tostring(err)
 					elseif succ then
 						task.defer(function()
 							local durationText = "Permanent"
@@ -160,6 +161,8 @@ module.Execute = function(parameters:table)
 						end)
 						execSuccess = true
 					end
+				else
+					execSuccess = "ERROR: User is not banned"
 				end
 			end
 		end
