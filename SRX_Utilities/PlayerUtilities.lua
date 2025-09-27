@@ -867,4 +867,112 @@ end
 
 ----------------------------------------------------------------
 
+module.IsPlayerBanned = function(userid:number)
+	if userid then
+
+		local function toUTC(isoString:string)
+			local year, month, day, hour, min, sec = isoString:match(
+				"^(%d+)%-(%d+)%-(%d+)T(%d+):(%d+):(%d+)Z$"
+			)
+
+			if not (year and month and day and hour and min and sec) then
+				warn("Invalid ISO 8601 format:", isoString)
+				return nil
+			end
+
+			return os.time({
+				year = tonumber(year),
+				month = tonumber(month),
+				day = tonumber(day),
+				hour = tonumber(hour),
+				min = tonumber(min),
+				sec = tonumber(sec),
+			})
+		end
+
+
+		userid = tonumber(userid)
+		local success, entries = pcall(function()
+			return game.Players:GetBanHistoryAsync(userid)
+		end)
+
+		if not success or not entries then
+			warn("Error retrieving ban history")
+			return nil
+		end
+
+		local firstEntry = entries[1]
+
+		if not firstEntry.Ban then return false end
+
+		local startTime = firstEntry.StartTime
+		local duration = firstEntry.Duration
+
+		if duration == -1 then return true end
+		local start_utc = toUTC(startTime)
+		local curr_utc = os.date("!*t")
+
+		if math.abs(curr_utc - start_utc) >= duration then
+			return false
+		else
+			return true
+		end		
+	end
+	return false
+end
+
+module.BanPlayer = function(userid:number,reason:string,privateReason:string,duration:number,excludeAlts:boolean)
+	local succ,err = false,nil
+	if tonumber(tostring(userid)) then
+		
+		if typeof(excludeAlts) ~= 'boolean' then
+			excludeAlts = false
+		end
+		if duration == nil or tonumber(tostring(duration)) == nil then
+			duration = -1
+		else
+			duration *= 86400
+		end
+		
+		reason = tostring(reason)
+		privateReason = tostring(privateReason)
+		
+		local banConfig = {
+			UserIds = {tonumber(tostring(userid))},
+			Duration = duration,
+			DisplayReason = reason,
+			PrivateReason = privateReason,
+			ExcludeAltAccounts = excludeAlts,
+			ApplyToUniverse = true,
+		}
+
+		succ,err = pcall(function()
+			game.Players:BanAsync(banConfig)
+		end)
+		
+	end
+	return succ,err
+end
+
+module.UnbanPlayer = function(userid:number)
+	local succ,err = false,nil
+	if tonumber(tostring(userid)) then
+		if module.IsPlayerBanned(userid) then
+			local unbanConfig = {
+				UserIds = {tonumber(tostring(userid))},
+				ApplyToUniverse = true,
+			}
+			succ,err = pcall(function()
+				game.Players:UnbanAsync(unbanConfig)
+			end)
+			
+		else
+			err = "PLAYER IS NOT BANNED"
+		end
+	end
+	return succ,err
+end
+
+----------------------------------------------------------------
+
 return module
