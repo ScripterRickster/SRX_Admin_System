@@ -30,6 +30,7 @@ local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
 local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
 local PlayerSettingsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERSETTINGS")
+local PlayerCommandCountDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERCOMMANDCOUNT")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
@@ -88,6 +89,14 @@ local defaultSettingsTable = {
 	["SRX_THEME"] = "";
 }
 
+----------------------------------------------------------------
+local playerCommandCount = {
+	--[[
+	[userid] = {
+		[CommandName] = #;
+	}
+	]]
+}
 ----------------------------------------------------------------
 
 
@@ -364,9 +373,24 @@ module.SetupPlayer = function(plr:Player)
 				plr:SetAttribute(sName,st)
 			end
 			
+			local succ1,res = pcall(function()
+				return serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerCommandCountDDS)
+			end)
+			
+			if succ1 then
+				if res == nil then
+					 playerCommandCount[tostring(plr.UserId)] = {}
+				else
+					res = HTTPS:JSONDecode(res)
+					playerCommandCount[tostring(plr.UserId)] = res
+				end
+				
+				print(playerCommandCount[tostring(plr.UserId)])
+			end
 		end
 		
 		loadPlayerSettings()
+		
 		
 		
 		task.defer(function()
@@ -470,6 +494,11 @@ module.PlayerLeft = function(plr:Player)
 	
 	task.defer(function()
 		module.RemovePlayerHelpRequest(plr)
+	end)
+	
+	task.defer(function()
+		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerCommandCountDDS,HTTPS:JSONEncode(playerCommandCount[tostring(plr.UserId)]))
+		playerCommandCount[tostring(plr.UserId)] = {}
 	end)
 	
 	trackedUsers[plr.UserId] = {}
@@ -817,6 +846,25 @@ end
 module.GetAllHelpRequests = function()
 	return activeHelpRequests
 end
+----------------------------------------------------------------
+
+module.UpdatePlayerCommandUse = function(plr:Player,cmdName:string)
+	if plr and playerCommandCount[tostring(plr.UserId)] ~= nil and cmdName then
+		local actualCMD = serverUtil.FindCommand(cmdName)
+		
+		if actualCMD ~= nil then
+			actualCMD = tostring(actualCMD)
+			local c = playerCommandCount[tostring(plr.UserId)][actualCMD]
+			
+			if c then
+				playerCommandCount[tostring(plr.UserId)][actualCMD] += 1
+			else
+				playerCommandCount[tostring(plr.UserId)][actualCMD] = 1
+			end
+		end
+	end
+end
+
 ----------------------------------------------------------------
 
 return module
