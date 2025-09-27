@@ -68,9 +68,6 @@ end
 ----------------------------------------------------------------
 
 
-----------------------------------------------------------------
-
-
 CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 	param1 = string.lower(tostring(param1))
 	if param1 == "allslashcmds" and param2 and chatSlashCMDS then
@@ -104,7 +101,7 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		
 	elseif param1 == "notification" and param2 and param3 then
 		task.defer(function()
-			NotificaitonUtility.CreateNotification(param2,param3)
+			NotificaitonUtility.CreateNotification(param2,param3,param4)
 		end)
 		
 	elseif param1 == "track" and param2 then
