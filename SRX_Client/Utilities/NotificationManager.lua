@@ -269,7 +269,7 @@ module.CreateNotification = function(notifName:string,notifMessage:text,manualDe
 		end)
 		
 		if manualDelete ~= true then
-			task.delay(20,closeNotif) -- change back to 10
+			task.delay(10,closeNotif)
 		end
 		
 	end)
