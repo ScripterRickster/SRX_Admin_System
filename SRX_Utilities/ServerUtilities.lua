@@ -11,7 +11,7 @@ local UTILITIES = _G.SRX_UTILITIES
 repeat wait() until _G.SRX_ASSETS ~= nil
 local ASSETS = _G.SRX_ASSETS
 ----------------------------------------------------------------
-local  webhookUtilities = require(UTILITIES.WebhookUtilities)
+local webhookUtilities = require(UTILITIES.WebhookUtilities)
 ----------------------------------------------------------------
 local TCS = game:GetService("TextChatService")
 local TS = game:GetService("TextService")
@@ -229,16 +229,25 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 			local function sendNotif(cmdSuccess)
 				if cmd_notif_created then return end
 				cmd_notif_created = true
-				if not cmdSuccess then
-					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","FAILURE")
-				else
+				
+				if cmdSuccess == true then
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
 					if c_cmd.SendLog then
 						table.insert(cmdLogs,{plr.UserId,os.time(os.date("!*t")),cmd})
 						PanelCSC_Event:FireAllClients("newcmdlog",{plr.UserId,os.time(os.date("!*t")),cmd})
 					end
+					SSC_Event:Fire("updateplrcmdcount",plr,cmd_Module.Name)
+				else
+					local errorMsg = ""
+					if cmdSuccess == false or cmdSuccess == nil then
+						errorMsg = "FAILURE"
+					else
+						errorMsg = string.upper(tostring(errorMsg))
+					end
+					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS",errorMsg)
 				end
 			end
+			
 			
 			local execSuccess = false
 			if applyToAllUsers then
@@ -263,6 +272,7 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 						task.defer(function()
 							sendNotif(execSuccess)
 						end)
+
 					end)
 					
 					
@@ -461,7 +471,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		end)
 
 		if not succ then
-			warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." | RETRYING.....")
+			warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).." | RETRYING.....")
 		else
 			result = res
 			break
@@ -470,7 +480,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		task.wait()
 	until current_tries == attempt_limit
 	if result == nil then
-		warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM A DATASTORE")
+		warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM THE DATASTORE: "..tostring(datastore))
 	end
 	return result
 end
@@ -483,7 +493,7 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 		end)
 
 		if not succ then
-			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." | RETRYING.....")
+			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
 		else
 			success = true
 			break
@@ -492,7 +502,7 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 		task.wait()
 	until current_tries == attempt_limit
 	if not success then
-		warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO A DATASTORE")
+		warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO THE DATASTORE: "..tostring(datastore))
 	end
 end
 
