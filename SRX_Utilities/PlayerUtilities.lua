@@ -384,8 +384,7 @@ module.SetupPlayer = function(plr:Player)
 					res = HTTPS:JSONDecode(res)
 					playerCommandCount[tostring(plr.UserId)] = res
 				end
-				
-				print(playerCommandCount[tostring(plr.UserId)])
+
 			end
 		end
 		
