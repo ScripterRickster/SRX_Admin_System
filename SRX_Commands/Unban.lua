@@ -58,59 +58,6 @@ module.SendLog = true -- whether the command is logged or not
 
 local excludeAlts = SETTINGS.BanSettings.ExcludeAltsInBans
 
-function isUserBanned(userid:number)
-	if userid then
-		
-		local function toUTC(isoString:string)
-			local year, month, day, hour, min, sec = isoString:match(
-				"^(%d+)%-(%d+)%-(%d+)T(%d+):(%d+):(%d+)Z$"
-			)
-
-			if not (year and month and day and hour and min and sec) then
-				warn("Invalid ISO 8601 format:", isoString)
-				return nil
-			end
-
-			return os.time({
-				year = tonumber(year),
-				month = tonumber(month),
-				day = tonumber(day),
-				hour = tonumber(hour),
-				min = tonumber(min),
-				sec = tonumber(sec),
-			})
-		end
-		
-		
-		userid = tonumber(userid)
-		local success, entries = pcall(function()
-			return game.Players:GetBanHistoryAsync(userid)
-		end)
-
-		if not success or not entries then
-			warn("Error retrieving ban history")
-			return nil
-		end
-		
-		local firstEntry = entries[1]
-		
-		if not firstEntry.Ban then return false end
-		
-		local startTime = firstEntry.StartTime
-		local duration = firstEntry.Duration
-		
-		if duration == -1 then return true end
-		local start_utc = toUTC(startTime)
-		local curr_utc = os.date("!*t")
-		
-		if math.abs(curr_utc - start_utc) >= duration then
-			return false
-		else
-			return true
-		end		
-	end
-	return false
-end
 module.Execute = function(parameters:table)
 	-- !! BY DEFAULT, ALL PARAMETER TABLES WILL INCLUDE THE PERSON WHO EXECUTED THE COMMAND | IT WILL BE STORED IN AS "EXECUTOR" !!
 	
@@ -130,40 +77,30 @@ module.Execute = function(parameters:table)
 			reason = serverUtil.FilterMessage(executor,reason)
 			
 			if isValid and userID then
-				local isBanned = isUserBanned(userID)
-				
-				if isBanned then
-					local unbanConfig = {
-						UserIds = {tonumber(userID)},
-						ApplyToUniverse = true,
-					}
+	
+				local succ,err = playerUtil.UnbanPlayer(userID)
 					
-					local succ,err = pcall(function()
-						game.Players:UnbanAsync(unbanConfig)
-					end)
 
-					if not succ and err then
-						warn("Failed to unban:",tostring(userID),"| Error: "..tostring(err))
-						execSuccess = "ERROR: "..tostring(err)
-					elseif succ then
-						task.defer(function()
-							local durationText = "Permanent"
+				if not succ and err then
+					warn("Failed to unban:",tostring(userID),"| Error: "..tostring(err))
+					execSuccess = "ERROR: "..tostring(err)
+				elseif succ then
+					task.defer(function()
+						local durationText = "Not Applicable"
 							
-							local infracData = {
+						local infracData = {
 
-								StaffMemberID = executor.UserId;
-								InfractionType = "Unban";
-								Reason = reason;
-								Duration = durationText;
+							StaffMemberID = executor.UserId;
+							InfractionType = "Unban";
+							Reason = reason;
+							Duration = durationText;
 
-							}
-							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
-						end)
-						execSuccess = true
-					end
-				else
-					execSuccess = "ERROR: User is not banned"
+						}
+						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
+					end)
+					execSuccess = true
 				end
+
 			end
 		end
 	end
