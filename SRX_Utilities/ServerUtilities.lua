@@ -242,7 +242,7 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					if cmdSuccess == false or cmdSuccess == nil then
 						errorMsg = "FAILURE"
 					else
-						errorMsg = string.upper(tostring(errorMsg))
+						errorMsg = string.upper(tostring(cmdSuccess))
 					end
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS",errorMsg)
 				end
