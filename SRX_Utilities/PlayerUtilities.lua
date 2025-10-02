@@ -98,6 +98,8 @@ local playerCommandCount = {
 	]]
 }
 ----------------------------------------------------------------
+local _,_,_,serverOwner = webhookUtil.getServerInfo()
+----------------------------------------------------------------
 
 
 module.SetupPlayerTag = function(plr:Player)
@@ -236,7 +238,7 @@ module.SetupPlayer = function(plr:Player)
 				end
 				-------------------------------
 				
-				if plr.UserId == game.CreatorId and not userRanked then
+				if plr.UserId == serverOwner and not userRanked then
 					DRN,DRID,DRC,DCUP = serverUtil.GetHighestRank()
 					userRanked = true
 				end
