@@ -47,7 +47,13 @@ if sOwner ~= 0 then
 	if game.CreatorType == Enum.CreatorType.Group then
 		sOwner = "["..game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId).Name.."](https://www.roblox.com/groups/"..game.CreatorId..")"
 	else
-		sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
+		if serverOwner ~= nil and serverOwner ~= "" and serverOwner ~= "0" and serverOwner ~= 0 then
+			sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
+		else
+			warn("SRX ADMIN SYSTEM  | FAILED TO GET CREATOR ID","SRX ADMIN SYSTEM || YOUR ADMIN SYSTEM MAY EXPERIENCE SOME ISSUES DUE TO ROBLOX NOT PROPERLY RETURNING THE CORRECT CREATOR ID")
+			sOwner = "UNKNOWN SERVER OWNER"
+		end
+		
 	end
 end
 
