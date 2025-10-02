@@ -20,7 +20,7 @@ local module = {
 
 ----------------------------------------------------------------
 local HTTP = game:GetService("HttpService")
-
+local MPS = game:GetService("MarketplaceService")
 ----------------------------------------------------------------
 local serverID = game.JobId
 if game.PrivateServerId ~= "" then
@@ -39,6 +39,13 @@ if game.PrivateServerId ~= "" then
 	serverOwner = game.PrivateServerOwnerId
 end
 
+if serverOwner == "0" or serverOwner == nil or serverOwner == 0 or serverOwner == "" then
+	local gInfo = MPS:GetProductInfo(game.PlaceId,Enum.InfoType.Asset)
+	
+	serverOwner = gInfo.Creator.CreatorTargetId
+	
+end
+
 
 
 local sOwner = "UNKNOWN"
@@ -53,13 +60,13 @@ if sOwner ~= 0 then
 			warn("SRX ADMIN SYSTEM  | FAILED TO GET CREATOR ID","SRX ADMIN SYSTEM || YOUR ADMIN SYSTEM MAY EXPERIENCE SOME ISSUES DUE TO ROBLOX NOT PROPERLY RETURNING THE CORRECT CREATOR ID")
 			sOwner = "UNKNOWN SERVER OWNER"
 		end
-		
+
 	end
 end
 
 
 module.getServerInfo = function()
-	return serverType,serverID,sOwner
+	return serverType,serverID,sOwner,serverOwner
 end
 
 module.getServerLink = function()
@@ -70,22 +77,6 @@ module.getTimeStampForDiscordEmbeds = function()
 	local ct = os.time(os.date("!*t"))
 	return "<t:"..ct..":F>"
 end
-----------------------------------------------------------------
-
-
---[[
-module.CheckIfNoLog = function(command:string)
-	if command == nil then return true end
-	command = tostring(command)
-	if command == "" then return true end
-	for _,v in pairs(module.NoLogCMDS) do
-		if string.lower(v.Name) == string.lower(command) then
-			return true
-		end
-	end
-	return false
-end
-]]
 
 ----------------------------------------------------------------
 
@@ -146,17 +137,17 @@ module.FormatCommandWebhook = function(command:ModuleScript,args:table)
 			["type"] = "rich",
 			["color"] = tonumber(commandEmbedColour:ToHex(),16),
 			["fields"] = {
-				
+
 			}
 		}}
 	}
-	
+
 	local cmd = require(command)
-	
+
 	for idx,v in pairs(args) do
-		
+
 		local value = tostring(v)
-		
+
 		if string.lower(idx) ~= "executor" then
 			local param_type = cmd["Parameters"][idx]["Class"]
 			if string.lower(tostring(param_type)) == "user" then
@@ -176,12 +167,12 @@ module.FormatCommandWebhook = function(command:ModuleScript,args:table)
 				value = "["..v.Name.."](https://www.roblox.com/users/"..tostring(v.UserId).."/profile)"
 			end
 		end
-		
-		
-		
-	
-		
-	
+
+
+
+
+
+
 		table.insert(data["embeds"][1]["fields"],
 			{
 				["name"] = string.upper(tostring(idx))..":",
@@ -190,11 +181,11 @@ module.FormatCommandWebhook = function(command:ModuleScript,args:table)
 			}
 		)
 	end
-	
+
 	for _,v in pairs(defaultParameters) do
 		table.insert(data["embeds"][1]["fields"],v)
 	end
-	
+
 	return data
 end
 
@@ -219,7 +210,7 @@ module.FormatDevConsoleLogWebhook = function(command:string)
 			}
 		}}
 	}
-	
+
 	for _,v in pairs(defaultParameters) do
 		table.insert(data["embeds"][1]["fields"],v)
 	end
@@ -229,15 +220,15 @@ end
 
 module.FormatInfractionLogWebhook = function(targID:number,infracData:table,action:string)
 	if tonumber(tostring(targID)) ~= nil and infracData and action then
-		
+
 		local staffMemID = infracData["StaffMemberID"]
 		local staffMemName = game.Players:GetNameFromUserIdAsync(tonumber(staffMemID))
-		
+
 		local targName = game.Players:GetNameFromUserIdAsync(tonumber(targID))
-		
+
 		local infracID = infracData["InfractionID"]
-		
-		
+
+
 		local data = {
 
 			["content"] = "",
@@ -251,13 +242,13 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 					["icon_url"] = "",
 				},
 				["fields"] = {
-					
+
 					{
 						["name"] = "ACTION:",
 						["value"] = "``"..action.."``",
 						["inline"] = true
 					},
-					
+
 					{
 						["name"] = "STAFF MEMBER:",
 						["value"] = "["..staffMemName.."](https://www.roblox.com/users/"..tostring(staffMemID).."/profile)",
@@ -269,28 +260,28 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 						["value"] = "["..targName.."](https://www.roblox.com/users/"..tostring(targID).."/profile)",
 						["inline"] = true
 					},
-					
+
 					{
 						["name"] = "INFRACTION TYPE:",
 						["value"] = tostring(infracData["InfractionType"]),
 						["inline"] = true
 					},
 
-					
+
 					{
 						["name"] = "REASON:",
 						["value"] = tostring(infracData["Reason"]),
 						["inline"] = true
 					},
-					
+
 					{
 						["name"] = "DURATION:",
 						["value"] = tostring(infracData["Duration"]),
 						["inline"] = true
 					},
-					
-					
-					
+
+
+
 				}
 			}}
 		}
@@ -307,7 +298,7 @@ end
 module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number)
 	if plr and joinType then
 		joinType = string.upper(tostring(joinType))
-		
+
 		local data = {
 
 			["content"] = "",
@@ -323,7 +314,7 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:num
 						["value"] = "["..plr.Name.."](https://www.roblox.com/users/"..tostring(plr.UserId).."/profile)",
 						["inline"] = true
 					},
-					
+
 					{
 						["name"] = "TYPE:",
 						["value"] = joinType,
@@ -332,26 +323,26 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:num
 				}
 			}}
 		}
-		
+
 		if joinType == "JOIN" and tonumber(tostring(totalJoins)) ~= nil then
 			totalJoins = tostring(totalJoins)
-			
+
 			local newParam = {
 				["name"] = "TOTAL JOINS:",
 				["value"] = "``"..totalJoins.."``",
 				["inline"] = true
 			}
-			
+
 			table.insert(data["embeds"][1]["fields"],newParam)
-			
+
 		end
 
 		for _,v in pairs(defaultParameters) do
 			table.insert(data["embeds"][1]["fields"],v)
 		end
-		
+
 		return data
-		
+
 	end
 	return nil
 end
@@ -359,7 +350,7 @@ end
 module.FormatChatLogWebhook = function(plr:Player,msg:string)
 	if plr then
 		msg = tostring(msg)
-		
+
 		local data = {
 
 			["content"] = "",
@@ -384,7 +375,7 @@ module.FormatChatLogWebhook = function(plr:Player,msg:string)
 				}
 			}}
 		}
-		
+
 		for _,v in pairs(defaultParameters) do
 			table.insert(data["embeds"][1]["fields"],v)
 		end
@@ -398,7 +389,7 @@ module.SendLog = function(wbhkid,data)
 
 		local wbhk_proxys = { 
 			-- {proxy link, can queue (so like adding /queue to the end of the link, but make sure the proxy service supports links with /queue)}
-			
+
 			{"http://c4.play2go.cloud:20894/api/webhooks/",false},
 			{"https://webhook.newstargeted.com/api/webhooks/",false},
 			{"https://webhook.lewisakura.moe/api/webhooks/",true},
@@ -421,11 +412,11 @@ module.SendLog = function(wbhkid,data)
 			end
 
 			local succ,err = pcall(function()
-				
+
 				HTTP:PostAsync(webhook,ndata)
 			end)
-			
-			
+
+
 			if succ then
 				print("SRX Admin System Successfully Logged An Action")
 				return
