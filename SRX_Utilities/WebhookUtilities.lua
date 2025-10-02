@@ -12,10 +12,7 @@ local ASSETS = _G.SRX_ASSETS
 
 ----------------------------------------------------------------
 
-local module = {
-
-	--NoLogCMDS = {}; -- the names of the commands that are not to be logged if executed
-}
+local module = {}
 
 
 ----------------------------------------------------------------
