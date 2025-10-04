@@ -147,6 +147,11 @@ module.ToolLocations = { -- locations of where the tools are at in the game
 	game.ServerStorage,
 }
 
+module.HelpTickets = { -- help tickets allow users to submit reports that get directly sent to the staff
+	Enabled = false; -- whether this feature is enabled or not
+	Cooldown = 5; -- cooldown (in seconds) between every help ticket submission
+};
+
 module.ClientThemes = { -- themes that can be switched to for each client || available in Version 1.0.1 and onwards
 	--[[
 	["TEMPLATE"] = { -- theme name
@@ -187,6 +192,11 @@ module.WebhookSettings = {
 	};
 	["CHAT_LOGS"] = {
 		Enabled = false; -- whether or not if the system sends a log every time a user sends a message || HEAVILY NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
+		EmbedColour = Color3.fromRGB(255,255,255);
+		WebhookLink = "";
+	};
+	["HELP_TICKET_LOGS"] = {
+		Enabled = false; -- whether or not if the system sends a log every time a user submits a help ticket
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = "";
 	}
