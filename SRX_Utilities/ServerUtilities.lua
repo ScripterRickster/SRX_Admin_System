@@ -622,15 +622,27 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 			end
 			
 			target = tostring(target)
-
-			local targetUID = game.Players:GetUserIdFromNameAsync(target)
+			
+			local succ,uid = pcall(function()
+				return game.Players:GetUserIdFromNameAsync(target)
+			end)
+			if succ == false then return nil end
+			local targetUID = uid
+			
+			local succ2,targPlrObj = pcall(function()
+				return game.Players:GetPlayerByUserId(targetUID)
+			end)
+			
 			
 			if targetUID then
 				ticketCooldownTracker[plr.UserId] = true
 				task.delay(SETTINGS.HelpTickets.Cooldown,function()
 					ticketCooldownTracker[plr.UserId] = false
 				end)
-				PanelCSC_Event:FireAllClients("CREATEHELPTICKET",plr,target,reason,evidence,notes)
+				
+				if succ2 then
+					SSC_Event:Fire("CREATEHELPREQ",targPlrObj)
+				end
 				task.defer(function()
 					if SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["Enabled"] then
 						webhookUtilities.SendLog(
