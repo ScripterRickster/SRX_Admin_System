@@ -6,6 +6,7 @@ local Assets = script.Parent:WaitForChild("Assets")
 
 
 local NotificaitonUtility = require(Utilities:WaitForChild("NotificationManager"))
+local IconUtility = require(Utilities:WaitForChild("Icon"))
 ----------------------------------------------------------------
 local CS_Func = SRX_Events:WaitForChild("CSC_Func")
 local CS_Event = SRX_Events:WaitForChild("CSC_Event")
@@ -17,7 +18,7 @@ local TWS = game:GetService("TweenService")
 ----------------------------------------------------------------
 local chatTagsEnabled = CS_Func:InvokeServer("ChatTagStatus")
 local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
-
+local isHelpTicketsEnabled = CS_Func:InvokeServer("HELPTICKETSTATUS")
 ----------------------------------------------------------------
 
 local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
@@ -29,7 +30,21 @@ local plr = game.Players.LocalPlayer
 local cam = game.Workspace.CurrentCamera
 
 ----------------------------------------------------------------
--- 
+
+if isHelpTicketsEnabled then
+	local ticket_icon = IconUtility.new()
+	ticket_icon:setLabel("Help Tickets","Viewing")
+	ticket_icon:setLabel("Help Tickets","Selected")
+	ticket_icon:setImage(121820422977145)
+	ticket_icon:setName("HT_BUTTON")
+	ticket_icon:oneClick(true)
+	
+	ticket_icon.toggled:Connect(function(isSelected, fromSource)
+		CS_Event:FireServer("GIVEHELPTICKETUI")
+	end)
+end
+
+----------------------------------------------------------------
 function registerTextChatCommand(cmd)
 	if SRX_TextCMDS:FindFirstChild(cmd) then
 		SRX_TextCMDS:FindFirstChild(cmd).AutocompleteVisible = true
