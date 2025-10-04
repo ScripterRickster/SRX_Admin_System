@@ -177,7 +177,7 @@ module.WebhookProxies = { -- proxies for the webhooks
 	{"https://webhook.lewisakura.moe/api/webhooks/",true},
 }
 
-module.WebhookSettings = {
+module.WebhookSettings = {  -- settings for discord webhooks
 	["COMMANDS"] = {
 		Enabled = false; -- whether to log commands or not
 		EmbedColour = Color3.fromRGB(255,255,255);
