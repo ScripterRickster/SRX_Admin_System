@@ -91,8 +91,8 @@ local helpTicketEmbedColour = SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["E
 module.FormatWebhookMentionableIDs = function(webhookClass)
 	local res = ""
 	if SETTINGS["WebhookSettings"][webhookClass] ~= nil  then
-		local roleIds = SETTINGS["WebhookSettings"][webhookClass]["Roles"]
-		local userIds = SETTINGS["WebhookSettings"][webhookClass]["Users"]
+		local roleIds = SETTINGS["WebhookSettings"][webhookClass]["Mentionable_Ids"]["Roles"]
+		local userIds = SETTINGS["WebhookSettings"][webhookClass]["Mentionable_Ids"]["Users"]
 		
 		if roleIds ~= nil then
 			for _,v in roleIds do
