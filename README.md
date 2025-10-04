@@ -10,7 +10,7 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
-Version 1.0.5 Progress:
+Version 1.0.6 Progress:
 - IN PROGRESS
 --------------------------------------------------------
 
