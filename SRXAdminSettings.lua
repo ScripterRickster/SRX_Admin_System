@@ -182,11 +182,37 @@ module.WebhookSettings = {
 		Enabled = false; -- whether to log commands or not
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
+		Mentionable_Ids = { --ids to mention when the webhook is sent
+
+			Roles = {
+				-- discord role id's
+				-- Ex: 123456789
+			};
+
+			Users = {
+				-- discord user id's
+				-- Ex: 987654321
+			};
+
+		};
 	};
 	["DEV_CONSOLE"] = {
 		Enabled = false; -- whether to log commands that goes through the developer console or not || note that it is currently impossible to detect who inputted what into roblox's developer console
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
+		Mentionable_Ids = { --ids to mention when the webhook is sent
+
+			Roles = {
+				-- discord role id's
+				-- Ex: 123456789
+			};
+
+			Users = {
+				-- discord user id's
+				-- Ex: 987654321
+			};
+
+		};
 	};
 	["INFRACTION_LOGS"] = { 
 		Enabled = false; -- whether or not if the system sends a log every time an infraction is created or removed
@@ -197,16 +223,55 @@ module.WebhookSettings = {
 		Enabled = false; -- whether or not if the system sends a log every time a user joins / leaves || NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
+		Mentionable_Ids = { --ids to mention when the webhook is sent
+
+			Roles = {
+				-- discord role id's
+				-- Ex: 123456789
+			};
+
+			Users = {
+				-- discord user id's
+				-- Ex: 987654321
+			};
+
+		};
 	};
 	["CHAT_LOGS"] = {
 		Enabled = false; -- whether or not if the system sends a log every time a user sends a message || HEAVILY NOT RECOMMENDED TO HAVE ENABLED DUE TO POTENTIAL RATELIMIT ISSUES
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = "";
+		Mentionable_Ids = { --ids to mention when the webhook is sent
+
+			Roles = {
+				-- discord role id's
+				-- Ex: 123456789
+			};
+
+			Users = {
+				-- discord user id's
+				-- Ex: 987654321
+			};
+
+		};
 	};
 	["HELP_TICKET_LOGS"] = {
 		Enabled = false; -- whether or not if the system sends a log every time a user submits a help ticket
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = "";
+		Mentionable_Ids = { --ids to mention when the webhook is sent
+
+			Roles = {
+				-- discord role id's
+				-- Ex: 123456789
+			};
+
+			Users = {
+				-- discord user id's
+				-- Ex: 987654321
+			};
+
+		};
 	}
 }
 
