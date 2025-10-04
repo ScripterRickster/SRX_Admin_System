@@ -627,7 +627,7 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 			
 			if targetUID then
 				ticketCooldownTracker[plr.UserId] = true
-				task.delay(5,function()
+				task.delay(SETTINGS.HelpTickets.Cooldown,function()
 					ticketCooldownTracker[plr.UserId] = false
 				end)
 				PanelCSC_Event:FireAllClients("CREATEHELPTICKET",plr,target,reason,evidence,notes)
