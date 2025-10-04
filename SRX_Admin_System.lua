@@ -32,7 +32,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------
-SELLING THIS SYSTEM; ANY PART OF THIS SYSTEM REGARDLESS IF IT IS MODIFIED OR NOT IS NOT ALLOWED || THIS SYSTEM WAS CREATED TO BE A FREE RESOURCE, NOT SOMETHING TO CAPITALIZE ON
+SELLING THIS SYSTEM; ANY PART OF THIS SYSTEM REGARDLESS IF IT IS MODIFIED OR NOT IS NOT ALLOWED || THIS SYSTEM WAS CREATED TO BE AND ONLY BE A FREE RESOURCE FOR EVERYONE TO USE
 ----------------------------------------------------------------
 ]]
 
@@ -171,6 +171,8 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "canusecommandconsole" then
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 			return adminSettings["CommandConsoleSettings"] ~= nil and adminSettings["CommandConsoleSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["CommandConsoleSettings"]["MinRank"]))
+		elseif param1 == "helpticketstatus" then
+			return adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"]
 		end
 	end
 end
@@ -239,6 +241,13 @@ SSC_Func.OnInvoke = function(action,param1,param2,param3,param4,param5)
 		return plrUtilities.FindPlayer(param1,param1)
 	end
 end
+
+SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
+	action = string.lower(tostring(action))
+	if action == "updateplrcmdcount" and param1 and param2 then
+		plrUtilities.UpdatePlayerCommandUse(param1,param2)
+	end
+end)
 ----------------------------------------------------------------
 if dev_consoleWebhookEnabled then
 	game:GetService("LogService").MessageOut:Connect(function(message, messageType)
