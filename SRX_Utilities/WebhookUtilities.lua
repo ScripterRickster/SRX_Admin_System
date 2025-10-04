@@ -391,7 +391,7 @@ module.FormatHelpTicketWebhook = function(plr:Player,targetName:string,targetUID
 				["title"] = "Help Ticket Log",
 				["description"] = "More Information Below: ",
 				["type"] = "rich",
-				["color"] = tonumber(chat_logEmbedColour:ToHex(),16),
+				["color"] = tonumber(helpTicketEmbedColour:ToHex(),16),
 				["fields"] = {
 
 					{
