@@ -85,6 +85,7 @@ local dev_consoleEmbedColour = SETTINGS["WebhookSettings"]["DEV_CONSOLE"]["Embed
 local infractionEmbedColour = SETTINGS["WebhookSettings"]["INFRACTION_LOGS"]["EmbedColour"]
 local join_logEmbedColour = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["EmbedColour"]
 local chat_logEmbedColour = SETTINGS["WebhookSettings"]["CHAT_LOGS"]["EmbedColour"]
+local helpTicketEmbedColour = SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["EmbedColour"]
 
 ----------------------------------------------------------------
 
@@ -381,18 +382,65 @@ module.FormatChatLogWebhook = function(plr:Player,msg:string)
 	return nil
 end
 
+module.FormatHelpTicketWebhook = function(plr:Player,targetName:string,targetUID:number,reason:string,evidence:string,notes:string)
+	if plr and targetName and targetUID then
+		local data = {
+
+			["content"] = "",
+			["embeds"] = {{
+				["title"] = "Help Ticket Log",
+				["description"] = "More Information Below: ",
+				["type"] = "rich",
+				["color"] = tonumber(chat_logEmbedColour:ToHex(),16),
+				["fields"] = {
+
+					{
+						["name"] = "PLAYER:",
+						["value"] = "["..plr.Name.."](https://www.roblox.com/users/"..tostring(plr.UserId).."/profile)",
+						["inline"] = true
+					},
+
+					{
+						["name"] = "REPORTED USER:",
+						["value"] = "["..targetName.."](https://www.roblox.com/users/"..tostring(targetUID).."/profile)",
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "REASON:",
+						["value"] = reason,
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "EVIDENCE:",
+						["value"] = evidence,
+						["inline"] = true
+					},
+					
+					{
+						["name"] = "NOTES:",
+						["value"] = notes,
+						["inline"] = true
+					},
+					
+					
+				}
+			}}
+		}
+		for _,v in pairs(defaultParameters) do
+			table.insert(data["embeds"][1]["fields"],v)
+		end
+		return data
+	end
+	return nil
+end
+
 module.SendLog = function(wbhkid,data)
 	if wbhkid and data then
 
-		local wbhk_proxys = { 
-			-- {proxy link, can queue (so like adding /queue to the end of the link, but make sure the proxy service supports links with /queue)}
-
-			{"http://c4.play2go.cloud:20894/api/webhooks/",false},
-			{"https://webhook.newstargeted.com/api/webhooks/",false},
-			{"https://webhook.lewisakura.moe/api/webhooks/",true},
-
-
-		}
+		local wbhk_proxys = SETTINGS.WebhookProxies
+		if wbhk_proxys == nil or typeof(wbhk_proxys) ~= 'table' then return nil end
 
 
 
