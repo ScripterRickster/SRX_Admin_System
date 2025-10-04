@@ -274,6 +274,8 @@ SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 	action = string.lower(tostring(action))
 	if action == "updateplrcmdcount" and param1 and param2 then
 		plrUtilities.UpdatePlayerCommandUse(param1,param2)
+	elseif action == "createhelpreq" and param1 then
+		plrUtilities.CreatePlayerHelpRequest(param1)
 	end
 end)
 ----------------------------------------------------------------
