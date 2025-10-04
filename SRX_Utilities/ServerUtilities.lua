@@ -43,6 +43,8 @@ local toolLocations = SETTINGS["ToolLocations"]
 local cmdLogs = {}
 
 ----------------------------------------------------------------
+local ticketCooldownTracker = {}
+----------------------------------------------------------------
 
 module.IsAlpha = function(s:string)
 	return s:match("^%a+$") ~= nil
@@ -604,8 +606,12 @@ module.GetCommandLogs = function(plr:Player)
 end
 
 ----------------------------------------------------------------
+function isUserOnHelpTicketCooldown(plr:Player)
+	if plr == nil then return true end
+	return ticketCooldownTracker[plr.UserId] == true
+end
 module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,evidence:string,notes:string)
-	if SETTINGS.HelpTickets ~= nil and SETTINGS.HelpTickets.Enabled then
+	if SETTINGS.HelpTickets ~= nil and SETTINGS.HelpTickets.Enabled and isUserOnHelpTicketCooldown(plr) == false then
 		if plr and target then
 			if notes == nil or notes == "" then
 				notes = "N/A"
@@ -620,6 +626,10 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 			local targetUID = game.Players:GetUserIdFromNameAsync(target)
 			
 			if targetUID then
+				ticketCooldownTracker[plr.UserId] = true
+				task.delay(5,function()
+					ticketCooldownTracker[plr.UserId] = false
+				end)
 				PanelCSC_Event:FireAllClients("CREATEHELPTICKET",plr,target,reason,evidence,notes)
 				task.defer(function()
 					if SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["Enabled"] then
