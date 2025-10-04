@@ -266,7 +266,7 @@ module.WebhookSettings = {  -- settings for discord webhooks
 				-- Ex: "987654321"
 			};
 			
-		};;
+		};
 	};
 	["HELP_TICKET_LOGS"] = {
 		Enabled = false; -- whether or not if the system sends a log every time a user submits a help ticket
