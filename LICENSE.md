@@ -3,7 +3,7 @@ Copyright © 2025 SR Studios (Discord Group), Scripter_Rickster (Roblox), questi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, and/or distribute copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-- The "Software" cannot be sold or capitalized upon, regardless if any modifications are made.
+- The "Software" , or any modifications of the "Software" cannot be sold.
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
