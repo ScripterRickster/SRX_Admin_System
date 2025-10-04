@@ -41,7 +41,9 @@ end
 local toolLocations = SETTINGS["ToolLocations"]
 ----------------------------------------------------------------
 local cmdLogs = {}
+
 ----------------------------------------------------------------
+
 module.IsAlpha = function(s:string)
 	return s:match("^%a+$") ~= nil
 end
@@ -600,5 +602,39 @@ module.GetCommandLogs = function(plr:Player)
 		return nil
 	end
 end
+
+----------------------------------------------------------------
+module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,evidence:string,notes:string)
+	if SETTINGS.HelpTickets ~= nil and SETTINGS.HelpTickets.Enabled then
+		if plr and target then
+			if notes == nil or notes == "" then
+				notes = "N/A"
+			end
+			
+			if evidence == nil or evidence == "" then
+				evidence = "N/A"
+			end
+			
+			target = tostring(target)
+
+			local targetUID = game.Players:GetUserIdFromNameAsync(target)
+			
+			if targetUID then
+				PanelCSC_Event:FireAllClients("CREATEHELPTICKET",plr,target,reason,evidence,notes)
+				task.defer(function()
+					if SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["Enabled"] then
+						webhookUtilities.SendLog(
+							SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["WebhookLink"],
+							webhookUtilities.FormatHelpTicketWebhook(plr,target,targetUID,reason,evidence,notes)
+						)
+					end
+				end)
+			end
+			
+			
+		end
+	end
+end
+----------------------------------------------------------------
 
 return module
