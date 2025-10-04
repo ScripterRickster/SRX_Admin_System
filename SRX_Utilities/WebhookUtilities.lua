@@ -88,6 +88,27 @@ local chat_logEmbedColour = SETTINGS["WebhookSettings"]["CHAT_LOGS"]["EmbedColou
 local helpTicketEmbedColour = SETTINGS["WebhookSettings"]["HELP_TICKET_LOGS"]["EmbedColour"]
 
 ----------------------------------------------------------------
+module.FormatWebhookMentionableIDs = function(webhookClass)
+	local res = ""
+	if SETTINGS["WebhookSettings"][webhookClass] ~= nil  then
+		local roleIds = SETTINGS["WebhookSettings"][webhookClass]["Roles"]
+		local userIds = SETTINGS["WebhookSettings"][webhookClass]["Users"]
+		
+		if roleIds ~= nil then
+			for _,v in roleIds do
+				res = res.."<@&"..tostring(v)..">\n"
+			end
+		end
+		
+		if userIds ~= nil then
+			for _,v in userIds do
+				res = res.."<@"..tostring(v)..">\n"
+			end
+		end
+	end
+	return res
+end
+----------------------------------------------------------------
 
 local defaultParameters = {
 	{
@@ -127,8 +148,9 @@ local defaultParameters = {
 
 module.FormatCommandWebhook = function(command:ModuleScript,args:table)
 	if command == nil then return nil end
+	local embedDesc = module.FormatWebhookMentionableIDs("COMMANDS")
 	local data = {
-		["content"] = "",
+		["content"] = embedDesc,
 		["embeds"] = {{
 			["title"] = string.upper(command.Name).." | Command Execution",
 			["description"] = "More Information Below:",
@@ -189,10 +211,10 @@ end
 
 module.FormatDevConsoleLogWebhook = function(command:string)
 	command = tostring(command)
-
+	local embedDesc = module.FormatWebhookMentionableIDs("DEV_CONSOLE")
 	local data = {
 
-		["content"] = "",
+		["content"] = embedDesc,
 		["embeds"] = {{
 			["title"] = "Developer Console Command Log",
 			["description"] = "A command entered within the developer console has been detected and subsequently logged below: ",
@@ -227,9 +249,11 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 		local infracID = infracData["InfractionID"]
 
 
+		local embedDesc = module.FormatWebhookMentionableIDs("INFRACTION_LOGS")
+		
 		local data = {
 
-			["content"] = "",
+			["content"] = embedDesc,
 			["embeds"] = {{
 				["title"] = "Infraction Log",
 				["description"] = "More Information Below: ",
@@ -296,10 +320,10 @@ end
 module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number)
 	if plr and joinType then
 		joinType = string.upper(tostring(joinType))
-
+		local embedDesc = module.FormatWebhookMentionableIDs("JOIN_LOGS")
 		local data = {
 
-			["content"] = "",
+			["content"] = embedDesc,
 			["embeds"] = {{
 				["title"] = "Join/Leave Log",
 				["description"] = "More Information Below: ",
@@ -348,10 +372,12 @@ end
 module.FormatChatLogWebhook = function(plr:Player,msg:string)
 	if plr then
 		msg = tostring(msg)
+		
+		local embedDesc = module.FormatWebhookMentionableIDs("CHAT_LOGS")
 
 		local data = {
 
-			["content"] = "",
+			["content"] = embedDesc,
 			["embeds"] = {{
 				["title"] = "Message Log",
 				["description"] = "More Information Below: ",
@@ -384,9 +410,12 @@ end
 
 module.FormatHelpTicketWebhook = function(plr:Player,targetName:string,targetUID:number,reason:string,evidence:string,notes:string)
 	if plr and targetName and targetUID then
+
+		local embedDesc = module.FormatWebhookMentionableIDs("HELP_TICKET_LOGS")
+		
 		local data = {
 
-			["content"] = "",
+			["content"] = embedDesc,
 			["embeds"] = {{
 				["title"] = "Help Ticket Log",
 				["description"] = "More Information Below: ",
