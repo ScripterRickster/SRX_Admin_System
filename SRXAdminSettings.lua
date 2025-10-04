@@ -150,6 +150,7 @@ module.ToolLocations = { -- locations of where the tools are at in the game
 module.HelpTickets = { -- help tickets allow users to submit reports that get directly sent to the staff
 	Enabled = false; -- whether this feature is enabled or not
 	Cooldown = 5; -- cooldown (in seconds) between every help ticket submission
+	BackgroundImage = ""; -- the background image for the help ticket ui
 };
 
 module.ClientThemes = { -- themes that can be switched to for each client || available in Version 1.0.1 and onwards
