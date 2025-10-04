@@ -169,6 +169,14 @@ module.ClientThemes = { -- themes that can be switched to for each client || ava
 	}
 }
 
+module.WebhookProxies = { -- proxies for the webhooks
+	-- {proxy link, can queue (so like adding /queue to the end of the link, but make sure the proxy service supports links with /queue)}
+
+	{"http://c4.play2go.cloud:20894/api/webhooks/",false},
+	{"https://webhook.newstargeted.com/api/webhooks/",false},
+	{"https://webhook.lewisakura.moe/api/webhooks/",true},
+}
+
 module.WebhookSettings = {
 	["COMMANDS"] = {
 		Enabled = false; -- whether to log commands or not
