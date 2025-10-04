@@ -173,6 +173,16 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return adminSettings["CommandConsoleSettings"] ~= nil and adminSettings["CommandConsoleSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["CommandConsoleSettings"]["MinRank"]))
 		elseif param1 == "helpticketstatus" then
 			return adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"]
+		elseif param1 == "gethelpticketcd" then
+			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
+				return adminSettings["HelpTickets"]["Cooldown"]
+			end
+			return math.huge
+		elseif param1 == "gethelpticketbg" then
+			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
+				return adminSettings["HelpTickets"]["BackgroundImage"]
+			end
+			return "rbxassetid://0"
 		end
 	end
 end
@@ -230,6 +240,24 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 			task.defer(function()
 				plrUtilities.HandlePlayerHelpRequest(plr,param2)
 			end)
+		elseif param1 == "givehelpticketui" then
+			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
+				local ticketUI = plr.PlayerGui:FindFirstChild("SRX_HelpTicket")
+				if ticketUI ~= nil then 
+					ticketUI.Enabled = true
+				else
+					local newTicketUI = assets:WaitForChild("SRX_HelpTicket"):Clone()
+					newTicketUI.Parent = plr.PlayerGui
+					newTicketUI.Enabled = true
+				end
+			end
+		elseif param1 == "submithelpticket" and param2 and param3 and param4 and param5 then
+			task.defer(function()
+				serverUtilities.SubmitHelpTicket(plr,param2,param3,param4,param5)
+			end)
+		elseif param1 == "closehelpticket" then
+			local ticketUI = plr.PlayerGui:FindFirstChild("SRX_HelpTicket")
+			if ticketUI then ticketUI.Enabled = false end
 		end
 
 	end
