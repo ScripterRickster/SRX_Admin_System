@@ -97,7 +97,7 @@ function setupPlayerList()
 	
 	userInput.FocusLost:Connect(function()
 		isUserInputFocused = false
-		task.delay(0.1,function()
+		task.delay(0.25,function()
 			if not isUserInputFocused then
 				userList.Visible = false
 			end
