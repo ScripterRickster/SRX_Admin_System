@@ -27,6 +27,7 @@ local reasonInput = reasonFrame:WaitForChild("Input")
 
 local userList = userFrame:WaitForChild("UserList")
 local userListTemplate = userList:WaitForChild("TEMPLATE")
+local isUserInputFocused = false
 
 local ticketCooldown = csc_func:InvokeServer("GETHELPTICKETCD")
 
@@ -34,7 +35,7 @@ local ticketCooldown = csc_func:InvokeServer("GETHELPTICKETCD")
 
 function setupPlayerList()
 	local filterText = ""
-	local isUserInputFocused = false
+	
 	
 	local function filterUserList()
 		for _,v in userList:GetChildren() do
@@ -57,7 +58,7 @@ function setupPlayerList()
 	for _,v in game.Players:GetChildren() do
 		local newTemplate = userListTemplate:Clone()
 		newTemplate.Name = v.Name
-		newTemplate.Text = string.upper(v.Name)
+		newTemplate.Text = v.Name
 		newTemplate.Parent = userList
 		newTemplate.Visible = true
 		
@@ -70,7 +71,7 @@ function setupPlayerList()
 	game.Players.PlayerAdded:Connect(function(plr)
 		local newTemplate = userListTemplate:Clone()
 		newTemplate.Name = plr.Name
-		newTemplate.Text = string.upper(plr.Name)
+		newTemplate.Text = plr.Name
 		newTemplate.Parent = userList
 		
 		if filterText ~= "" then
@@ -96,7 +97,7 @@ function setupPlayerList()
 	
 	userInput.FocusLost:Connect(function()
 		isUserInputFocused = false
-		task.delay(1,function()
+		task.delay(0.1,function()
 			if not isUserInputFocused then
 				userList.Visible = false
 			end
@@ -117,10 +118,20 @@ function setupPlayerList()
 end
 
 function clearInputs()
+	isUserInputFocused = false
 	userInput.Text = ""
 	reasonInput.Text = ""
 	evidenceInput.Text = ""
 	notesInput.Text = ""
+end
+
+function onCooldown()
+	submitBttn.Active = false
+	submitBttn.BackgroundColor3 = Color3.fromRGB(66, 66, 66)
+	task.wait(ticketCooldown)
+	submitBttn.BackgroundColor3 = Color3.fromRGB(43, 255, 10)
+	submitBttn.Active = true
+	
 end
 
 -- main code
@@ -130,6 +141,10 @@ bg.Image = csc_func:InvokeServer("GETHELPTICKETBG")
 
 submitBttn.Activated:Connect(function()
 	csc_event:FireServer("SUBMITHELPTICKET",userInput.Text,reasonInput.Text,evidenceInput.Text,notesInput.Text)
+	clearInputs()
+	task.defer(function()
+		onCooldown()
+	end)
 end)
 
 closeBttn.Activated:Connect(function()
