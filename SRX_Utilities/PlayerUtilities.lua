@@ -900,7 +900,7 @@ module.IsPlayerBanned = function(userid:number)
 		end)
 
 		if not success or not entries then
-			warn("Error retrieving ban history")
+			warn("SRX | ERROR RETRIEVING BAN HISTORY")
 			return nil
 		end
 
@@ -1005,6 +1005,7 @@ module.GetPlayerInformation = function(user)
 		UserID = nil;
 		IsBanned = nil;
 		JoinCount = nil;
+		AccountAge = nil;
 	}
 	
 	local succ,info = pcall(function()
@@ -1020,8 +1021,16 @@ module.GetPlayerInformation = function(user)
 		end
 		
 		data.IsBanned = module.IsPlayerBanned(data.UserID)
+		
+		if data.IsBanned == nil then data.IsBanned = false end
 		data.JoinCount = module.GetPlayerJoinCount(data.UserID)
+		
+		local _,_,plrObject = module.FindPlayer(nil,data.UserID)
+		if plrObject then
+			data.AccountAge = tostring(plrObject.AccountAge).." Days Old"
+		end
 	end
+	
 	
 	return data
 end
