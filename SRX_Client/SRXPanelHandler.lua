@@ -1088,6 +1088,10 @@ userLookupSearchBox.FocusLost:Connect(function()
 	loadUserInformation(userLookupSearchBox.Text)
 end)
 
+userLookupSearchBox.Focused:Connect(function()
+	userLookupGeneralMessage.Visible = false
+end)
+
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 	if param1 then
 		param1 = string.lower(tostring(param1))
