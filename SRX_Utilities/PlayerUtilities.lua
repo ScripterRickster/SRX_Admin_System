@@ -1004,6 +1004,7 @@ module.GetPlayerInformation = function(user)
 		Username = nil;
 		UserID = nil;
 		IsBanned = nil;
+		JoinCount = nil;
 	}
 	
 	local succ,info = pcall(function()
@@ -1019,6 +1020,7 @@ module.GetPlayerInformation = function(user)
 		end
 		
 		data.IsBanned = module.IsPlayerBanned(data.UserID)
+		data.JoinCount = module.GetPlayerJoinCount(data.UserID)
 	end
 	
 	return data
