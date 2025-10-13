@@ -544,7 +544,7 @@ function loadUserInformation(inquiredUser:string)
 	else
 		userLookupGeneralMessage.Text = "LOADING USER INFORMATION...."
 		userLookupGeneralMessage.Visible = true
-		local info = csc_func:InvokeServer("GETPLAYERINFO")
+		local info = csc_func:InvokeServer("GETPLAYERINFO",inquiredUser)
 		
 		if info == nil then
 			userLookupGeneralMessage.Text = "COULD NOT FIND USER"
