@@ -212,6 +212,8 @@ module.SetupPlayer = function(plr:Player)
 
 		end)
 		
+		plr:SetAttribute("SRX_JOINCOUNT",joins)
+		
 		if logJoins then
 			task.defer(function()
 				webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"JOIN",joins))
@@ -974,6 +976,53 @@ module.UnbanPlayer = function(userid:number)
 	return succ,err
 end
 
+----------------------------------------------------------------
+module.GetPlayerJoinCount = function(userid:number)
+	if tonumber(tostring(userid)) == nil then return 0 end
+	local joins = serverUtil.GetDataFromDDS(tostring(userid),PlayerJoinsDDS)
+	
+	if tonumber(tostring(joins)) == nil then joins = 0 end
+	return joins
+end
+----------------------------------------------------------------
+module.GetPlayerInformation = function(user)
+	if user == nil or user == "" or user == 0 or user == "0" then return nil end
+	
+	if tonumber(user) then
+		user = tonumber(user)
+	else
+		local succ1,uid = pcall(function()
+			return game.Players:GetUserIdFromNameAsync(user)
+		end)
+		
+		if succ1 == false or uid == nil then return nil end
+		user = uid
+	end
+	
+	local data = {
+		DisplayName = nil;
+		Username = nil;
+		UserID = nil;
+		IsBanned = nil;
+	}
+	
+	local succ,info = pcall(function()
+		return US:GetUserInfosByUserIdsAsync({user})
+	end)
+	
+	
+	if succ and info ~= nil then
+		for _,v in pairs(info) do
+			data.DisplayName = v.DisplayName
+			data.Username = v.Username
+			data.UserID = v.Id
+		end
+		
+		data.IsBanned = module.IsPlayerBanned(data.UserID)
+	end
+	
+	return data
+end
 ----------------------------------------------------------------
 
 return module
