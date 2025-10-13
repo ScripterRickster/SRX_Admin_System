@@ -22,6 +22,7 @@ local logs = main:WaitForChild("Logs")
 local aiPage = main:WaitForChild("AI_Panel")
 local helpReqPage = main:WaitForChild("HelpRequests")
 local cmdConsolePage = main:WaitForChild("CommandConsole")
+local userLookupPage = main:WaitForChild("UserInformation")
 local settingsPage = main:WaitForChild("Settings")
 
 local panelTheme = main:WaitForChild("UserTheme")
@@ -67,6 +68,10 @@ local MainButtons = {
 	["CMDConsoleBttn"] = {
 		TButton = H_Options:WaitForChild("CMDConsole"):WaitForChild("Enter");
 		DesiredPage = cmdConsolePage;
+	};
+	["UserLookupBttn"] = {
+		TButton = H_Options:WaitForChild("UserLookup"):WaitForChild("Enter");
+		DesiredPage = userLookupPage;
 	};
 	["SettingsBttn"] = {
 		TButton = H_Options:WaitForChild("Settings"):WaitForChild("Enter");
@@ -127,6 +132,11 @@ local ccParameterHint = cmdConsolePage:WaitForChild("ParameterHint")
 local ccCMDNameDropdown = cmdConsolePage:WaitForChild("CMDNameDropdown")
 local ccCMDDropdownList = ccCMDNameDropdown:WaitForChild("List")
 local ccCMDTemplate = ccCMDDropdownList:WaitForChild("Template")
+
+-- user information / lookup page
+local userLookupMainFrame = userLookupPage:WaitForChild("UFrame")
+local userLookupGeneralMessage = userLookupPage:WaitForChild("GeneralMessage")
+local userLookupSearchBox = userLookupPage:WaitForChild("Search"):WaitForChild("SearchBox")
 
 -- settings page
 local SettingsList = settingsPage:WaitForChild("MainFrame"):WaitForChild("SettingsList")
@@ -522,6 +532,42 @@ function loadLogs()
 			task.defer(function()
 				createLog("cmd",v)
 			end)
+		end
+	end
+end
+
+function loadUserInformation(inquiredUser:string)
+	userLookupMainFrame.Visible = false
+	if inquiredUser == "" or inquiredUser == nil then
+		userLookupGeneralMessage.Text = "COULD NOT FIND USER"
+		userLookupGeneralMessage.Visible = true
+	else
+		userLookupGeneralMessage.Text = "LOADING USER INFORMATION...."
+		userLookupGeneralMessage.Visible = true
+		local info = csc_func:InvokeServer("GETPLAYERINFO")
+		
+		if info == nil then
+			userLookupGeneralMessage.Text = "COULD NOT FIND USER"
+		else
+			if info["UserID"] ~= nil then
+				userLookupGeneralMessage.Visible = false
+				local accAge = info["AccountAge"]
+				if accAge == nil or accAge == "" then accAge = "COULD NOT RETRIEVE" end
+				
+				userLookupMainFrame:WaitForChild("PFP").Image = game.Players:GetUserThumbnailAsync(tonumber(info["UserID"]),Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
+				userLookupMainFrame:WaitForChild("UID").Text = "USER ID: "..tostring(info["UserID"])
+				userLookupMainFrame:WaitForChild("UserName").Text = "USERNAME: "..tostring(info["Username"])
+				userLookupMainFrame:WaitForChild("DisplayName").Text = "DISPLAY NAME: "..tostring(info["DisplayName"])
+				userLookupMainFrame:WaitForChild("BanStatus").Text = "IS BANNED: "..tostring(info["IsBanned"])
+				userLookupMainFrame:WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
+				userLookupMainFrame:WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
+				
+				userLookupMainFrame.Visible = true
+			else
+				userLookupGeneralMessage.Text = "COULD NOT FIND USER"
+			end
+			
+			
 		end
 	end
 end
@@ -1036,6 +1082,10 @@ ccCommandInput:GetPropertyChangedSignal("Text"):Connect(function()
 	ccInputChanged = true
 	filterConsoleCMDList(ccCommandInput.Text)
 	ccInputChanged = false
+end)
+
+userLookupSearchBox.FocusLost:Connect(function()
+	loadUserInformation(userLookupSearchBox.Text)
 end)
 
 panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
