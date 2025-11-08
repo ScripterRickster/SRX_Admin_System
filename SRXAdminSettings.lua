@@ -117,6 +117,8 @@ module.ManageInfractionRank = 0; -- the rank required to manage other infraction
 
 module.CommandCooldown = 5; -- how long the cooldown is in-between each command execution
 
+module.RequestTimeout = 60; -- how long the system waits to receive a response back from a request across all the servers before deleting the request (in seconds) || Higher value = longer wait times (which could lead to delayed actions and a ton of backlog)
+
 module.VIPServerSettings = { -- settings for VIP servers
 	VIPCommands = false; -- whether vip server owners get commands or not
 	ServerOwnerRankId = 0; -- rank id for vip server owners
