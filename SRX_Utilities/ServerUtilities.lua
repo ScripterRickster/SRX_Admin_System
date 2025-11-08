@@ -658,5 +658,31 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 	end
 end
 ----------------------------------------------------------------
+module.GenerateRequestID = function()
+	return HTTP:GenerateGUID(false)
+end
+
+module.GenerateRequest = function(actionName:string,parameters:table,functionThread)
+	if actionName and parameters and typeof(parameters) == 'table' then
+		local newReqID = ""
+		
+		while true do
+			task.wait(1)
+			newReqID = module.GenerateRequestID()
+			local idExists = SSC_Func:Invoke("CHECKIFREQIDEXISTS",newReqID)
+			if not idExists then break end
+		end
+		
+		local reqBody = {
+			["RequestID"] = newReqID;
+			["Parameters"] = parameters;
+			["FunctionThread"] = functionThread;
+			["ActionID"] = actionName;
+		}
+		SSC_Event:Fire("createreq",reqBody)
+		
+	end
+end
+----------------------------------------------------------------
 
 return module
