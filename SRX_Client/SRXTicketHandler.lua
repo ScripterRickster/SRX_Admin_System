@@ -136,7 +136,8 @@ end
 
 -- main code
 
-bg.Image = csc_func:InvokeServer("GETHELPTICKETBG")
+bg.Image,bg.ImageTransparency = csc_func:InvokeServer("GETHELPTICKETBG")
+
 
 
 submitBttn.Activated:Connect(function()
