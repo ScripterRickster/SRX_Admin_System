@@ -489,7 +489,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 	return result
 end
 
-module.SaveDataToDDS = function(key,datastore:DataStore,data)
+module.SaveDataToDDS = function(key,datastore:DataStore,data,printSuccess:boolean)
 	local attempt_limit,current_tries,success = 3,0,false
 	repeat
 		local succ,err = pcall(function()
@@ -500,6 +500,9 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
 		else
 			success = true
+			if printSuccess then
+				print("SUCCESSFULLY SAVED "..tostring(data).." FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore))
+			end
 			break
 		end
 		current_tries += 1
