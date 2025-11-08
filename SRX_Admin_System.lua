@@ -89,6 +89,20 @@ local HTTP = game:GetService("HttpService")
 ----------------------------------------------------------------
 task.defer(serverUtilities.RegisterTextChatCommands)
 ----------------------------------------------------------------
+local awaitingRequests = {
+	--[[
+	[reqID] = {
+	 ["Parameters"] = {
+	 	["ParameterName"] = value;
+	 }
+	 
+	 ["Function"] = functionThread / functionObject;
+	 
+	}
+	]]
+	
+}
+----------------------------------------------------------------
 MS:SubscribeAsync("SRX_GLOBALANNOUNCEMENTS",function(info)
 	local data = HTTP:JSONDecode(info.Data)
 	
@@ -97,6 +111,50 @@ MS:SubscribeAsync("SRX_GLOBALANNOUNCEMENTS",function(info)
 	
 	CSC_Event:FireAllClients("announcement",staffID,msg)
 	
+end)
+
+MS:SubscribeAsync("SRX_CHECKFORPLAYER",function(req)
+	local data = HTTP:JSONDecode(req.Data)
+	
+	local reqID = data.RequestID
+	local playerID = data.PlayerID
+	
+	if tonumber(tostring(playerID)) ~= nil then
+		local plr = game.Players:GetPlayerByUserId(playerID)
+		if plr ~= nil then
+			local _,serverID = webhookUtilities.getServerInfo()
+			local returnData = {
+				["RequestID"] = reqID;
+				["Parameters"] = {
+					["PlayerID"] = playerID;
+					["ServerID"] = serverID;
+				};
+				
+			}
+			MS:PublishAsync("SRX_RECEIVEREQUEST",HTTP:JSONEncode(data))
+		end
+	end
+end)
+
+
+MS:SubscribeAsync("SRX_RECEIVEREQUEST",function(req)
+	local data = HTTP:JSONDecode(req.Data)
+	
+	local reqID = data.RequestID
+	local reqParams = data.Parameters
+	
+	if awaitingRequests[reqID] then
+		local reqClone = table.clone(awaitingRequests[reqID])
+		awaitingRequests[reqID] = nil
+		
+		for paramName,_ in reqClone["Parameters"] do
+			reqClone[paramName] = reqParams[paramName]
+		end
+		
+		if reqClone["Function"] ~= nil then
+			reqClone["Function"](reqClone["Parameters"])
+		end
+	end
 end)
 ----------------------------------------------------------------
 
@@ -269,6 +327,15 @@ SSC_Func.OnInvoke = function(action,param1,param2,param3,param4,param5)
 	action = string.lower(tostring(action))
 	if action == "getplayer" then
 		return plrUtilities.FindPlayer(param1,param1)
+	elseif action == "converttodhms" and tonumber(tostring(param1)) ~= nil then
+		local d,h,m,s = serverUtilities.ConvertToDHMS(tonumber(tostring(param1)))
+		if param2 == "stringformat" then
+			return tostring(d).." Days, "..tostring(h).." Hours, "..tostring(m).." Minutes, "..tostring(s).." Seconds"
+		else
+			return d,h,m,s
+		end
+	elseif action == "checkifreqidexists" and param1 then
+		return awaitingRequests[param1] ~= nil
 	end
 end
 
@@ -278,6 +345,18 @@ SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 		plrUtilities.UpdatePlayerCommandUse(param1,param2)
 	elseif action == "createhelpreq" and param1 then
 		plrUtilities.CreatePlayerHelpRequest(param1)
+	elseif action == "createreq" and param1 then
+		local reqID = param1["RequestID"]
+		local actionID = param1["ActionID"]
+		local params = param1["Parameters"]
+		local fn = param1["FunctionThread"]
+		if reqID and awaitingRequests[reqID] == nil and actionID then
+			awaitingRequests[reqID] = {
+			  ["Parameters"] = params;
+			  ["Function"] = fn
+			}
+			MS:PublishAsync(actionID,HTTP:JSONEncode(params))
+		end
 	end
 end)
 ----------------------------------------------------------------
