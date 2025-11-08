@@ -153,6 +153,7 @@ module.HelpTickets = { -- help tickets allow users to submit reports that get di
 	Enabled = false; -- whether this feature is enabled or not
 	Cooldown = 5; -- cooldown (in seconds) between every help ticket submission
 	BackgroundImage = ""; -- the background image for the help ticket ui
+	BackgroundImageTransparency = 0; -- the background image transparency for the help ticket ui
 };
 
 module.ClientThemes = { -- themes that can be switched to for each client || available in Version 1.0.1 and onwards
