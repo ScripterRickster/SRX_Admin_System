@@ -29,6 +29,7 @@ local HTTPS = game:GetService("HttpService")
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
 local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
+local PlayerPlayTimeDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERPLAYTIME")
 local PlayerSettingsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERSETTINGS")
 local PlayerCommandCountDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERCOMMANDCOUNT")
 ----------------------------------------------------------------
@@ -95,6 +96,16 @@ local playerCommandCount = {
 	[userid] = {
 		[CommandName] = #;
 	}
+	]]
+}
+
+local playerJoinTime = {
+	--[[
+	[userid] = {
+		["PreviousTotalTime"] = prevTotalTime;
+		["JoinTime"] = os.time();
+	}
+	
 	]]
 }
 ----------------------------------------------------------------
@@ -164,6 +175,8 @@ module.SetupPlayer = function(plr:Player)
 		
 		OverheadTagStatus[plr.UserId] = false
 		
+		playerJoinTime[plr.UserId] = {}
+		
 		
 		
 		for idx,v in pairs(SETTINGS["BanSettings"]["BannedUsers"]) do
@@ -209,14 +222,27 @@ module.SetupPlayer = function(plr:Player)
 		joins += 1
 		task.defer(function()
 			serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerJoinsDDS,joins)
-
 		end)
+		
+		local playTime = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerPlayTimeDDS)
+		
+		if tonumber(tostring(playTime)) == nil then
+			playTime = 0
+			task.defer(function()
+				serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,0)
+			end)
+		end
+		
+		playerJoinTime[plr.UserId]["PreviousTotalTime"] = playTime
+		playerJoinTime[plr.UserId]["JoinTime"] = os.time()
+		
+		
 		
 		plr:SetAttribute("SRX_JOINCOUNT",joins)
 		
 		if logJoins then
 			task.defer(function()
-				webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"JOIN",joins))
+				webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"JOIN",joins,playTime))
 			end)
 		end
 		
@@ -500,11 +526,21 @@ module.PlayerLeft = function(plr:Player)
 	end)
 	
 	task.defer(function()
+		local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
+		if not logJoins then
+			playerJoinTime[plr.UserId] = {}
+		end
+		
+		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime)
+	end)
+	
+	task.defer(function()
 		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerCommandCountDDS,HTTPS:JSONEncode(playerCommandCount[tostring(plr.UserId)]))
 		playerCommandCount[tostring(plr.UserId)] = {}
 	end)
 	
 	trackedUsers[plr.UserId] = {}
+	
 	
 	for _,v in pairs(game.Players:GetChildren()) do
 		task.defer(function()
@@ -515,7 +551,8 @@ module.PlayerLeft = function(plr:Player)
 	
 	if logJoins then
 		task.defer(function()
-			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE"))
+			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE",0,module.GetPlayerPlayTime(plr.UserId)))
+			playerJoinTime[plr.UserId] = {}
 		end)
 	end
 	if saveRanks then
@@ -984,6 +1021,18 @@ module.GetPlayerJoinCount = function(userid:number)
 	if tonumber(tostring(joins)) == nil then joins = 0 end
 	return joins
 end
+
+module.GetPlayerPlayTime = function(userid:number)
+	if tonumber(tostring(userid)) == nil then return 0 end
+	userid = tonumber(tostring(userid))
+	local pPTTime = playerJoinTime[userid]["PreviousTotalTime"]
+	local pJTime = playerJoinTime[userid]["JoinTime"]
+	
+	
+	if pPTTime == 0 or pPTTime == nil or pJTime == 0 or pJTime == nil then return 0 end
+	
+	return (os.time() - pJTime) + pPTTime
+end
 ----------------------------------------------------------------
 module.GetPlayerInformation = function(user)
 	if user == nil or user == "" or user == 0 or user == "0" then return nil end
@@ -1006,6 +1055,7 @@ module.GetPlayerInformation = function(user)
 		IsBanned = nil;
 		JoinCount = nil;
 		AccountAge = nil;
+		PlayTime = nil;
 	}
 	
 	local succ,info = pcall(function()
@@ -1024,6 +1074,8 @@ module.GetPlayerInformation = function(user)
 		
 		if data.IsBanned == nil then data.IsBanned = false end
 		data.JoinCount = module.GetPlayerJoinCount(data.UserID)
+		data.PlayTime = module.GetPlayerPlayTime(data.UserID)
+		
 		
 		local _,_,plrObject = module.FindPlayer(nil,data.UserID)
 		if plrObject then
