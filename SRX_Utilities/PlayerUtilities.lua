@@ -229,7 +229,7 @@ module.SetupPlayer = function(plr:Player)
 		if tonumber(tostring(playTime)) == nil then
 			playTime = 0
 			task.defer(function()
-				serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,0)
+				serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,playTime)
 			end)
 		end
 		
@@ -516,6 +516,7 @@ module.SetupPlayer = function(plr:Player)
 end
 
 module.PlayerLeft = function(plr:Player)
+	local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
 	
 	task.defer(function()
 		module.SavePlayerSettings(plr)
@@ -526,13 +527,26 @@ module.PlayerLeft = function(plr:Player)
 	end)
 	
 	task.defer(function()
-		local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
-		if not logJoins then
-			playerJoinTime[plr.UserId] = {}
-		end
-		
-		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime)
+		playerJoinTime[plr.UserId] = {}
+
+		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime,true)
 	end)
+	
+	if logJoins then
+		task.defer(function()
+			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE",0,totalPlayTime))
+		end)
+	end
+	if saveRanks then
+		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
+		dds_data = HTTPS:JSONEncode(dds_data)
+		task.defer(function()
+			serverUtil.SaveDataToDDS(tostring(plr.UserId),RankDDS,dds_data)
+		end)
+	end
+	
+	
+	
 	
 	task.defer(function()
 		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerCommandCountDDS,HTTPS:JSONEncode(playerCommandCount[tostring(plr.UserId)]))
@@ -549,19 +563,7 @@ module.PlayerLeft = function(plr:Player)
 	end
 	
 	
-	if logJoins then
-		task.defer(function()
-			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE",0,module.GetPlayerPlayTime(plr.UserId)))
-			playerJoinTime[plr.UserId] = {}
-		end)
-	end
-	if saveRanks then
-		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
-		dds_data = HTTPS:JSONEncode(dds_data)
-		task.defer(function()
-			serverUtil.SaveDataToDDS(tostring(plr.UserId),RankDDS,dds_data)
-		end)
-	end
+	
 end
 
 ----------------------------------------------------------------
@@ -1016,6 +1018,7 @@ end
 ----------------------------------------------------------------
 module.GetPlayerJoinCount = function(userid:number)
 	if tonumber(tostring(userid)) == nil then return 0 end
+	
 	local joins = serverUtil.GetDataFromDDS(tostring(userid),PlayerJoinsDDS)
 	
 	if tonumber(tostring(joins)) == nil then joins = 0 end
@@ -1025,13 +1028,16 @@ end
 module.GetPlayerPlayTime = function(userid:number)
 	if tonumber(tostring(userid)) == nil then return 0 end
 	userid = tonumber(tostring(userid))
+	if not playerJoinTime[userid] then return 0 end
 	local pPTTime = playerJoinTime[userid]["PreviousTotalTime"]
 	local pJTime = playerJoinTime[userid]["JoinTime"]
 	
 	
+	
 	if pPTTime == 0 or pPTTime == nil or pJTime == 0 or pJTime == nil then return 0 end
 	
-	return (os.time() - pJTime) + pPTTime
+	local res = (os.time() - pJTime) + pPTTime 
+	return res
 end
 ----------------------------------------------------------------
 module.GetPlayerInformation = function(user)
@@ -1075,6 +1081,8 @@ module.GetPlayerInformation = function(user)
 		if data.IsBanned == nil then data.IsBanned = false end
 		data.JoinCount = module.GetPlayerJoinCount(data.UserID)
 		data.PlayTime = module.GetPlayerPlayTime(data.UserID)
+		
+		print(data.PlayTime)
 		
 		
 		local _,_,plrObject = module.FindPlayer(nil,data.UserID)
