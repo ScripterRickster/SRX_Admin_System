@@ -238,7 +238,7 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return math.huge
 		elseif param1 == "gethelpticketbg" then
 			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
-				return adminSettings["HelpTickets"]["BackgroundImage"]
+				return adminSettings["HelpTickets"]["BackgroundImage"],adminSettings["HelpTickets"]["BackgroundImageTransparency"]
 			end
 			return "rbxassetid://0"
 		elseif param1 == "getplayerinfo" and param2 then
