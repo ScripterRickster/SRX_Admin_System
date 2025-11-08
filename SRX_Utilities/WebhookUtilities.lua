@@ -317,9 +317,11 @@ module.FormatInfractionLogWebhook = function(targID:number,infracData:table,acti
 	return nil
 end
 
-module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number)
+module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:number,totalPlayTime:number)
 	if plr and joinType then
 		joinType = string.upper(tostring(joinType))
+		
+		local days,hours,minutes,seconds = SSC_Func:Invoke("CONVERTTODHMS",totalPlayTime)
 		local embedDesc = module.FormatWebhookMentionableIDs("JOIN_LOGS")
 		local data = {
 
@@ -342,6 +344,12 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:num
 						["value"] = joinType,
 						["inline"] = true
 					},
+					
+					{
+						["name"] = "TOTAL PLAY TIME:",
+						["value"] = "``"..tostring(days).."`` Days, ``"..tostring(hours).."`` Hours, ``"..tostring(minutes).."`` Minutes, ``"..tostring(seconds).."`` Seconds",
+						["inline"] = true
+					}
 				}
 			}}
 		}
@@ -354,6 +362,7 @@ module.FormatJoinLogWebhook = function(plr:Player,joinType:string,totalJoins:num
 				["value"] = "``"..totalJoins.."``",
 				["inline"] = true
 			}
+			
 
 			table.insert(data["embeds"][1]["fields"],newParam)
 
