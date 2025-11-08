@@ -356,6 +356,9 @@ SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 			  ["Function"] = fn
 			}
 			MS:PublishAsync(actionID,HTTP:JSONEncode(params))
+			task.delay(adminSettings.RequestTimeout,function()
+				awaitingRequests[reqID] = nil
+			end)
 		end
 	end
 end)
