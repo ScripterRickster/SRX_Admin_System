@@ -156,12 +156,13 @@ CS_Event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5)
 		task.defer(function()
 			NotificaitonUtility.CreateNotification("SYSTEM PREFIX",tostring(param2))
 		end)
-	elseif param1 == "setupaccessbutton" then
+	elseif param1 == "setupaccessbutton" and not sysButtonSetup then
 		if string.lower(tostring(sysAccessType)) == "button" then
+			sysButtonSetup = true
 			local sysAccessIcon = IconUtility.new()
-			sysAccessIcon:setLabel("SRX ADMIN UI","Viewing")
-			sysAccessIcon:setLabel("SRX ADMIN UI","Selected")
-			sysAccessIcon:setImage(128874314992009)
+			sysAccessIcon:setLabel("ADMIN UI","Viewing")
+			sysAccessIcon:setLabel("ADMIN UI","Selected")
+			sysAccessIcon:setImage(89559826198988)
 			sysAccessIcon:setName("SRX_UI_BUTTON")
 			sysAccessIcon:oneClick(true)
 
