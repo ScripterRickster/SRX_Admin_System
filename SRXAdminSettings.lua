@@ -157,6 +157,8 @@ module.HelpTickets = { -- help tickets allow users to submit reports that get di
 	BackgroundImageTransparency = 0; -- the background image transparency for the help ticket ui
 };
 
+module.EnableDebugComments = false; -- whether or not if you want debug information to be printed out or not
+
 module.ClientThemes = { -- themes that can be switched to for each client || available in Version 1.0.1 and onwards
 	--[[
 	["TEMPLATE"] = { -- theme name
