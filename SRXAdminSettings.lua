@@ -163,16 +163,19 @@ module.ClientThemes = { -- themes that can be switched to for each client || ava
 	--[[
 	["TEMPLATE"] = { -- theme name
 		ThemeID = ""; -- asset id of this theme
+		ThemeTransparency = 0; -- how transparent the theme image is || 0 = opaque | 1 = transparent || BY DEFAULT, IF THE PARAMETER DOES NOT EXIST OR HAS AN INVALID VALUE, IT WILL ASSUME THAT THEMETRANSPARENCY = 0
 		
 	}
 	]]
 
 	["NO THEME"] = {
 		ThemeID = "";
+		ThemeTransparency = 0;
 	};
-	
+
 	["SRX THEME"] = {
 		ThemeID = "rbxassetid://117504597000768";
+		ThemeTransparency = 0;
 	}
 }
 
@@ -190,17 +193,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	};
 	["DEV_CONSOLE"] = {
@@ -208,17 +211,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	};
 	["INFRACTION_LOGS"] = { 
@@ -226,17 +229,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	};
 	["JOIN_LOGS"] = { 
@@ -244,17 +247,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = ""; -- webhook link
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	};
 	["CHAT_LOGS"] = {
@@ -262,17 +265,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = "";
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	};
 	["HELP_TICKET_LOGS"] = {
@@ -280,17 +283,17 @@ module.WebhookSettings = {  -- settings for discord webhooks
 		EmbedColour = Color3.fromRGB(255,255,255);
 		WebhookLink = "";
 		Mentionable_Ids = { --ids to mention when the webhook is sent
-			
+
 			Roles = {
 				-- discord role id's (as a string)
 				-- Ex: "123456789"
 			};
-			
+
 			Users = {
 				-- discord user id's (as a string)
 				-- Ex: "987654321"
 			};
-			
+
 		};
 	}
 }
