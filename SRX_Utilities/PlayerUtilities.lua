@@ -377,7 +377,13 @@ module.SetupPlayer = function(plr:Player)
 				
 				if DCUP then
 					plr:SetAttribute("SRX_CANUSEPANEL",DCUP)
-					adminTool:Clone().Parent = plr.Backpack
+					
+					if string.lower(tostring(SETTINGS.SystemAccessType)) == "button" then
+						CSC_Event:FireClient(plr,"SETUPACCESSBUTTON")
+					else
+						adminTool:Clone().Parent = plr.Backpack
+					end
+
 				end
 			end
 			
@@ -440,10 +446,11 @@ module.SetupPlayer = function(plr:Player)
 			srx_attach.Parent = hrp
 			
 			if plr:GetAttribute("SRX_CANUSEPANEL") then
-				if not plr.Backpack:FindFirstChild(adminTool.Name) then
-					adminTool:Clone().Parent = plr.Backpack
+				if string.lower(tostring(SETTINGS.SystemAccessType)) ~= "button" then
+					if not plr.Backpack:FindFirstChild(adminTool.Name) then
+						adminTool:Clone().Parent = plr.Backpack
+					end
 				end
-				
 			end
 			
 			task.defer(function()
