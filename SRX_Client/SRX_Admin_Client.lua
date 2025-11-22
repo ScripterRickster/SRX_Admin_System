@@ -19,6 +19,7 @@ local TWS = game:GetService("TweenService")
 local chatTagsEnabled = CS_Func:InvokeServer("ChatTagStatus")
 local chatSlashCMDS = CS_Func:InvokeServer("ChatSlashCMDStatus")
 local isHelpTicketsEnabled = CS_Func:InvokeServer("HELPTICKETSTATUS")
+local sysAccessType = CS_Func:InvokeServer("GetSysAccessType")
 ----------------------------------------------------------------
 
 local SRX_TextCMDS = TCS:WaitForChild("SRX_TEXTCHATCOMMANDS")
@@ -30,6 +31,19 @@ local plr = game.Players.LocalPlayer
 local cam = game.Workspace.CurrentCamera
 
 ----------------------------------------------------------------
+
+if string.lower(tostring(sysAccessType)) == "button" then
+	local sysAccessIcon = IconUtility.new()
+	sysAccessIcon:setLabel("SRX ADMIN UI","Viewing")
+	--sysAccessIcon:setLabel("OPENED UI","Selected")
+	sysAccessIcon:setImage(121820422977145)
+	sysAccessIcon:setName("SRX_UI_BUTTON")
+	sysAccessIcon:oneClick(true)
+
+	sysAccessIcon.toggled:Connect(function(isSelected, fromSource)
+		CS_Event:FireServer("GETADMINPANEL")
+	end)
+end
 
 if isHelpTicketsEnabled then
 	local ticket_icon = IconUtility.new()
@@ -43,6 +57,8 @@ if isHelpTicketsEnabled then
 		CS_Event:FireServer("GIVEHELPTICKETUI")
 	end)
 end
+
+
 
 ----------------------------------------------------------------
 function registerTextChatCommand(cmd)
