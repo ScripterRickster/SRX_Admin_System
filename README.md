@@ -18,7 +18,7 @@ Modular, configurable, and clean admin system for ROBLOX
 
 Created to replace the old SR Admin System
 
-Features (Version 1.0.6):
+Features (Version 1.0.7):
 - Clean, organized, and unobfuscated code
 - The standard pre-made commands
 - Modular system that can easily be utilized by other systems if required
@@ -31,6 +31,7 @@ Features (Version 1.0.6):
 - Optional feature to include text slash commands in ROBLOX's default chat
 - Optional feature to include webhook-logging via Discord
 - Optional feature to include a console-like page to directly type commands into instead of using the default ROBLOX chat
+- Option to switch between having a button at the top or using a tool to open up the admin panel
 - and more stuff that I forgot about
 --------------------------------------------------------
 
