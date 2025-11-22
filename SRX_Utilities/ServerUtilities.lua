@@ -475,7 +475,10 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		end)
 
 		if not succ then
-			warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).." | RETRYING.....")
+			if SETTINGS.EnableDebugComments then
+				warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).." | RETRYING.....")
+			end
+			
 		else
 			result = res
 			break
@@ -484,12 +487,14 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		task.wait()
 	until current_tries == attempt_limit
 	if result == nil then
-		warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM THE DATASTORE: "..tostring(datastore))
+		if SETTINGS.EnableDebugComments then
+			warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM THE DATASTORE: "..tostring(datastore))
+		end
 	end
 	return result
 end
 
-module.SaveDataToDDS = function(key,datastore:DataStore,data,printSuccess:boolean)
+module.SaveDataToDDS = function(key,datastore:DataStore,data)
 	local attempt_limit,current_tries,success = 3,0,false
 	repeat
 		local succ,err = pcall(function()
@@ -497,10 +502,13 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data,printSuccess:boolea
 		end)
 
 		if not succ then
-			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
+			if SETTINGS.EnableDebugComments then
+				warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
+			end
+			
 		else
 			success = true
-			if printSuccess then
+			if SETTINGS.EnableDebugComments then
 				print("SUCCESSFULLY SAVED "..tostring(data).." FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore))
 			end
 			break
@@ -509,7 +517,9 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data,printSuccess:boolea
 		task.wait()
 	until current_tries == attempt_limit
 	if not success then
-		warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO THE DATASTORE: "..tostring(datastore))
+		if SETTINGS.EnableDebugComments then
+			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO THE DATASTORE: "..tostring(datastore))
+		end
 	end
 end
 
