@@ -88,6 +88,7 @@ local activeHelpRequests = {
 local defaultSettingsTable = {
 	["SRX_PREFIX"] = SETTINGS.Prefix;
 	["SRX_THEME"] = "";
+	["SRX_THEME_TRANSPARENCY"] = 0;
 }
 
 ----------------------------------------------------------------
@@ -827,8 +828,18 @@ end
 
 module.SetPlayerTheme = function(plr:Player,theme:string)
 	if plr and theme then
-		plr:SetAttribute("SRX_THEME",theme)
-		PanelCSC_Event:FireClient(plr,"UPDATEPANELTHEME",tostring(theme))
+		
+		local themeInfo = serverUtil.FindTheme(theme)
+		if themeInfo ~= nil then
+			plr:SetAttribute("SRX_THEME",themeInfo.ThemeID)
+			if themeInfo.ThemeTransparency ~= nil and tonumber(tostring(themeInfo.ThemeTransparency)) ~= nil then
+				plr:SetAttribute("SRX_THEME_TRANSPARENCY",themeInfo.ThemeTransparency)
+			else
+				plr:SetAttribute("SRX_THEME_TRANSPARENCY",0)
+			end
+			PanelCSC_Event:FireClient(plr,"UPDATEPANELTHEME",tostring(themeInfo.ThemeID),themeInfo.ThemeTransparency)
+		end
+		
 	end
 end
 
