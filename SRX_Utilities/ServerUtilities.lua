@@ -608,6 +608,16 @@ module.FindTool = function(toolName:string,forcedLocation)
 	return toolObject,fullToolName
 end
 
+module.FindTheme = function(themeID,themeName)
+	if SETTINGS.ClientThemes[themeName] ~= nil then return SETTINGS.ClientThemes[themeName] end
+	
+	for tmName,themeInfo in SETTINGS.ClientThemes do
+		if themeInfo.ThemeID == themeID then
+			return themeInfo
+		end
+	end
+	return nil
+end
 -----------------------------------------------------------------------------------
 
 module.GetCommandLogs = function(plr:Player)
