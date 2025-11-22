@@ -80,7 +80,7 @@ module.RankBinds = {
 	DefaultAdminRank = 0; -- what rank you want everybody who isn't already ranked to be at
 }
 
-module.SystemAccessType = "Tool"; -- whether you use a tool to bring up the UI, or you click on a button at the top || "Tool" = a tool that you equip to bring up the UI, "Button"  = a button that you click at the top of your screen to bring up the UI || any invalid options will be treated by the default option of a "tool"
+module.SystemAccessType = "Tool"; -- whether you use a tool to bring up the UI, or you click on a button at the top || "Tool" -> a tool that you equip to bring up the UI, "Button"  -> a button that you click at the top of your screen to bring up the UI || any invalid options will be treated by the default option of a "tool"
 
 module.ChatTags = false; -- whether or not if chat  tags should appear for each staff rank (any rank with an id > 0)
 module.OverheadTags = {
