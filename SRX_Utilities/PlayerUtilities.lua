@@ -918,7 +918,9 @@ module.IsPlayerBanned = function(userid:number)
 			)
 
 			if not (year and month and day and hour and min and sec) then
-				warn("Invalid ISO 8601 format:", isoString)
+				if SETTINGS.EnableDebugComments then
+					warn("Invalid ISO 8601 format:", isoString)
+				end
 				return nil
 			end
 
@@ -939,7 +941,9 @@ module.IsPlayerBanned = function(userid:number)
 		end)
 
 		if not success or not entries then
-			warn("SRX | ERROR RETRIEVING BAN HISTORY")
+			if SETTINGS.EnableDebugComments then
+				warn("SRX | ERROR RETRIEVING BAN HISTORY")
+			end
 			return nil
 		end
 
@@ -1081,8 +1085,6 @@ module.GetPlayerInformation = function(user)
 		if data.IsBanned == nil then data.IsBanned = false end
 		data.JoinCount = module.GetPlayerJoinCount(data.UserID)
 		data.PlayTime = module.GetPlayerPlayTime(data.UserID)
-		
-		print(data.PlayTime)
 		
 		
 		local _,_,plrObject = module.FindPlayer(nil,data.UserID)
