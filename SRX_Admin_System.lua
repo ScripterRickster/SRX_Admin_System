@@ -216,7 +216,15 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			local result = serverUtilities.FilterMessage(plr,param2,true)
 			return result
 		elseif param1 == "getplayertheme" then
-			return plr:GetAttribute("SRX_THEME")
+			local themeID = plr:GetAttribute("SRX_THEME")
+			local themeInfo = serverUtilities.FindTheme(themeID)
+			if themeInfo == nil then return "",0 end
+			plr:SetAttribute("SRX_THEME",themeInfo.ThemeID)
+			local thTransparency = themeInfo.ThemeTransparency
+			if tonumber(tostring(thTransparency)) == nil then thTransparency = 0 end
+			thTransparency = math.min(math.max(thTransparency,0),1)
+			plr:SetAttribute("SRX_THEME_TRANSPARENCY",thTransparency)
+			return themeInfo.ThemeID,thTransparency
 		elseif param1 == "getplayerprefix" then
 			return plr:GetAttribute("SRX_PREFIX")
 		elseif param1 == "getallthemes" then
