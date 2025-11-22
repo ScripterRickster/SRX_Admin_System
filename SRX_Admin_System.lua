@@ -243,6 +243,8 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return "rbxassetid://0"
 		elseif param1 == "getplayerinfo" and param2 then
 			return plrUtilities.GetPlayerInformation(param2)
+		elseif param1 == "getsysaccesstype" then
+			return adminSettings.SystemAccessType
 		end
 	end
 end
