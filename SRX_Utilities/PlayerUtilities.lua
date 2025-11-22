@@ -536,7 +536,7 @@ module.PlayerLeft = function(plr:Player)
 	task.defer(function()
 		playerJoinTime[plr.UserId] = {}
 
-		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime,true)
+		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime)
 	end)
 	
 	if logJoins then
