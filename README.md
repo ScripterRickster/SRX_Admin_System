@@ -15,7 +15,8 @@ Version 2.0.0 Progress:
 - Added in a Server Statistics Section, Quick Actions Section, and Update Log Section (optional) to the Home Page of the Admin Panel
 - Added in FPS/Ping indicator on the panel
 - Moved Help Requests and AI Chat to the right side of the admin panel
-[TO BE CONTINUED]
+- Removed deprecated functions and replaced them with currently supported ones
+- [TO BE CONTINUED]
 --------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
