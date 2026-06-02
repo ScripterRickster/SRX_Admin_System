@@ -18,6 +18,7 @@ local module = {}
 ----------------------------------------------------------------
 local HTTP = game:GetService("HttpService")
 local MPS = game:GetService("MarketplaceService")
+local GS = game:GetService("GroupService")
 ----------------------------------------------------------------
 local serverID = game.JobId
 if game.PrivateServerId ~= "" then
@@ -31,13 +32,22 @@ end
 local serverType = "REGULAR"
 local serverOwner = game.CreatorId
 
+if game.CreatorType == Enum.CreatorType.Group then
+	pcall(function()
+		local tempG = GS:GetGroupInfoAsync(serverOwner)
+		if tempG then
+			serverOwner = tempG.Owner.Id
+		end
+	end)
+end
+
 if game.PrivateServerId ~= "" then
 	serverType = "VIP"
 	serverOwner = game.PrivateServerOwnerId
 end
 
 if serverOwner == "0" or serverOwner == nil or serverOwner == 0 or serverOwner == "" then
-	local gInfo = MPS:GetProductInfo(game.PlaceId,Enum.InfoType.Asset)
+	local gInfo = MPS:GetProductInfoAsync(game.PlaceId,Enum.InfoType.Asset)
 	
 	serverOwner = gInfo.Creator.CreatorTargetId
 	
