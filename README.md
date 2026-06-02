@@ -11,7 +11,11 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
 Version 2.0.0 Progress:
-- IN PROGRESS
+- Added in a check to support games owned by groups - admin system did not previously support automatic owner rank for games under groups
+- Added in a Server Statistics Section, Quick Actions Section, and Update Log Section (optional) to the Home Page of the Admin Panel
+- Added in FPS/Ping indicator on the panel
+- Moved Help Requests and AI Chat to the right side of the admin panel
+[TO BE CONTINUED]
 --------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
