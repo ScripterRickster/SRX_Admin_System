@@ -25,6 +25,7 @@ local MPS = game:GetService("MarketplaceService")
 local US = game:GetService("UserService")
 local DDS = game:GetService("DataStoreService")
 local HTTPS = game:GetService("HttpService")
+local GS = game:GetService("GroupService")
 ----------------------------------------------------------------
 local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
 local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
@@ -109,6 +110,8 @@ local playerJoinTime = {
 	
 	]]
 }
+
+local staffCount = 0
 ----------------------------------------------------------------
 local _,_,_,serverOwner = webhookUtil.getServerInfo()
 ----------------------------------------------------------------
@@ -249,7 +252,7 @@ module.SetupPlayer = function(plr:Player)
 		
 		local function setupPlayerRank()
 			local userRanked = false
-			local DRN,DRID,DRC,DCUP = nil,nil,nil,nil
+			local DRN,DRID,DRC,DCUP,sRank = nil,nil,nil,nil,false
 			-- DRN = DesiredRankName, DRID = DesiredRankID, DRC = DesiredRankColour
 			
 			
@@ -268,7 +271,7 @@ module.SetupPlayer = function(plr:Player)
 				-------------------------------
 				
 				if plr.UserId == serverOwner and not userRanked then
-					DRN,DRID,DRC,DCUP = serverUtil.GetHighestRank()
+					DRN,DRID,DRC,DCUP,sRank = serverUtil.GetHighestRank()
 					userRanked = true
 				end
 			end
@@ -279,7 +282,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for _,u in pairs(SETTINGS.RankBinds.Users) do
 					if string.lower(u[1]) == string.lower(plr.Name) or u[1] == plr.UserId then
-						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(u[2]))
+						DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(tonumber(u[2]))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -293,11 +296,18 @@ module.SetupPlayer = function(plr:Player)
 			
 			if not userRanked then
 				for gid,g in pairs(SETTINGS.RankBinds.Groups) do
-					if plr:GetRankInGroup(tonumber(gid)) >= g.Min_Group_Rank then
-						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(g.RankId))
-						if DRN and DRID then
-							userRanked = true
-							break
+					for rid,rgid in pairs(g) do
+						local pRanks = GS:GetRolesInGroupAsync(plr.UserId,gid)
+						if pRanks then
+							for _,v in pRanks.Roles do
+								if v.Id == tonumber(rgid) then
+									DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(tonumber(rid))
+									if DRN and DRID then
+										userRanked = true
+										break
+									end
+								end
+							end
 						end
 					end
 				end
@@ -308,7 +318,7 @@ module.SetupPlayer = function(plr:Player)
 			if not userRanked then
 				for gpid,g in pairs(SETTINGS.RankBinds.Gamepasses) do
 					if MPS:UserOwnsGamePassAsync(plr.UserId,tonumber(gpid)) then
-						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(gpid))
+						DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(tonumber(gpid))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -323,8 +333,11 @@ module.SetupPlayer = function(plr:Player)
 			
 			if not userRanked then
 				for aid,a in pairs(SETTINGS.RankBinds.OtherAssets) do
-					if MPS:PlayerOwnsAsset(plr,tonumber(aid)) then
-						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(a))
+					local succ,res = pcall(function()
+						return MPS:PlayerOwnsAssetAsync(plr,tonumber(aid))
+					end)
+					if res then
+						DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(tonumber(a))
 						if DRN and DRID then
 							userRanked = true
 							break
@@ -339,7 +352,7 @@ module.SetupPlayer = function(plr:Player)
 				local result = serverUtil.GetDataFromDDS(tostring(plr.UserId),RankDDS)
 				if result ~= nil then
 					result = HTTPS:JSONDecode(result)
-					DRN,DRID,DRC,DCUP = result[1],result[2],result[3],result[4]
+					DRN,DRID,DRC,DCUP,sRank = result[1],result[2],result[3],result[4],result[5]
 					userRanked = true
 				end
 			end
@@ -357,10 +370,10 @@ module.SetupPlayer = function(plr:Player)
 				if defaultRank and tonumber(tostring(defaultRank)) ~= nil then
 					defaultRank = tonumber(tostring(defaultRank))
 					
-					DRN,DRID,DRC,DCUP = serverUtil.FindRank(defaultRank)
+					DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(defaultRank)
 					userRanked = true
 				else
-					DRN,DRID,DRC,DCUP = serverUtil.GetLowestRank()
+					DRN,DRID,DRC,DCUP,sRank = serverUtil.GetLowestRank()
 					userRanked = true
 				end
 			end
@@ -388,9 +401,17 @@ module.SetupPlayer = function(plr:Player)
 				end
 			end
 			
+			if sRank then
+				plr:SetAttribute("SRX_IS_STAFF",true)
+				staffCount += 1
+				-- evt fire
+			end
+			
 		end
 
 		setupPlayerRank()
+		
+
 		
 		local function loadPlayerSettings()
 			local plrSettings = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerSettingsDDS)
@@ -526,6 +547,11 @@ end
 module.PlayerLeft = function(plr:Player)
 	local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
 	
+	if plr:GetAttribute("SRX_IS_STAFF") then
+		staffCount -= 1
+		-- evt fire
+	end
+	
 	task.defer(function()
 		module.SavePlayerSettings(plr)
 	end)
@@ -630,13 +656,18 @@ end
 module.SetPlayerRank = function(plr:Player,rank_id:number)
 	if plr then
 		
-		local rank_name,rank_id,rank_colour,can_use_panel = serverUtil.FindRank(rank_id,nil)
+		local rank_name,rank_id,rank_colour,can_use_panel,sRank = serverUtil.FindRank(rank_id,nil)
 		if rank_id ~= nil and rank_name ~= nil then
 			plr:SetAttribute("SRX_RANKID",rank_id)
 			plr:SetAttribute("SRX_RANKNAME",rank_name)
 			plr:SetAttribute("SRX_RANKCOLOUR",rank_colour)
 			plr:SetAttribute("SRX_CANUSEPANEL",can_use_panel)
+			plr:SetAttribute("SRX_IS_STAFF",sRank)
 			
+			if not sRank then
+				staffCount -= 1
+				-- evt fire
+			end
 			
 			
 			CSC_Event:FireClient(plr,"notification","RANK UPDATE","Your rank has been updated to: "..tostring(rank_name))
@@ -679,18 +710,19 @@ end
 module.GetPlayerRankInfo = function(username:string,userid:number)
 	local isValidPlayer,plrID,plrObject = module.FindPlayer(username,userid)
 	
-	local rank_id,rank_name,rank_colour,can_use_panel = nil,nil,nil,nil
+	local rank_id,rank_name,rank_colour,can_use_panel,is_staff_rank = nil,nil,nil,nil,false
 	
 	if isValidPlayer and plrObject then
 		rank_id = plrObject:GetAttribute("SRX_RANKID")
 		rank_name = plrObject:GetAttribute("SRX_RANKNAME")
 		rank_colour = plrObject:GetAttribute("SRX_RANKCOLOUR")
 		can_use_panel = plrObject:GetAttribute("SRX_CANUSEPANEL")
+		is_staff_rank = plrObject:GetAttribute("SRX_IS_STAFF")
 		
 	end
 	
 	
-	return rank_id,rank_name,rank_colour,can_use_panel
+	return rank_id,rank_name,rank_colour,can_use_panel,is_staff_rank
 	
 	
 	
@@ -1115,5 +1147,9 @@ module.GetPlayerInformation = function(user)
 	return data
 end
 ----------------------------------------------------------------
+
+module.GetStaffCount = function()
+	return staffCount
+end
 
 return module
