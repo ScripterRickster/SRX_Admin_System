@@ -16,6 +16,8 @@ Version 2.0.0 Progress:
 - Added in FPS/Ping indicator on the panel
 - Moved Help Requests and AI Chat to the right side of the admin panel
 - Removed deprecated functions and replaced them with currently supported ones
+- Fixed a logic error for the player command counter + introduced API support to retrieve top X amount of commands used by a player
+- Fixed a logic error that would not remove the topbar access button for the panel whenever a staff member get's de-ranked
 - [TO BE CONTINUED]
 --------------------------------------------------------
 
