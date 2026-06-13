@@ -175,7 +175,7 @@ module.AI_Services = { -- if you wish to include a "chatbot" in the admin panel 
 	Enabled = false; -- whether this feature is enabled
 	OpenCloudAPI_Key = ""; -- put your OpenRouter API key here
 	MinRank = 0; -- minimum rank required to be able to use this feature if enabled
-	AI_Model = "deepseek/deepseek-chat-v3.1:free"; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-chat-v3.1:free"
+	AI_Model = ""; -- the model of which is used through OpenRouter | Ex: "deepseek/deepseek-chat-v3.1:free"
 	Max_Tokens = 2048; -- how long the response is based on tokens || higher the token amount, the longer the response and vice versa
 	FilterAIMessages = true; -- whether to filter AI messages or not through Roblox's Filtering System
 }
