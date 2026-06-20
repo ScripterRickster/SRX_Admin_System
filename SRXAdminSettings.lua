@@ -1,7 +1,5 @@
 local module = {}
 
-module.UIVersion = "v2"; -- default: v2 || set to "v1" or 'v2" for whichever version of the user-interface you want to use || WARNING: "v1" USER INTERFACE WILL EVENTUALLY BE DEPRECEATED AND ALL USERS WILL HAVE TO MIGRATE TO THE "v2" USER INTERFACE
--- also note that module.UIVersion is not required to be included in your config file as it automatically defaults to v2 if it doesn't find it
 
 
 module.Prefix = "!" -- default prefix for the admin system || staff members will be able to set their own prefixes
@@ -193,12 +191,15 @@ module.DecorativeSettings = {
 };
 
 
-module.PanelSettings = {  
+module.PanelSettings = { 
+	UIVersion = "v2"; -- default: v2 || set to "v1" or 'v2" for whichever version of the user-interface you want to use || WARNING: "v1" USER INTERFACE WILL EVENTUALLY BE DEPRECEATED AND ALL USERS WILL HAVE TO MIGRATE TO THE "v2" USER INTERFACE
+	-- also note that module.UIVersion is not required to be included in your config file
+	
 	SystemAccessType = "Tool"; -- whether you use a tool to bring up the UI, or you click on a button at the top || "Tool" -> a tool that you equip to bring up the UI, "Button"  -> a button that you click at the top of your screen to bring up the UI || any invalid options will be treated by the default option of a "tool"
 	
 	UpdateLog = { -- update log description area
 		Enabled = true; -- whether to show the update log inside of the admin panel
-		Text = "SRX Admin V2 Release 🔥"; -- description for the update log - supports richtext
+		Text = "SRX Admin V2 Release Soon???????"; -- description for the update log - supports richtext
 	};
 	
 	CommandConsoleSettings = { -- settings for the built-in command console
