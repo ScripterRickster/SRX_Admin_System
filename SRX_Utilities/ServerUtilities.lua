@@ -38,12 +38,14 @@ for _,a in pairs(COMMANDS:GetChildren()) do
 end
 
 ----------------------------------------------------------------
-local toolLocations = SETTINGS["ToolLocations"]
+local toolLocations = SETTINGS["ToolLocations"] or SETTINGS.GeneralSettings.ToolLocations
 ----------------------------------------------------------------
 local cmdLogs = {}
 
 ----------------------------------------------------------------
 local ticketCooldownTracker = {}
+
+local serverUptime = 0
 ----------------------------------------------------------------
 
 module.IsAlpha = function(s:string)
@@ -91,7 +93,7 @@ customTCCFolder.Parent = TCS
 
 local customTCCRegistered = false
 module.RegisterTextChatCommands = function()
-	if SETTINGS.IncludeChatSlashCommands then
+	if SETTINGS.IncludeChatSlashCommands or SETTINGS.CommandSettings.IncludeChatSlashCommands then
 		if customTCCRegistered then return end
 		customTCCRegistered = true
 		
@@ -128,7 +130,7 @@ module.RegisterTextChatCommands = function()
 end
 
 module.RegisterClientTextChatCommands = function(plr:Player)
-	if SETTINGS.IncludeChatSlashCommands then
+	if SETTINGS.IncludeChatSlashCommands or SETTINGS.CommandSettings.IncludeChatSlashCommands then
 		CSC_Event:FireClient(plr,"ALLSLASHCMDS",module.GetAllPlayerUsableCommands(plr))
 	end
 end
@@ -410,33 +412,35 @@ end
 
 
 module.GetHighestRank = function()
-	local rankName,rankId,rankColour,canUsePanel = nil,-math.huge,nil,nil
+	local rankName,rankId,rankColour,canUsePanel,isstaffrank = nil,-math.huge,nil,nil,false
 	for n,r in pairs(SETTINGS.Ranks) do
 		if r.RankId > rankId then
 			rankName = n
 			rankId = r.RankId
 			rankColour = r.RankColour
 			canUsePanel = r.CanUsePanel
+			isstaffrank = true and r.IsStaffRank or false
 		end
 	end
-	return rankName,rankId,rankColour,canUsePanel
+	return rankName,rankId,rankColour,canUsePanel,isstaffrank
 end
 
 module.GetLowestRank = function()
-	local rankName,rankId,rankColour,canUsePanel = nil,math.huge,nil,nil
+	local rankName,rankId,rankColour,canUsePanel,isstaffrank = nil,math.huge,nil,nil,false
 	for n,r in pairs(SETTINGS.Ranks) do
 		if r.RankId < rankId then
 			rankName = n
 			rankId = r.RankId
 			rankColour = r.RankColour
 			canUsePanel = r.CanUsePanel
+			isstaffrank = true and r.IsStaffRank or false
 		end
 	end
-	return rankName,rankId,rankColour,canUsePanel
+	return rankName,rankId,rankColour,canUsePanel,isstaffrank
 end
 
 module.FindRank = function(rank_id,rank_name)
-	local rankName,rankId,rankColour,canUsePanel = nil,nil,nil,nil
+	local rankName,rankId,rankColour,canUsePanel,isstaffrank = nil,nil,nil,nil,false
 	rank_id = tonumber(tostring(rank_id))
 	if rank_id then
 		
@@ -446,8 +450,8 @@ module.FindRank = function(rank_id,rank_name)
 				rankName = n
 				rankColour = r.RankColour
 				canUsePanel = r.CanUsePanel
-				
-				return rankName,rankId,rankColour,canUsePanel
+				isstaffrank = true and r.IsStaffRank or false
+				return rankName,rankId,rankColour,canUsePanel,isstaffrank
 			end
 		end
 	end
@@ -459,11 +463,14 @@ module.FindRank = function(rank_id,rank_name)
 				rankName = n
 				rankColour = r.RankColour
 				canUsePanel = r.CanUsePanel
+				isstaffrank = true and r.IsStaffRank or false
 				break
 			end
 		end
+		
 	end
-	return rankName,rankId,rankColour,canUsePanel
+
+	return rankName,rankId,rankColour,canUsePanel,isstaffrank
 end
 -----------------------------------------------------------------------------------
 
@@ -475,7 +482,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		end)
 
 		if not succ then
-			if SETTINGS.EnableDebugComments then
+			if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).." | RETRYING.....")
 			end
 			
@@ -487,7 +494,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 		task.wait()
 	until current_tries == attempt_limit
 	if result == nil then
-		if SETTINGS.EnableDebugComments then
+		if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 			warn("FAILED TO RETRIEVE KEY: "..tostring(key).." FROM THE DATASTORE: "..tostring(datastore))
 		end
 	end
@@ -502,13 +509,13 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 		end)
 
 		if not succ then
-			if SETTINGS.EnableDebugComments then
+			if SETTINGS.EnableDebugComments  or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
 			end
 			
 		else
 			success = true
-			if SETTINGS.EnableDebugComments then
+			if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 				print("SUCCESSFULLY SAVED "..tostring(data).." FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore))
 			end
 			break
@@ -517,7 +524,7 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 		task.wait()
 	until current_tries == attempt_limit
 	if not success then
-		if SETTINGS.EnableDebugComments then
+		if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 			warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO THE DATASTORE: "..tostring(datastore))
 		end
 	end
@@ -609,13 +616,23 @@ module.FindTool = function(toolName:string,forcedLocation)
 end
 
 module.FindTheme = function(themeID,themeName)
-	if SETTINGS.ClientThemes[themeName] ~= nil then return SETTINGS.ClientThemes[themeName] end
 	
-	for tmName,themeInfo in SETTINGS.ClientThemes do
+	local CThemeTable = SETTINGS.ClientThemes
+	
+	if CThemeTable == nil and SETTINGS.PanelSettings and SETTINGS.PanelSettings.ClientThemes then
+		CThemeTable = SETTINGS.PanelSettings.ClientThemes
+	end
+
+	if CThemeTable == nil then return nil end
+
+	if CThemeTable[themeName] ~= nil then return CThemeTable[themeName] end
+
+	for tmName,themeInfo in CThemeTable do
 		if themeInfo.ThemeID == themeID then
 			return themeInfo
 		end
 	end
+	
 	return nil
 end
 -----------------------------------------------------------------------------------
@@ -634,7 +651,8 @@ function isUserOnHelpTicketCooldown(plr:Player)
 	return ticketCooldownTracker[plr.UserId] == true
 end
 module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,evidence:string,notes:string)
-	if SETTINGS.HelpTickets ~= nil and SETTINGS.HelpTickets.Enabled and isUserOnHelpTicketCooldown(plr) == false then
+	local helpTicketSettings = SETTINGS.HelpTickets or SETTINGS.AdministrativeSettings.HelpTickets
+	if helpTicketSettings ~= nil and helpTicketSettings.Enabled and isUserOnHelpTicketCooldown(plr) == false then
 		if plr and target then
 			if notes == nil or notes == "" then
 				notes = "N/A"
@@ -659,7 +677,7 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 			
 			if targetUID then
 				ticketCooldownTracker[plr.UserId] = true
-				task.delay(SETTINGS.HelpTickets.Cooldown,function()
+				task.delay(helpTicketSettings.Cooldown,function()
 					ticketCooldownTracker[plr.UserId] = false
 				end)
 				
@@ -705,6 +723,15 @@ module.GenerateRequest = function(actionName:string,parameters:table,functionThr
 		SSC_Event:Fire("createreq",reqBody)
 		
 	end
+end
+----------------------------------------------------------------
+module.ServerTimeUpdate = function()
+	serverUptime += 1
+	task.delay(1,module.ServerTimeUpdate)
+end
+
+module.GetServerTime = function()
+	return serverUptime
 end
 ----------------------------------------------------------------
 
