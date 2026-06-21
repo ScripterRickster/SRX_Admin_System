@@ -27,12 +27,13 @@ local DDS = game:GetService("DataStoreService")
 local HTTPS = game:GetService("HttpService")
 local GS = game:GetService("GroupService")
 ----------------------------------------------------------------
-local RankDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"SAVEDRANKS")
-local InfractionDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"USERINFRACTIONS")
-local PlayerJoinsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERJOINS")
-local PlayerPlayTimeDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERPLAYTIME")
-local PlayerSettingsDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERSETTINGS")
-local PlayerCommandCountDDS = DDS:GetDataStore(SETTINGS.DatastoreName,"PLAYERCOMMANDCOUNT")
+local DSName = SETTINGS.DatastoreName or SETTINGS.DatastoreSettings.DatastoreName
+local RankDDS = DDS:GetDataStore(DSName,"SAVEDRANKS")
+local InfractionDDS = DDS:GetDataStore(DSName,"USERINFRACTIONS")
+local PlayerJoinsDDS = DDS:GetDataStore(DSName,"PLAYERJOINS")
+local PlayerPlayTimeDDS = DDS:GetDataStore(DSName,"PLAYERPLAYTIME")
+local PlayerSettingsDDS = DDS:GetDataStore(DSName,"PLAYERSETTINGS")
+local PlayerCommandCountDDS = DDS:GetDataStore(DSName,"PLAYERCOMMANDCOUNT")
 ----------------------------------------------------------------
 
 local OverheadTagStatus = {}
@@ -44,7 +45,7 @@ local ftag = ASSETS:WaitForChild("SRX_FROZENTAG")
 local adminTool = ASSETS:WaitForChild("SRXAdminTool")
 
 ----------------------------------------------------------------
-local saveRanks = SETTINGS.SaveRanks
+local saveRanks = SETTINGS.SaveRanks or SETTINGS.DatastoreSettings.SaveRanks
 
 local logJoins = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["Enabled"]
 local joinLogsWebhook = SETTINGS["WebhookSettings"]["JOIN_LOGS"]["WebhookLink"]
@@ -118,7 +119,8 @@ local _,_,_,serverOwner = webhookUtil.getServerInfo()
 
 
 module.SetupPlayerTag = function(plr:Player)
-	if plr and SETTINGS["OverheadTags"]["Enabled"] then
+	local ohTagSetting = SETTINGS.OverheadTags or SETTINGS.DecorativeSettings.OverheadTags
+	if plr and ohTagSetting["Enabled"] then
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local head = char:WaitForChild("Head")
 		if plr:GetAttribute("SRX_RANKCOLOUR") ~= nil and plr:GetAttribute("SRX_RANKNAME") ~= nil then
@@ -152,7 +154,8 @@ module.SetupPlayerTag = function(plr:Player)
 end
 
 module.ManagePlayerTag = function(plr:Player,forcedStatus:boolean)
-	if plr and SETTINGS["OverheadTags"]["Enabled"] then
+	local ohTagSetting = SETTINGS.OverheadTags or SETTINGS.DecorativeSettings.OverheadTags
+	if plr and ohTagSetting["Enabled"] then
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local head = char:WaitForChild("Head")
 		if head:FindFirstChild("SRX_RANKTAG") then
@@ -260,8 +263,9 @@ module.SetupPlayer = function(plr:Player)
 				-- SERVER OWNER
 				-------------------------------
 				if game.PrivateServerId ~= "" then --private server
-					if plr.UserId == game.PrivateServerOwnerId and SETTINGS.VIPServerSettings.VIPCommands then
-						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(SETTINGS.VIPServerSettings.ServerOwnerRankId))
+					local vipsettings = SETTINGS.VIPServerSettings or SETTINGS.GeneralSettings.VIPServerSettings
+					if plr.UserId == game.PrivateServerOwnerId and vipsettings.VIPCommands then
+						DRN,DRID,DRC,DCUP = serverUtil.FindRank(tonumber(vipsettings.ServerOwnerRankId))
 						
 						userRanked = true
 						
@@ -392,7 +396,13 @@ module.SetupPlayer = function(plr:Player)
 				if DCUP then
 					plr:SetAttribute("SRX_CANUSEPANEL",DCUP)
 					
-					if string.lower(tostring(SETTINGS.SystemAccessType)) == "button" then
+					local aType = SETTINGS.SystemAccessType
+					
+					if aType == nil and SETTINGS.PanelSettings then
+						aType = SETTINGS.PanelSettings.SystemAccessType
+					end
+					
+					if string.lower(tostring(aType)) == "button" then
 						CSC_Event:FireClient(plr,"SETUPACCESSBUTTON")
 					else
 						adminTool:Clone().Parent = plr.Backpack
@@ -422,6 +432,7 @@ module.SetupPlayer = function(plr:Player)
 				for vName,v in pairs(plrSettings) do
 					if defaultSettingsTable[vName] ~= nil then
 						defaultSettingsTable[vName] = v
+						print(vName,v)
 					end
 				end
 			end
@@ -436,7 +447,8 @@ module.SetupPlayer = function(plr:Player)
 			end)
 			
 			if succ1 then
-				if res == nil then
+				
+				if res == nil or tostring(res) == "null" then
 					 playerCommandCount[tostring(plr.UserId)] = {}
 				else
 					res = HTTPS:JSONDecode(res)
@@ -468,7 +480,13 @@ module.SetupPlayer = function(plr:Player)
 			srx_attach.Parent = hrp
 			
 			if plr:GetAttribute("SRX_CANUSEPANEL") then
-				if string.lower(tostring(SETTINGS.SystemAccessType)) ~= "button" then
+				local aType = SETTINGS.SystemAccessType
+
+				if aType == nil and SETTINGS.PanelSettings then
+					aType = SETTINGS.PanelSettings.SystemAccessType
+				end
+				
+				if string.lower(tostring(aType)) ~= "button" then
 					if not plr.Backpack:FindFirstChild(adminTool.Name) then
 						adminTool:Clone().Parent = plr.Backpack
 					end
@@ -498,8 +516,9 @@ module.SetupPlayer = function(plr:Player)
 		end)
 
 		plr.Chatted:Connect(function(msg)
-			if SETTINGS.OverheadTags["Enabled"] then
-				if string.lower(tostring(SETTINGS.OverheadTags["Command"])) == string.lower(msg) then
+			local ohTagSetting = SETTINGS.OverheadTags or SETTINGS.DecorativeSettings.OverheadTags
+			if ohTagSetting["Enabled"] then
+				if string.lower(tostring(ohTagSetting["Command"])) == string.lower(msg) then
 					task.defer(function()
 						module.ManagePlayerTag(plr)
 					end)
@@ -507,9 +526,10 @@ module.SetupPlayer = function(plr:Player)
 				end
 			end
 			
-			if SETTINGS.HelpCMDSettings ~= nil then
-				local helpCMDEnabled = SETTINGS.HelpCMDSettings["Enabled"]
-				local helpCMD = SETTINGS.HelpCMDSettings["Command"]
+			local helpCMDSettings = SETTINGS.HelpCMDSettings or SETTINGS.AdministrativeSettings.HelpCMDSettings
+			if helpCMDSettings ~= nil then
+				local helpCMDEnabled = helpCMDSettings["Enabled"]
+				local helpCMD = helpCMDSettings["Command"]
 				
 				if helpCMDEnabled then
 					if string.lower(tostring(helpCMD)) == string.lower(msg) then
@@ -545,32 +565,21 @@ module.SetupPlayer = function(plr:Player)
 end
 
 module.PlayerLeft = function(plr:Player)
-	local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
-	
-	if plr:GetAttribute("SRX_IS_STAFF") then
-		staffCount -= 1
-		-- evt fire
-	end
-	
-	task.defer(function()
-		module.SavePlayerSettings(plr)
-	end)
-	
-	task.defer(function()
-		module.RemovePlayerHelpRequest(plr)
-	end)
-	
-	task.defer(function()
-		playerJoinTime[plr.UserId] = {}
 
-		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime)
-	end)
+	
+	task.spawn(module.SavePlayerSettings,plr)
+	task.spawn(serverUtil.SaveDataToDDS,tostring(plr.UserId),PlayerCommandCountDDS,HTTPS:JSONEncode(playerCommandCount[tostring(plr.UserId)]))
+	print("saved")
+	task.spawn(module.RemovePlayerHelpRequest,plr)
+	
+	local totalPlayTime = module.GetPlayerPlayTime(plr.UserId)
+	task.spawn(serverUtil.SaveDataToDDS,tostring(plr.UserId),PlayerPlayTimeDDS,totalPlayTime)
+	
 	
 	if logJoins then
-		task.defer(function()
-			webhookUtil.SendLog(joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE",0,totalPlayTime))
-		end)
+		task.spawn(webhookUtil.SendLog,joinLogsWebhook,webhookUtil.FormatJoinLogWebhook(plr,"LEAVE",0,totalPlayTime))
 	end
+	
 	if saveRanks then
 		local dds_data = {plr:GetAttribute("SRX_RANKNAME"),plr:GetAttribute("SRX_RANKID"),plr:GetAttribute("SRX_RANKCOLOUR")}
 		dds_data = HTTPS:JSONEncode(dds_data)
@@ -579,21 +588,16 @@ module.PlayerLeft = function(plr:Player)
 		end)
 	end
 	
+	if plr:GetAttribute("SRX_IS_STAFF") then
+		staffCount -= 1
+	end
 	
-	
-	
-	task.defer(function()
-		serverUtil.SaveDataToDDS(tostring(plr.UserId),PlayerCommandCountDDS,HTTPS:JSONEncode(playerCommandCount[tostring(plr.UserId)]))
-		playerCommandCount[tostring(plr.UserId)] = {}
-	end)
-	
+	playerJoinTime[plr.UserId] = {}
 	trackedUsers[plr.UserId] = {}
-	
+	playerCommandCount[tostring(plr.UserId)] = {}
 	
 	for _,v in pairs(game.Players:GetChildren()) do
-		task.defer(function()
-			module.UntrackPlayer(v,plr)
-		end)
+		task.spawn(module.UntrackPlayer,v,plr)
 	end
 	
 	
@@ -666,33 +670,46 @@ module.SetPlayerRank = function(plr:Player,rank_id:number)
 			
 			if not sRank then
 				staffCount -= 1
-				-- evt fire
 			end
 			
 			
 			CSC_Event:FireClient(plr,"notification","RANK UPDATE","Your rank has been updated to: "..tostring(rank_name))
 			PanelCSC_Event:FireClient(plr,"updatepanel")
 			
+			local aType = SETTINGS.SystemAccessType
+
+			if aType == nil and SETTINGS.PanelSettings then
+				aType = SETTINGS.PanelSettings.SystemAccessType
+			end
+			
 			if can_use_panel ~= true then
 				local pTool = plr.Backpack:FindFirstChild("SRXAdminTool")
 				local char = plr.Character or plr.CharacterAdded:Wait()
+
+
 				
 				local cTool = char:FindFirstChild("SRXAdminTool")
 				
 				if pTool then pTool:Destroy() end
 				if cTool then cTool:Destroy() end
 				
-				local panelUI = plr.PlayerGui:FindFirstChild("SRXPanelUI")
+				local panelUI = plr.PlayerGui:FindFirstChild("SRXPanelUI") or plr.PlayerGui:FindFirstChild("SRXPanelUI_V2")
 				if panelUI then panelUI:Destroy() end
+				CSC_Event:FireClient(plr,"DESTROYACCESSBUTTON")
 				
 			else
 				local pTool = plr.Backpack:FindFirstChild("SRXAdminTool")
 				local char = plr.Character or plr.CharacterAdded:Wait()
 				local cTool = char:FindFirstChild("SRXAdminTool")
 				
-				if pTool == nil and cTool == nil then
-					ASSETS:WaitForChild("SRXAdminTool"):Clone().Parent = plr.Backpack
+				if string.lower(aType) == "tool" then
+					if pTool == nil and cTool == nil then
+						ASSETS:WaitForChild("SRXAdminTool"):Clone().Parent = plr.Backpack
+					end
+				elseif string.lower(aType) == "button" then
+					CSC_Event:FireClient(plr,"SETUPACCESSBUTTON")
 				end
+			
 				
 			end
 			
@@ -780,7 +797,8 @@ module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 	if isValidPlayer and infracID and staffMem then
 		
 		local staffRankID = staffMem:GetAttribute("SRX_RANKID")
-		if tonumber(tostring(staffRankID)) >= SETTINGS.ManageInfractionRank then
+		local mfr = SETTINGS.ManageInfractionRank or SETTINGS.AdministrativeSettings.ManageInfractionRank
+		if tonumber(tostring(staffRankID)) >= mfr then
 			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
 			currInfractions = HTTPS:JSONDecode(currInfractions)
 			if currInfractions[infracID] then
@@ -896,7 +914,8 @@ end
 ----------------------------------------------------------------
 
 module.CreatePlayerHelpRequest = function(plr:Player)
-	if plr and SETTINGS["HelpCMDSettings"] ~= nil and SETTINGS["HelpCMDSettings"]["Enabled"] then
+	local helpCMDSettings = SETTINGS.HelpCMDSettings or SETTINGS.AdministrativeSettings.HelpCMDSettings
+	if plr and helpCMDSettings ~= nil and helpCMDSettings["Enabled"] then
 		if activeHelpRequests[plr.UserId] == nil then
 			activeHelpRequests[plr.UserId] = true
 			PanelCSC_Event:FireAllClients("CREATEHELPREQ",plr)
@@ -917,8 +936,8 @@ end
 module.HandlePlayerHelpRequest = function(plr1:Player,plr2:Player)
 	if plr1 and plr2 then
 		if activeHelpRequests[plr2.UserId] ~= nil then
-			
-			if tonumber(tostring(SETTINGS["HelpCMDSettings"]["HandlerMinRank"])) <= tonumber(tostring(plr1:GetAttribute("SRX_RANKID"))) then
+			local helpCMDSettings = SETTINGS.HelpCMDSettings or SETTINGS.AdministrativeSettings.HelpCMDSettings
+			if tonumber(tostring(helpCMDSettings["HandlerMinRank"])) <= tonumber(tostring(plr1:GetAttribute("SRX_RANKID"))) then
 				task.defer(function()
 					module.RemovePlayerHelpRequest(plr2)
 				end)
@@ -941,9 +960,11 @@ end
 ----------------------------------------------------------------
 
 module.UpdatePlayerCommandUse = function(plr:Player,cmdName:string)
-	if plr and playerCommandCount[tostring(plr.UserId)] ~= nil and cmdName then
+	if plr and cmdName then
+		if playerCommandCount[tostring(plr.UserId)] == nil then
+			playerCommandCount[tostring(plr.UserId)] = {}
+		end
 		local actualCMD = serverUtil.FindCommand(cmdName)
-		
 		if actualCMD ~= nil then
 			actualCMD = tostring(actualCMD)
 			local c = playerCommandCount[tostring(plr.UserId)][actualCMD]
@@ -953,6 +974,8 @@ module.UpdatePlayerCommandUse = function(plr:Player,cmdName:string)
 			else
 				playerCommandCount[tostring(plr.UserId)][actualCMD] = 1
 			end
+			
+			PanelCSC_Event:FireClient(plr,"qactupdate","home")
 		end
 	end
 end
@@ -968,7 +991,7 @@ module.IsPlayerBanned = function(userid:number)
 			)
 
 			if not (year and month and day and hour and min and sec) then
-				if SETTINGS.EnableDebugComments then
+				if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 					warn("Invalid ISO 8601 format:", isoString)
 				end
 				return nil
@@ -991,7 +1014,7 @@ module.IsPlayerBanned = function(userid:number)
 		end)
 
 		if not success or not entries then
-			if SETTINGS.EnableDebugComments then
+			if SETTINGS.EnableDebugComments  or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("SRX | ERROR RETRIEVING BAN HISTORY")
 			end
 			return nil
@@ -1151,5 +1174,38 @@ end
 module.GetStaffCount = function()
 	return staffCount
 end
+
+----------------------------------------------------------------
+
+module.GetMostUsedCommands = function(plr:Player,numOfCmd:number)
+	if plr and numOfCmd then
+		local uid = tostring(plr.UserId)
+		local counts = playerCommandCount[uid]
+
+		if counts == nil then return {} end
+
+		local sorted = {}
+		for cmdName,uses in pairs(counts) do
+			table.insert(sorted,{Command = cmdName, Uses = uses})
+		end
+
+		table.sort(sorted,function(a,b)
+			return a.Uses > b.Uses
+		end)
+
+		local result = {}
+		for i=1,math.min(numOfCmd,#sorted) do
+			table.insert(result,sorted[i])
+		end
+		
+
+		return result
+	end
+	
+	return nil
+end
+
+----------------------------------------------------------------
+
 
 return module
