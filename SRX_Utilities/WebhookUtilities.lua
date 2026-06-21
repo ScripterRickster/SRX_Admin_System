@@ -64,7 +64,7 @@ if sOwner ~= 0 then
 		if serverOwner ~= nil and serverOwner ~= "" and serverOwner ~= "0" and serverOwner ~= 0 then
 			sOwner = "["..game.Players:GetNameFromUserIdAsync(serverOwner).."](https://www.roblox.com/users/"..serverOwner.."/profile)"
 		else
-			if SETTINGS.EnableDebugComments then
+			if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("SRX ADMIN SYSTEM  | FAILED TO GET CREATOR ID","SRX ADMIN SYSTEM || YOUR ADMIN SYSTEM MAY EXPERIENCE SOME ISSUES DUE TO ROBLOX NOT PROPERLY RETURNING THE CORRECT CREATOR ID")
 			end
 			sOwner = "UNKNOWN SERVER OWNER"
@@ -513,13 +513,13 @@ module.SendLog = function(wbhkid,data)
 
 
 			if succ then
-				if SETTINGS.EnableDebugComments then
+				if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 					print("SRX Admin System Successfully Logged An Action")
 				end
 				return
 			end
 		end
-		if SETTINGS.EnableDebugComments then
+		if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 			warn("SRX Admin System Encountered An Error While Loggin An Action")
 		end
 	end
