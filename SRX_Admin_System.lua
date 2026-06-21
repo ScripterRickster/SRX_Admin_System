@@ -24,9 +24,10 @@ DEVFORUM Post: https://devforum.roblox.com/t/srx-admin-system-a-modular-unobfusc
 ----------------------------------------------------------------
 Licensed Under:
 MIT LICENSE
-Copyright © 2025 SR Studios (Discord Group), Scripter_Rickster (Roblox), questionable_existence (Discord)
+Copyright © 2026 SR Studios (Discord Group), Scripter_Rickster (Roblox), questionable_existence (Discord)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sublicense copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+- The "system" cannot be sold for monetary value unless permission is explicitly obtained from SR Studios
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
@@ -88,6 +89,7 @@ local HTTP = game:GetService("HttpService")
 
 ----------------------------------------------------------------
 task.defer(serverUtilities.RegisterTextChatCommands)
+task.defer(serverUtilities.ServerTimeUpdate)
 ----------------------------------------------------------------
 local awaitingRequests = {
 	--[[
@@ -163,9 +165,9 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		param1 = string.lower(tostring(param1))
 		
 		if param1 == "chattagstatus" then
-			return adminSettings.ChatTags
+			return adminSettings.ChatTags or adminSettings.DecorativeSettings.ChatTags
 		elseif param1 == "chatslashcmdstatus" then
-			return adminSettings.IncludeChatSlashCommands
+			return adminSettings.IncludeChatSlashCommands or adminSettings.CommandSettings.IncludeChatSlashCommands
 		elseif param1 == "getrankinfo" then
 			return plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 		elseif param1 == "getadminversion" then
@@ -207,7 +209,7 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return msgLogs
 			
 		elseif param1 == "getcmdcooldown" then
-			return adminSettings.CommandCooldown
+			return adminSettings.CommandCooldown or adminSettings.CommandSettings.CommandCooldown
 			
 		elseif param1 == "getairesponse" and param2 then
 			local result = serverUtilities.GetAIResponse(plr,param2)
@@ -228,31 +230,52 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 		elseif param1 == "getplayerprefix" then
 			return plr:GetAttribute("SRX_PREFIX")
 		elseif param1 == "getallthemes" then
-			return adminSettings.ClientThemes
+			local themes = adminSettings.ClientThemes or adminSettings.PanelSettings.ClientThemes
+			return themes
 		elseif param1 == "canviewhelpreq" then
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
-			return adminSettings["HelpCMDSettings"] ~= nil and adminSettings["HelpCMDSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["HelpCMDSettings"]["HandlerMinRank"]))
+			local helpCMDSettings = adminSettings.HelpCMDSettings or adminSettings.AdministrativeSettings.HelpCMDSettings
+			return helpCMDSettings ~= nil and helpCMDSettings["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(helpCMDSettings["HandlerMinRank"]))
 		elseif param1 == "getallhelprequests" then
 			return plrUtilities.GetAllHelpRequests()
 		elseif param1 == "canusecommandconsole" then
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
-			return adminSettings["CommandConsoleSettings"] ~= nil and adminSettings["CommandConsoleSettings"]["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(adminSettings["CommandConsoleSettings"]["MinRank"]))
+			local ccsettings = adminSettings.CommandConsoleSettings or adminSettings.PanelSettings.CommandConsoleSettings
+			return ccsettings ~= nil and ccsettings["Enabled"] and tonumber(tostring(rID)) >= tonumber(tostring(ccsettings["MinRank"]))
 		elseif param1 == "helpticketstatus" then
-			return adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"]
+			local helpTicketSettings = adminSettings.HelpTickets or adminSettings.AdministrativeSettings.HelpTickets
+			return helpTicketSettings ~= nil and helpTicketSettings["Enabled"]
 		elseif param1 == "gethelpticketcd" then
-			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
-				return adminSettings["HelpTickets"]["Cooldown"]
+			local helpTicketSettings = adminSettings.HelpTickets or adminSettings.AdministrativeSettings.HelpTickets
+			if helpTicketSettings ~= nil and helpTicketSettings["Enabled"] then
+				return helpTicketSettings["Cooldown"]
 			end
 			return math.huge
 		elseif param1 == "gethelpticketbg" then
-			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
-				return adminSettings["HelpTickets"]["BackgroundImage"],adminSettings["HelpTickets"]["BackgroundImageTransparency"]
+			local helpTicketSettings = adminSettings.HelpTickets or adminSettings.AdministrativeSettings.HelpTickets
+			if helpTicketSettings ~= nil and helpTicketSettings["Enabled"] then
+				return helpTicketSettings["BackgroundImage"],helpTicketSettings["BackgroundImageTransparency"]
 			end
 			return "rbxassetid://0"
 		elseif param1 == "getplayerinfo" and param2 then
 			return plrUtilities.GetPlayerInformation(param2)
 		elseif param1 == "getsysaccesstype" then
-			return adminSettings.SystemAccessType
+			if adminSettings.SystemAccessType then return adminSettings.SystemAccessType elseif adminSettings.PanelSettings then return adminSettings.PanelSettings.SystemAccessType else return nil end
+		elseif param1 == "getupdatelog" then
+			if not adminSettings.PanelSettings then return nil end
+			if not adminSettings.PanelSettings.UpdateLog then return nil end
+			if not adminSettings.PanelSettings.UpdateLog.Enabled then return nil end
+			return adminSettings.PanelSettings.UpdateLog.Text
+		elseif param1 == "getmostusedcmds" and tonumber(tostring(param2)) then
+			
+			local res = plrUtilities.GetMostUsedCommands(plr,tonumber(tostring(param2)))
+			return res
+		elseif param1 == "getserveruptime" then
+			return serverUtilities.GetServerTime()
+		elseif param1 == "canmanageinfractions" then
+			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
+			local mir = adminSettings.ManageInfractionRank or adminSettings.AdministrativeSettings.ManageInfractionRank or math.huge
+			return mir <= rID
 		end
 	end
 end
@@ -269,10 +292,11 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 				local tbl = adminSettings["Ranks"][rName]
 				if tbl then
 					if tbl["CanUsePanel"] then
-						local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
-						
+						local uiVersion = string.lower(adminSettings.PanelSettings.UIVersion) or "v2"
+						local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI") or plr.PlayerGui:FindFirstChild("SRXPanelUI_V2")
+						local targUI =  uiVersion == "v1" and assets:WaitForChild("SRXPanelUI") or assets:WaitForChild("SRXPanelUI_V2")
 						if currPanel == nil then
-							local adminPanel = assets:WaitForChild("SRXPanelUI")
+							local adminPanel = targUI
 							local newAdminPanel = adminPanel:Clone()
 							newAdminPanel.Parent = plr.PlayerGui
 							newAdminPanel.Enabled = true
@@ -284,7 +308,7 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 				end
 			end
 		elseif param1 == "closeadminpanel" then
-			local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI")
+			local currPanel = plr.PlayerGui:FindFirstChild("SRXPanelUI") or plr.PlayerGui:FindFirstChild("SRXPanelUI_V2")
 			if currPanel then
 				currPanel.Enabled = false
 			end
@@ -311,7 +335,8 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 				plrUtilities.HandlePlayerHelpRequest(plr,param2)
 			end)
 		elseif param1 == "givehelpticketui" then
-			if adminSettings["HelpTickets"] ~= nil and adminSettings["HelpTickets"]["Enabled"] then
+			local helpTicketSettings = adminSettings.HelpTickets or adminSettings.AdministrativeSettings.HelpTickets
+			if helpTicketSettings ~= nil and helpTicketSettings["Enabled"] then
 				local ticketUI = plr.PlayerGui:FindFirstChild("SRX_HelpTicket")
 				if ticketUI ~= nil then 
 					ticketUI.Enabled = true
@@ -352,8 +377,9 @@ end
 SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 	action = string.lower(tostring(action))
 	if action == "updateplrcmdcount" and param1 and param2 then
-		plrUtilities.UpdatePlayerCommandUse(param1,param2)
+		task.spawn(plrUtilities.UpdatePlayerCommandUse,param1,param2)
 	elseif action == "createhelpreq" and param1 then
+		task.spawn(plrUtilities.CreatePlayerHelpRequest,param1)
 		plrUtilities.CreatePlayerHelpRequest(param1)
 	elseif action == "createreq" and param1 then
 		local reqID = param1["RequestID"]
@@ -366,7 +392,8 @@ SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 			  ["Function"] = fn
 			}
 			MS:PublishAsync(actionID,HTTP:JSONEncode(params))
-			task.delay(adminSettings.RequestTimeout,function()
+			local tmout = adminSettings.RequestTimeout or adminSettings.GeneralSettings.RequestTimeout
+			task.delay(tmout,function()
 				awaitingRequests[reqID] = nil
 			end)
 		end
@@ -385,21 +412,16 @@ end
 
 ----------------------------------------------------------------
 game.Players.PlayerAdded:Connect(function(plr)
-	task.defer(function()
-		plrUtilities.SetupPlayer(plr)
-	end)
+	task.spawn(plrUtilities.SetupPlayer,plr)
 end)
 
 game.Players.PlayerRemoving:Connect(function(plr)
-	task.defer(function()
-		plrUtilities.PlayerLeft(plr)
-	end)
+	task.spawn(plrUtilities.PlayerLeft,plr)
+
 end)
 
 for _,v in pairs(game.Players:GetChildren()) do
-	task.defer(function()
-		plrUtilities.SetupPlayer(v)
-	end)
+	task.spawn(plrUtilities.SetupPlayer,v)
 end
 
 ----------------------------------------------------------------
