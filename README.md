@@ -19,6 +19,7 @@ Version 2.0.0 Progress:
 - Removed deprecated functions and replaced them with currently supported ones
 - Fixed a logic error for the player command counter + introduced API support to retrieve top X amount of commands used by a player
 - Fixed a logic error that would not remove the topbar access button for the panel whenever a staff member get's de-ranked
+- Added in cross-server command use
 - Fixed logic errors involving saving player settings
 - Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
 - and more stuff that Im too lazy to include on here

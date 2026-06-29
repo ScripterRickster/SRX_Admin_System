@@ -22,7 +22,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 module.ExecutableCommand = true; -- whether you can actually even use this command or not || this parameter is not required
 module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
-module.CrossServerUse = true; -- allows banning by user identity even when the target is not in this server
+module.CrossServerUse = false; --  -- target of this command can be in a different server
 
 module.CommandDescription = "Bans the target"; -- description of the command
 

@@ -351,7 +351,7 @@ module.GetCommandInformation = function(cmd)
 	if targCMD then
 		local rCMD = require(targCMD)
 		
-		return rCMD.CommandDescription,rCMD.Parameters
+		return rCMD.CommandDescription,rCMD.Parameters,rCMD.CrossServerUse
 	else 
 		return nil
 	end
