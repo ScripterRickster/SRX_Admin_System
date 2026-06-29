@@ -22,6 +22,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 module.ExecutableCommand = false; -- whether you can actually even use this command or not || this parameter is not required
 module.ExecutionLevel = 0; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
+module.CrossServerUse = false; -- whether this command can resolve and execute against users across servers
 
 module.CommandDescription = ""; -- description of the command
 

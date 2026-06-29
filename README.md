@@ -14,10 +14,12 @@ Version 2.0.0 Progress:
 - Added in a check to support games owned by groups - admin system did not previously support automatic owner rank for games under groups
 - Added in a Server Statistics Section, Quick Actions Section, and Update Log Section (optional) to the Home Page of the Admin Panel
 - Added in FPS/Ping indicator on the panel
-- Moved Help Requests and AI Chat to the right side of the admin panel
+- Moved Help Requests and AI Chat to the right side of the admin panel on V2's UI
+- Added in ServerID and "Teleport to Server" buttons when looking up a user V2's UI
 - Removed deprecated functions and replaced them with currently supported ones
 - Fixed a logic error for the player command counter + introduced API support to retrieve top X amount of commands used by a player
 - Fixed a logic error that would not remove the topbar access button for the panel whenever a staff member get's de-ranked
+- Fixed logic errors involving saving player settings
 - Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
 - and more stuff that Im too lazy to include on here
 --------------------------------------------------------

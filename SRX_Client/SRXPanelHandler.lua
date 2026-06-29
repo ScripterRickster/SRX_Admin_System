@@ -538,6 +538,7 @@ end
 
 function loadUserInformation(inquiredUser:string)
 	userLookupMainFrame.Visible = false
+
 	if inquiredUser == "" or inquiredUser == nil then
 		userLookupGeneralMessage.Text = "COULD NOT FIND USER"
 		userLookupGeneralMessage.Visible = true
@@ -552,6 +553,7 @@ function loadUserInformation(inquiredUser:string)
 			if info["UserID"] ~= nil then
 				userLookupGeneralMessage.Visible = false
 				local accAge = info["AccountAge"]
+				local diffServer = info["IsInDifferentServer"]
 				if accAge == nil or accAge == "" then accAge = "COULD NOT RETRIEVE" end
 				
 				userLookupMainFrame:WaitForChild("PFP").Image = game.Players:GetUserThumbnailAsync(tonumber(info["UserID"]),Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
@@ -561,7 +563,6 @@ function loadUserInformation(inquiredUser:string)
 				userLookupMainFrame:WaitForChild("BanStatus").Text = "IS BANNED: "..tostring(info["IsBanned"])
 				userLookupMainFrame:WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
 				userLookupMainFrame:WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
-				
 				userLookupMainFrame.Visible = true
 			else
 				userLookupGeneralMessage.Text = "COULD NOT FIND USER"

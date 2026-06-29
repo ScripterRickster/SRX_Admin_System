@@ -21,6 +21,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 
 module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
+module.CrossServerUse = true; -- allows unbanning by user identity even when the target is not in this server
 
 module.CommandDescription = "Unbans the target if they're banned"; -- description of the command
 
@@ -96,7 +97,7 @@ module.Execute = function(parameters:table)
 							Duration = durationText;
 
 						}
-						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
+							playerUtil.RecordPlayerInfraction(userID,infracData)
 					end)
 					execSuccess = true
 				end

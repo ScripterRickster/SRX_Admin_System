@@ -22,6 +22,7 @@ local playerUtil = require(UTILITIES.PlayerUtilities)
 module.ExecutableCommand = true; -- whether you can actually even use this command or not || this parameter is not required
 module.ExecutionLevel = 2; -- rank id required to execute the command
 module.LockToRank = false; -- whether or not if it is only available to the rank put in "ExecutionLevel" | false -> any rank above the posted requirement can execute the rank | true -> only the required rank can execute the command
+module.CrossServerUse = true; -- allows banning by user identity even when the target is not in this server
 
 module.CommandDescription = "Bans the target"; -- description of the command
 
@@ -77,22 +78,23 @@ module.Execute = function(parameters:table)
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
+			local targetUserId = target and target.UserId or userID
 
-			if target then
+			if targetUserId then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
-				if tRankId < e_rID then
+				if target == nil or tRankId < e_rID then
 					local banReason,banDuration,banPrivateReason = serverUtil.FilterMessage(executor,parameters["REASON"]),parameters["DURATION"],serverUtil.FilterMessage(executor,parameters["EXTRA NOTES"])
 					if banReason == nil then banReason = "No Reason" end
 					banDuration = tonumber(tostring(banDuration))
 					if banDuration == nil then banDuration = -1 else banDuration *= 86400 end
 
 
-					local succ,err = playerUtil.BanPlayer(target.UserId,banReason,banPrivateReason,banDuration,excludeAlts)
+					local succ,err = playerUtil.BanPlayer(targetUserId,banReason,banPrivateReason,banDuration,excludeAlts)
 					
 
 					if not succ and err then
-						warn("Failed to ban: "..target.Name.." ("..tostring(target.UserId)..") | Error: "..tostring(err))
+						warn("Failed to ban: "..tostring(target and target.Name or targetUserId).." ("..tostring(targetUserId)..") | Error: "..tostring(err))
 						execSuccess = "ERROR: "..tostring(err)
 					elseif succ then
 						task.defer(function()
@@ -109,7 +111,7 @@ module.Execute = function(parameters:table)
 								Duration = durationText;
 
 							}
-							playerUtil.RecordPlayerInfraction(target.UserId,infracData)
+							playerUtil.RecordPlayerInfraction(targetUserId,infracData)
 						end)
 						
 						execSuccess = true

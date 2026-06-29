@@ -222,6 +222,8 @@ function setupPanel()
 	end
 
 	local cmdpanelloadcounter=0
+	local commandsSetupLoaded = false
+	local commandsSetupRunning = false
 	local function loadCMDPanel(cmd,cmdParams)
 		if cmd and cmdParams then
 			cmdpanelloadcounter+=1
@@ -365,7 +367,7 @@ function setupPanel()
 							newCMD.Text = v["Command"]
 							newCMD.Parent = tempBttn.Parent
 							newCMD.Visible = true
-							
+
 							local cmdDesc,cmdParams = csc_func:InvokeServer("GETCMDINFO",v["Command"])
 
 							newCMD.Activated:Connect(function()
@@ -477,6 +479,10 @@ function setupPanel()
 			end,
 
 			Setup = function(reload:boolean)
+				if commandsSetupRunning then return end
+				if commandsSetupLoaded and not reload then return end
+				commandsSetupRunning = true
+				commandsSetupLoaded = true
 				local canUseCommandConsole = csc_func:InvokeServer("CANUSECOMMANDCONSOLE")
 
 				local cmdList = mainselection:WaitForChild("Commands"):WaitForChild("MainCMDS"):WaitForChild("CMDFrame"):WaitForChild("CMDList")
@@ -517,15 +523,21 @@ function setupPanel()
 
 				for _,v in pairs(newCMDS) do
 					-- regular command
+					if cmdList:FindFirstChild(tostring(v)) then
+						continue
+					end
+
 					local newCMDTemplate = cmdTemplate:Clone()
 					newCMDTemplate:WaitForChild("Title").Text = "<u>"..string.upper(tostring(v)).."</u>"
 
-					local cmdDesc,cmdParams = csc_func:InvokeServer("GETCMDINFO",v)
+					local cmdDesc,cmdParams,cmdCrossServerUse = csc_func:InvokeServer("GETCMDINFO",v)
 
 					if cmdDesc == nil then cmdDesc = "N/A" end
 
 					cmdDesc = tostring(cmdDesc)
 					newCMDTemplate:WaitForChild("Description").Text = cmdDesc
+					newCMDTemplate:WaitForChild("CrossServerUse").Text =  cmdCrossServerUse and "SUPPORTS CROSS SERVER USE" or "CANNOT USE ACROSS SERVERS"
+					newCMDTemplate:WaitForChild("CrossServerUse").TextColor3 =  cmdCrossServerUse and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
 					newCMDTemplate.Name = tostring(v)
 					newCMDTemplate.Parent = cmdList
 					newCMDTemplate.Visible = true
@@ -536,6 +548,10 @@ function setupPanel()
 
 					-- command console command
 					if canUseCommandConsole then
+						if ccCMDDropdownList:FindFirstChild(string.upper(tostring(v))) then
+							continue
+						end
+
 						local new_ccCMDTemplate = ccCMDTemplate:Clone()
 						new_ccCMDTemplate.Name = string.upper(tostring(v))
 						new_ccCMDTemplate.Text = string.upper(tostring(v))
@@ -635,6 +651,8 @@ function setupPanel()
 
 
 				end
+
+				commandsSetupRunning = false
 
 
 
@@ -885,15 +903,27 @@ function setupPanel()
 							if info["UserID"] ~= nil then
 								userLookupGeneralMessage.Visible = false
 								local accAge = info["AccountAge"]
+								local diffServer = info["IsInDifferentServer"]
 								if accAge == nil or accAge == "" then accAge = "COULD NOT RETRIEVE" end
 								task.spawn(loadUserInfractions,info["UserID"])
 								userLookupMainFrame:WaitForChild("PFP").Image = game.Players:GetUserThumbnailAsync(tonumber(info["UserID"]),Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
-								userLookupMainFrame:WaitForChild("UID").Text = "USER ID: "..tostring(info["UserID"])
-								userLookupMainFrame:WaitForChild("UserName").Text = "USERNAME: "..tostring(info["Username"])
-								userLookupMainFrame:WaitForChild("DisplayName").Text = "DISPLAY NAME: "..tostring(info["DisplayName"])
-								userLookupMainFrame:WaitForChild("BanStatus").Text = "IS BANNED: "..tostring(info["IsBanned"])
-								userLookupMainFrame:WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
-								userLookupMainFrame:WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("UID").Text = "USER ID: "..tostring(info["UserID"])
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("UserName").Text = "USERNAME: "..tostring(info["Username"])
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("DisplayName").Text = "DISPLAY NAME: "..tostring(info["DisplayName"])
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("BanStatus").Text = "IS BANNED: "..tostring(info["IsBanned"])
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
+								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("ServerID").Text = "SERVER ID: "..tostring(info["ServerID"])
+								
+								if diffServer and info["ServerID"] then
+									local tpButton = userLookupMainFrame:WaitForChild("ActionsList"):WaitForChild("Teleport")
+									tpButton.Visible = true
+									
+									tpButton.Activated:Connect(function()
+										csc_event:FireServer("SWITCH_SERVERS",info["UserID"],info["ServerID"])
+									end)
+									
+								end
 
 								userLookupMainFrame.Visible = true
 							else
@@ -1029,6 +1059,12 @@ function setupPanel()
 
 
 	local function setupButtons()
+		for _,v in pairs(buttons:GetChildren()) do
+			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+				v:Destroy()
+			end
+		end
+
 		for _,v in mainselection:GetChildren() do
 			if v:IsA("Frame") and not v:GetAttribute("Ignore") then
 
@@ -1039,6 +1075,8 @@ function setupPanel()
 							task.spawn(CustomFrameFunctions[string.lower(v.Name)]["Setup"])
 						end
 					end)
+
+					if buttons:FindFirstChild(v.Name) then return end
 
 					local b = buttonTemplate:Clone()
 					b.Name = v.Name
