@@ -1185,6 +1185,7 @@ module.GetPlayerInformation = function(user)
 		AccountAge = nil;
 		PlayTime = nil;
 		IsOnline = false;
+		IsInDifferentServer = false;
 		ServerID = nil;
 	}
 	
@@ -1217,6 +1218,7 @@ module.GetPlayerInformation = function(user)
 			if serverInfo ~= nil and serverInfo["ServerID"] ~= nil then
 				data.IsOnline = true
 				data.ServerID = serverInfo["ServerID"]
+				data.IsInDifferentServer = tostring(serverInfo["ServerID"]) ~= tostring(currentServerID)
 			end
 		end
 	end

@@ -86,6 +86,7 @@ local SSC_Event = events:WaitForChild("SSC_Event") -- server-server bindable eve
 
 local MS = game:GetService("MessagingService")
 local HTTP = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
 
 ----------------------------------------------------------------
 task.defer(serverUtilities.RegisterTextChatCommands)
@@ -353,6 +354,18 @@ CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,
 		elseif param1 == "closehelpticket" then
 			local ticketUI = plr.PlayerGui:FindFirstChild("SRX_HelpTicket")
 			if ticketUI then ticketUI.Enabled = false end
+		elseif param1 == "switch_servers" and param2 and param3 then
+			local targetUserId = tonumber(tostring(param2))
+			local targetServerId = tostring(param3)
+
+			if targetUserId ~= nil and targetServerId ~= "" then
+				local info = plrUtilities.GetPlayerInformation(targetUserId)
+				if info and info["ServerID"] == targetServerId and info["IsOnline"] then
+					pcall(function()
+						TeleportService:TeleportToPlaceInstance(game.PlaceId,targetServerId,plr)
+					end)
+				end
+			end
 		end
 
 	end
