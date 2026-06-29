@@ -66,7 +66,7 @@ module.Execute = function(parameters:table)
 				local exec_char = executor.Character or executor.CharacterAdded:Wait()
 
 				local char_hrp = char:WaitForChild("HumanoidRootPart")
-				local exec_hrp = char:WaitForChild("HumanoidRootPart")
+				local exec_hrp = exec_char:WaitForChild("HumanoidRootPart")
 
 				exec_hrp.CFrame = char_hrp.CFrame
 

@@ -330,10 +330,10 @@ module.SetupPlayer = function(plr:Player)
 			
 			if not userRanked then
 				for gid,g in pairs(SETTINGS.RankBinds.Groups) do
-					for rid,rgid in pairs(g) do
-						local pRanks = GS:GetRolesInGroupAsync(plr.UserId,gid)
-						if pRanks then
-							for _,v in pRanks.Roles do
+					local pRanks = GS:GetRolesInGroupAsync(plr.UserId,gid)
+					if pRanks and pRanks.Roles then
+						for rid,rgid in pairs(g) do
+							for _,v in pairs(pRanks.Roles) do
 								if v.Id == tonumber(rgid) then
 									DRN,DRID,DRC,DCUP,sRank = serverUtil.FindRank(tonumber(rid))
 									if DRN and DRID then
@@ -342,7 +342,13 @@ module.SetupPlayer = function(plr:Player)
 									end
 								end
 							end
+							if userRanked then
+								break
+							end
 						end
+					end
+					if userRanked then
+						break
 					end
 				end
 			end
@@ -832,7 +838,11 @@ module.RemovePlayerInfraction = function(userid:number,infracID,staffMem:Player)
 		local mfr = SETTINGS.ManageInfractionRank or SETTINGS.AdministrativeSettings.ManageInfractionRank
 		if tonumber(tostring(staffRankID)) >= mfr then
 			local currInfractions = serverUtil.GetDataFromDDS(tostring(userid),InfractionDDS)
-			currInfractions = HTTPS:JSONDecode(currInfractions)
+			local decodeSuccess,decodedInfractions = pcall(function()
+				return HTTPS:JSONDecode(currInfractions)
+			end)
+			if not decodeSuccess or type(decodedInfractions) ~= "table" then return end
+			currInfractions = decodedInfractions
 			if currInfractions[infracID] then
 				local canDelete = currInfractions[infracID]["CanDelete"]
 
@@ -1063,7 +1073,8 @@ module.IsPlayerBanned = function(userid:number)
 
 		if duration == -1 then return true end
 		local start_utc = toUTC(startTime)
-		local curr_utc = os.date("!*t")
+		local curr_utc = os.time(os.date("!*t"))
+		if start_utc == nil then return false end
 
 		if math.abs(curr_utc - start_utc) >= duration then
 			return false
