@@ -1260,7 +1260,7 @@ function setupPanel()
 	panelcsc_event.OnClientEvent:Connect(function(act,p1,p2,p3,p4,p5)
 		act = string.lower(tostring(act))
 		print(act,p1,p2,p3,p4,p5)
-		if act == "updatepanel" or "updatepaneltheme" then
+		if act == "updatepanel" or act == "updatepaneltheme" then
 			if act == "updatepaneltheme" then
 				panelTheme.Image = p1
 

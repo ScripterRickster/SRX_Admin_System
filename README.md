@@ -19,7 +19,6 @@ Version 2.0.0 Progress:
 - Fixed a logic error for the player command counter + introduced API support to retrieve top X amount of commands used by a player
 - Fixed a logic error that would not remove the topbar access button for the panel whenever a staff member get's de-ranked
 - Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
-- Replaced the date/time with a reason display for the help requests in the v2 UI - WIP
 - and more stuff that Im too lazy to include on here
 --------------------------------------------------------
 

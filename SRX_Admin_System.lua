@@ -27,7 +27,7 @@ MIT LICENSE
 Copyright © 2026 SR Studios (Discord Group), Scripter_Rickster (Roblox), questionable_existence (Discord)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sublicense copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-- The "system" cannot be sold for monetary value unless permission is explicitly obtained from SR Studios
+- The "system" cannot be sold for monetary value unless permission is explicitly obtained from SR Studios, where the "system" is defined as the entirety, or any portion of the entirety of the software / system provided.
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
@@ -133,7 +133,7 @@ MS:SubscribeAsync("SRX_CHECKFORPLAYER",function(req)
 				};
 				
 			}
-			MS:PublishAsync("SRX_RECEIVEREQUEST",HTTP:JSONEncode(data))
+			MS:PublishAsync("SRX_RECEIVEREQUEST",HTTP:JSONEncode(returnData))
 		end
 	end
 end)
@@ -149,8 +149,8 @@ MS:SubscribeAsync("SRX_RECEIVEREQUEST",function(req)
 		local reqClone = table.clone(awaitingRequests[reqID])
 		awaitingRequests[reqID] = nil
 		
-		for paramName,_ in reqClone["Parameters"] do
-			reqClone[paramName] = reqParams[paramName]
+		for paramName,paramValue in pairs(reqParams or {}) do
+			reqClone["Parameters"][paramName] = paramValue
 		end
 		
 		if reqClone["Function"] ~= nil then

@@ -15,6 +15,7 @@ local ASSETS = _G.SRX_ASSETS
 
 local CSC_Event = EVENTS:WaitForChild("CSC_Event")
 local PanelCSC_Event = EVENTS:WaitForChild("PanelCSC_Event")
+local SSC_Event = EVENTS:WaitForChild("SSC_Event")
 ----------------------------------------------------------------
 
 local serverUtil = require(UTILITIES.ServerUtilities)
@@ -114,8 +115,37 @@ local playerJoinTime = {
 
 local staffCount = 0
 ----------------------------------------------------------------
-local _,_,_,serverOwner = webhookUtil.getServerInfo()
+local _,currentServerID,_,serverOwner = webhookUtil.getServerInfo()
 ----------------------------------------------------------------
+
+local function getCrossServerPlayerInfo(userid:number)
+	if tonumber(tostring(userid)) == nil then return nil end
+
+	local requestID = HTTPS:GenerateGUID(false)
+	local responseData = nil
+	local requestFinished = false
+
+	SSC_Event:Fire("createreq",{
+		["RequestID"] = requestID;
+		["ActionID"] = "SRX_CHECKFORPLAYER";
+		["Parameters"] = {
+			["RequestID"] = requestID;
+			["PlayerID"] = tonumber(userid);
+		};
+		["FunctionThread"] = function(returnData)
+			responseData = returnData
+			requestFinished = true
+		end;
+	})
+
+	local requestTimeout = math.min(tonumber(SETTINGS.RequestTimeout or SETTINGS.GeneralSettings.RequestTimeout) or 5, 5)
+	local startTime = os.clock()
+	while not requestFinished and (os.clock() - startTime) < requestTimeout do
+		task.wait()
+	end
+
+	return responseData
+end
 
 
 module.SetupPlayerTag = function(plr:Player)
@@ -425,20 +455,20 @@ module.SetupPlayer = function(plr:Player)
 		
 		local function loadPlayerSettings()
 			local plrSettings = serverUtil.GetDataFromDDS(tostring(plr.UserId),PlayerSettingsDDS)
+			local playerSettingsTable = table.clone(defaultSettingsTable)
 			
 			if plrSettings ~= nil then
 				plrSettings = HTTPS:JSONDecode(plrSettings)
 				
 				for vName,v in pairs(plrSettings) do
-					if defaultSettingsTable[vName] ~= nil then
-						defaultSettingsTable[vName] = v
-						print(vName,v)
+					if playerSettingsTable[vName] ~= nil then
+						playerSettingsTable[vName] = v
 					end
 				end
 			end
 			
 			
-			for sName,st in pairs(defaultSettingsTable) do
+			for sName,st in pairs(playerSettingsTable) do
 				plr:SetAttribute(sName,st)
 			end
 			
@@ -609,17 +639,19 @@ end
 
 module.FindPlayer = function(username:string,userid:number)
 	local isValidPlayer,userID,plrObject = false,false,nil
-	username = tostring(username)
-	if (username == nil or username == "") and (userid == nil or tonumber(userid) == nil) then return isValidPlayer,userID,plrObject end
-	
-	username = string.lower(username)
+	local userIdNumber = tonumber(userid)
+	local normalizedUsername = username ~= nil and tostring(username) or ""
+	if (normalizedUsername == "" and userIdNumber == nil) then return isValidPlayer,userID,plrObject end
+
+	normalizedUsername = string.lower(normalizedUsername)
+	local hasUsername = normalizedUsername ~= ""
 
 	for _,v in pairs(game.Players:GetChildren()) do
 		local pN = string.lower(v.Name)
 		local pUID = v.UserId
 		
 		
-		if pUID == userid or string.match(pN,username,1) then
+		if (userIdNumber ~= nil and pUID == userIdNumber) or (hasUsername and string.find(pN,normalizedUsername,1,true) ~= nil) then
 			isValidPlayer = true
 			userID = pUID
 			plrObject = v
@@ -629,19 +661,19 @@ module.FindPlayer = function(username:string,userid:number)
 		
 	end
 	
-	if tonumber(userid) ~= nil then
+	if userIdNumber ~= nil then
 		local succ,temp_name = pcall(function()
-			return game.Players:GetNameFromUserIdAsync(tonumber(userid))
+			return game.Players:GetNameFromUserIdAsync(userIdNumber)
 		end)
 		if succ then
 			isValidPlayer = true
 			plrObject = nil
-			userID = tonumber(userid)
+			userID = userIdNumber
 			return isValidPlayer,userID,plrObject
 		end
 	else
 		local succ,temp_id = pcall(function()
-			return game.Players:GetUserIdFromNameAsync(tostring(username))
+			return game.Players:GetUserIdFromNameAsync(normalizedUsername)
 		end)
 		
 		if succ then
@@ -873,6 +905,7 @@ end
 module.SetPlayerPrefix = function(plr:Player,prefix:string)
 	if plr and prefix then
 		plr:SetAttribute("SRX_PREFIX",prefix)
+		task.spawn(module.SavePlayerSettings,plr)
 	end
 end
 
@@ -961,6 +994,7 @@ end
 
 module.UpdatePlayerCommandUse = function(plr:Player,cmdName:string)
 	if plr and cmdName then
+		if not serverUtil.PlayerCanUseCommand(plr,cmdName) then return end
 		if playerCommandCount[tostring(plr.UserId)] == nil then
 			playerCommandCount[tostring(plr.UserId)] = {}
 		end
@@ -1139,6 +1173,8 @@ module.GetPlayerInformation = function(user)
 		JoinCount = nil;
 		AccountAge = nil;
 		PlayTime = nil;
+		IsOnline = false;
+		ServerID = nil;
 	}
 	
 	local succ,info = pcall(function()
@@ -1163,6 +1199,14 @@ module.GetPlayerInformation = function(user)
 		local _,_,plrObject = module.FindPlayer(nil,data.UserID)
 		if plrObject then
 			data.AccountAge = tostring(plrObject.AccountAge).." Days Old"
+			data.IsOnline = true
+			data.ServerID = currentServerID
+		else
+			local serverInfo = getCrossServerPlayerInfo(data.UserID)
+			if serverInfo ~= nil and serverInfo["ServerID"] ~= nil then
+				data.IsOnline = true
+				data.ServerID = serverInfo["ServerID"]
+			end
 		end
 	end
 	
@@ -1186,7 +1230,9 @@ module.GetMostUsedCommands = function(plr:Player,numOfCmd:number)
 
 		local sorted = {}
 		for cmdName,uses in pairs(counts) do
-			table.insert(sorted,{Command = cmdName, Uses = uses})
+			if serverUtil.PlayerCanUseCommand(plr,cmdName) then
+				table.insert(sorted,{Command = cmdName, Uses = uses})
+			end
 		end
 
 		table.sort(sorted,function(a,b)
