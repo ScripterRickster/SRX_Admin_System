@@ -231,6 +231,69 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 		if cmd and cmd_Module then
 			local c_cmd = require(cmd_Module)
 			local cmd_notif_created = false
+
+			local function commandUsesUserTarget(commandInfo)
+				if commandInfo == nil or commandInfo.Parameters == nil then return false end
+				for _,paramInfo in pairs(commandInfo.Parameters) do
+					if string.lower(tostring(paramInfo.Class)) == "user" then
+						return true
+					end
+				end
+				return false
+			end
+
+			local function resolveTargetInfo(targetValue,allowCrossServer)
+				if targetValue == nil then return nil,nil,nil end
+
+				local isValid,targetUserId,targetPlayer = SSC_Func:Invoke("getplayer",targetValue)
+				if not isValid or targetUserId == nil then
+					return nil,nil,"TARGET COULD NOT BE RESOLVED"
+				end
+
+				if targetPlayer then
+					return SSC_Func:Invoke("getplayerinfo",targetPlayer.UserId),targetPlayer,nil
+				end
+
+				if allowCrossServer then
+					return SSC_Func:Invoke("getplayerinfo",targetUserId),nil,nil
+				end
+
+				return nil,nil,"TARGET MUST BE IN THIS SERVER"
+			end
+
+			local function checkGlobalTargetRank(commandInfo,givenParameters)
+				if commandInfo == nil or givenParameters == nil then return true end
+				if commandUsesUserTarget(commandInfo) ~= true then return true end
+				local allowCrossServer = commandInfo.CrossServerUse == true
+
+				local executorRankId = tonumber(tostring(plr:GetAttribute("SRX_RANKID")))
+				if executorRankId == nil then
+					return false,"EXECUTOR RANK IS INVALID"
+				end
+
+				for paramName,paramInfo in pairs(commandInfo.Parameters) do
+					if string.lower(tostring(paramInfo.Class)) == "user" then
+						if paramInfo.ANY_RANK == true then
+							continue
+						end
+
+						local targetValue = givenParameters[paramName]
+						if targetValue ~= nil and string.lower(tostring(targetValue)) ~= "all" then
+							local targetInfo,_,resolveError = resolveTargetInfo(targetValue,allowCrossServer)
+							if resolveError then
+								return false,resolveError
+							end
+
+							local targetRankId = tonumber(tostring(targetInfo and targetInfo.RankID))
+							if targetRankId ~= nil and targetRankId > executorRankId then
+								return false,"TARGET RANK IS TOO HIGH"
+							end
+						end
+					end
+				end
+
+				return true
+			end
 			
 			local function sendNotif(cmdSuccess)
 				if cmd_notif_created then return end
@@ -256,6 +319,11 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 			
 			
 			local execSuccess = false
+			local rankCheckSuccess,rankCheckResult = checkGlobalTargetRank(c_cmd,newParameters)
+			if rankCheckSuccess ~= true then
+				sendNotif(rankCheckResult)
+				return
+			end
 			if applyToAllUsers then
 				for _,p in pairs(game.Players:GetChildren()) do
 					local paramClone = table.clone(newParameters)

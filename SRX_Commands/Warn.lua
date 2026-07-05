@@ -64,40 +64,35 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
+				local warnReason = parameters["REASON"]
 				
-				if tRankId <= e_rID then
-					local warnReason = parameters["REASON"]
-					
-					if warnReason == nil then warnReason = "N/A" end
-					
-					warnReason = serverUtil.FilterMessage(executor,warnReason)
-					
-					CSC_Event:FireClient(target,"Warn",executor.UserId,warnReason)
-					
-					task.defer(function()
-						local durationText = "Not Applicable"
-						local infracData = {
+				if warnReason == nil then warnReason = "N/A" end
+				
+				warnReason = serverUtil.FilterMessage(executor,warnReason)
+				
+				CSC_Event:FireClient(target,"Warn",executor.UserId,warnReason)
+				
+				task.defer(function()
+					local durationText = "Not Applicable"
+					local infracData = {
 
-							StaffMemberID = executor.UserId;
-							InfractionType = "Warn";
-							Reason = warnReason;
-							Deletable = true;
-							Duration = durationText;
-						}
-						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
-						
-						
-					end)
+						StaffMemberID = executor.UserId;
+						InfractionType = "Warn";
+						Reason = warnReason;
+						Deletable = true;
+						Duration = durationText;
+					}
+					playerUtil.RecordPlayerInfraction(target.UserId,infracData)
 					
-					execSuccess = true
-				end
+					
+				end)
+				
+				execSuccess = true
 				
 			end
 		end

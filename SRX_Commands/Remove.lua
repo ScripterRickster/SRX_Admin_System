@@ -66,13 +66,11 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
-			local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 			local toolName = parameters["TOOL"]
-			if target and toolName and table.find(ignoreToolNames,tostring(toolName)) == nil and tRankId <= e_rID then
+			if target and toolName and table.find(ignoreToolNames,tostring(toolName)) == nil then
 				local desiredTool,fullToolName = serverUtil.FindTool(toolName,target.Backpack)
 				if desiredTool then
 					desiredTool:Destroy()

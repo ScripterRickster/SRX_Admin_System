@@ -22,6 +22,7 @@ Version 2.0.0 Progress:
 - Added in cross-server command use
 - Fixed logic errors involving saving player settings
 - Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
+- Globalized the target rank check so you yourself no longer have to manually check for it
 - and more stuff that Im too lazy to include on here
 --------------------------------------------------------
 

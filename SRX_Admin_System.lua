@@ -126,11 +126,19 @@ MS:SubscribeAsync("SRX_CHECKFORPLAYER",function(req)
 		local plr = game.Players:GetPlayerByUserId(playerID)
 		if plr ~= nil then
 			local _,serverID = webhookUtilities.getServerInfo()
+			local rankID,rankName,rankColour,canUsePanel,isStaff = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
 			local returnData = {
 				["RequestID"] = reqID;
 				["Parameters"] = {
 					["PlayerID"] = playerID;
 					["ServerID"] = serverID;
+					["RankID"] = rankID;
+					["RankName"] = rankName;
+					["RankColour"] = rankColour;
+					["CanUsePanel"] = canUsePanel;
+					["IsStaff"] = isStaff;
+					["DisplayName"] = plr.DisplayName;
+					["Username"] = plr.Name;
 				};
 				
 			}
@@ -382,6 +390,8 @@ SSC_Func.OnInvoke = function(action,param1,param2,param3,param4,param5)
 		else
 			return d,h,m,s
 		end
+	elseif action == "getplayerinfo" and param1 then
+		return plrUtilities.GetPlayerInformation(param1)
 	elseif action == "checkifreqidexists" and param1 then
 		return awaitingRequests[param1] ~= nil
 	end

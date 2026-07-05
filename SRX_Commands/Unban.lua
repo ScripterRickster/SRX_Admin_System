@@ -36,9 +36,10 @@ module.Parameters = {
 	]]
 	
 	["TARGET"] = {
-		Description = "Target of the command"; 
+		Description = "Target user ID"; 
 		Required = true; 
 		Class = "User";
+		ANY_RANK = true;
 
 	};
 	
@@ -67,7 +68,6 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
@@ -78,7 +78,6 @@ module.Execute = function(parameters:table)
 			reason = serverUtil.FilterMessage(executor,reason)
 			
 			if isValid and userID then
-	
 				local succ,err = playerUtil.UnbanPlayer(userID)
 					
 

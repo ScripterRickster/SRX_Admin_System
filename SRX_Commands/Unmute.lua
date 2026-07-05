@@ -68,7 +68,7 @@ module.Execute = function(parameters:table)
 			if target  then
 				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
 				
-				if tRankId < e_rID and target:GetAttribute("SRX_MUTED") then
+				if tRankId <= e_rID and target:GetAttribute("SRX_MUTED") then
 			
 					target:SetAttribute("SRX_MUTED",false)
 					

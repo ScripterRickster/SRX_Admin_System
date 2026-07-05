@@ -1187,6 +1187,11 @@ module.GetPlayerInformation = function(user)
 		IsOnline = false;
 		IsInDifferentServer = false;
 		ServerID = nil;
+		RankID = nil;
+		RankName = nil;
+		RankColour = nil;
+		CanUsePanel = nil;
+		IsStaff = nil;
 	}
 	
 	local succ,info = pcall(function()
@@ -1213,12 +1218,22 @@ module.GetPlayerInformation = function(user)
 			data.AccountAge = tostring(plrObject.AccountAge).." Days Old"
 			data.IsOnline = true
 			data.ServerID = currentServerID
+			data.RankID = plrObject:GetAttribute("SRX_RANKID")
+			data.RankName = plrObject:GetAttribute("SRX_RANKNAME")
+			data.RankColour = plrObject:GetAttribute("SRX_RANKCOLOUR")
+			data.CanUsePanel = plrObject:GetAttribute("SRX_CANUSEPANEL")
+			data.IsStaff = plrObject:GetAttribute("SRX_IS_STAFF")
 		else
 			local serverInfo = getCrossServerPlayerInfo(data.UserID)
 			if serverInfo ~= nil and serverInfo["ServerID"] ~= nil then
 				data.IsOnline = true
 				data.ServerID = serverInfo["ServerID"]
 				data.IsInDifferentServer = tostring(serverInfo["ServerID"]) ~= tostring(currentServerID)
+				data.RankID = serverInfo["RankID"]
+				data.RankName = serverInfo["RankName"]
+				data.RankColour = serverInfo["RankColour"]
+				data.CanUsePanel = serverInfo["CanUsePanel"]
+				data.IsStaff = serverInfo["IsStaff"]
 			end
 		end
 	end
