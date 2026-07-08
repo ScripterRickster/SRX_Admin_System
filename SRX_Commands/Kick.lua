@@ -63,37 +63,31 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
+				local kickReason = parameters["REASON"]
 				
-				if tRankId <= e_rID then
-					local kickReason = parameters["REASON"]
-					
-					if kickReason == nil then kickReason = "N/A" end
-					
-					kickReason = serverUtil.FilterMessage(executor,kickReason)
-					
-					task.defer(function()
-						local durationText = "Not Applicable"
-						local infracData = {
+				if kickReason == nil then kickReason = "N/A" end
+				
+				kickReason = serverUtil.FilterMessage(executor,kickReason)
+				
+				task.defer(function()
+					local durationText = "Not Applicable"
+					local infracData = {
 
 							StaffMemberID = executor.UserId;
 							InfractionType = "Kick";
 							Reason = kickReason;
 							Duration = durationText;
 
-						}
-						playerUtil.RecordPlayerInfraction(target.UserId,infracData)
-						target:Kick(kickReason)
-					end)
-					
-					execSuccess = true
-				end
+					}
+					playerUtil.RecordPlayerInfraction(target.UserId,infracData)
+					target:Kick(kickReason)
+				end)
+				
+				execSuccess = true
 				
 			end
 		end

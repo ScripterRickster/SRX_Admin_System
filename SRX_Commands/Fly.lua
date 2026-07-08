@@ -65,8 +65,6 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
@@ -78,28 +76,24 @@ module.Execute = function(parameters:table)
 					flyingSpeed = defaultFlyingSpeed
 				end
 				
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
+				
+				target:SetAttribute("SRX_FLYING",true)
 
-				if tRankId <= e_rID then
+				local char = target.Character or target.CharacterAdded:Wait()
 					
-					target:SetAttribute("SRX_FLYING",true)
+				local newFlightScript = flyingAssets:WaitForChild("Flight"):Clone()
+					
+				newFlightScript:WaitForChild("Speed").Value = tonumber(flyingSpeed) or defaultFlyingSpeed
+					
+				local newFlightGyro,newFlightPos = flyingAssets:WaitForChild("FlightGyro"):Clone(),flyingAssets:WaitForChild("FlightPos"):Clone()
+					
+				local hrp = char:WaitForChild("HumanoidRootPart")
+					
+				newFlightScript.Parent = hrp
+				newFlightGyro.Parent = hrp
+				newFlightPos.Parent = hrp
 
-					local char = target.Character or target.CharacterAdded:Wait()
-					
-					local newFlightScript = flyingAssets:WaitForChild("Flight"):Clone()
-					
-					newFlightScript:WaitForChild("Speed").Value = tonumber(flyingSpeed) or defaultFlyingSpeed
-					
-					local newFlightGyro,newFlightPos = flyingAssets:WaitForChild("FlightGyro"):Clone(),flyingAssets:WaitForChild("FlightPos"):Clone()
-					
-					local hrp = char:WaitForChild("HumanoidRootPart")
-					
-					newFlightScript.Parent = hrp
-					newFlightGyro.Parent = hrp
-					newFlightPos.Parent = hrp
-
-					execSuccess = true
-				end
+				execSuccess = true
 			end
 
 		end

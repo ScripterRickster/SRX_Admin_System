@@ -57,23 +57,16 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
 				
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
+				task.defer(function()
+					playerUtil.TrackPlayer(executor,target)
+				end)
 
-				if tRankId <= e_rID then
-					
-					task.defer(function()
-						playerUtil.TrackPlayer(executor,target)
-					end)
-
-					exexSuccess = true
-				end
+				exexSuccess = true
 			end
 
 		end

@@ -1234,6 +1234,26 @@ module.GetPlayerInformation = function(user)
 				data.RankColour = serverInfo["RankColour"]
 				data.CanUsePanel = serverInfo["CanUsePanel"]
 				data.IsStaff = serverInfo["IsStaff"]
+			elseif saveRanks then
+				local savedRankData = serverUtil.GetDataFromDDS(tostring(data.UserID),RankDDS)
+				if savedRankData ~= nil then
+					if typeof(savedRankData) == "string" then
+						local decodeSuccess,decodedRankData = pcall(function()
+							return HTTPS:JSONDecode(savedRankData)
+						end)
+						if decodeSuccess then
+							savedRankData = decodedRankData
+						end
+					end
+
+					if typeof(savedRankData) == "table" then
+						data.RankName = savedRankData[1]
+						data.RankID = savedRankData[2]
+						data.RankColour = savedRankData[3]
+						data.CanUsePanel = savedRankData[4]
+						data.IsStaff = savedRankData[5]
+					end
+				end
 			end
 		end
 	end

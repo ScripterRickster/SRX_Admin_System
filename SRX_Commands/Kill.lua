@@ -58,25 +58,17 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
+				local char = target.Character or target.CharacterAdded:Wait()
 				
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-
-				if tRankId <= e_rID then
-
-					local char = target.Character or target.CharacterAdded:Wait()
-					
-					local hum = char:WaitForChild("Humanoid")
-					hum.Health = 0
+				local hum = char:WaitForChild("Humanoid")
+				hum.Health = 0
 
 
-					execSuccess = true
-				end
+				execSuccess = true
 			end
 
 		end

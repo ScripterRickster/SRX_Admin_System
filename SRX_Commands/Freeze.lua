@@ -59,29 +59,23 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
 				
 				if not target:GetAttribute("SRX_FROZEN") then
-					local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-
-					if tRankId <= e_rID then
-						
-						target:SetAttribute("SRX_FROZEN",true)
-						local char = target.Character or target.CharacterAdded:Wait()
-						char:WaitForChild("HumanoidRootPart").Anchored = true
-						local currCharCframe = char:WaitForChild("HumanoidRootPart").CFrame
-						target:SetAttribute("SRX_FREEZECFRAME",currCharCframe)
-						
-						frozenTag:Clone().Parent = char:WaitForChild("Head")
-						
-						
-						execSuccess = true
-					end
+					target:SetAttribute("SRX_FROZEN",true)
+					local char = target.Character or target.CharacterAdded:Wait()
+					char:WaitForChild("HumanoidRootPart").Anchored = true
+					local currCharCframe = char:WaitForChild("HumanoidRootPart").CFrame
+					target:SetAttribute("SRX_FREEZECFRAME",currCharCframe)
+					
+					frozenTag:Clone().Parent = char:WaitForChild("Head")
+					
+					
+					execSuccess = true
+				end
 				end
 			end
 

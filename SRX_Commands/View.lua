@@ -38,6 +38,7 @@ module.Parameters = {
 		Description = "Target of the command";
 		Required = true;
 		Class = "User";
+		ANY_RANK = true; -- can be used on anybody -> ignores rank checks
 	}
 }
 
@@ -59,23 +60,13 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
 		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
-			if target  then
-				
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-
-				if tRankId <= e_rID then
-					
-					CSC_Event:FireClient(executor,"VIEW",target)
-					
-
-
-					execSuccess = true
-				end
+			if target then
+				CSC_Event:FireClient(executor,"VIEW",target)
+				execSuccess = true
 			end
 
 		end

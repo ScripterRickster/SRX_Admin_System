@@ -284,8 +284,16 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 								return false,resolveError
 							end
 
+							if targetInfo == nil or targetInfo.RankID == nil then
+								return false,"TARGET RANK COULD NOT BE RESOLVED"
+							end
+
 							local targetRankId = tonumber(tostring(targetInfo and targetInfo.RankID))
-							if targetRankId ~= nil and targetRankId > executorRankId then
+							if paramInfo.RequireLowerRank == true then
+								if targetRankId ~= nil and targetRankId >= executorRankId then
+									return false,"TARGET RANK IS TOO HIGH"
+								end
+							elseif targetRankId ~= nil and targetRankId > executorRankId then
 								return false,"TARGET RANK IS TOO HIGH"
 							end
 						end

@@ -54,23 +54,12 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
-				
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-
-				if tRankId <= e_rID then
-					
-					CSC_Event:FireClient(executor,"VIEW",executor)
-					
-
-
-					execSuccess = true
-				end
+				CSC_Event:FireClient(executor,"VIEW",executor)
+				execSuccess = true
 			end
 
 		end

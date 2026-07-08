@@ -63,15 +63,11 @@ module.Execute = function(parameters:table)
 	
 	if meetsRequirements then
 		local executor = parameters.EXECUTOR
-		local e_rID = executor:GetAttribute("SRX_RANKID")
-		
 		if serverUtil.PlayerCanUseCommand(executor,script) then
 			local isValid,userID,target = playerUtil.FindPlayer(parameters["TARGET"])
 
 			if target  then
-				local tRankId,tRankName = playerUtil.GetPlayerRankInfo(target)
-				
-				if tRankId <= e_rID and not target:GetAttribute("SRX_MUTED") then
+				if not target:GetAttribute("SRX_MUTED") then
 					target:SetAttribute("SRX_MUTED",true)
 					local muteReason = parameters["REASON"]
 					
