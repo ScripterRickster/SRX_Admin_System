@@ -39,7 +39,7 @@ module.Parameters = {
 		Description = "Target user ID"; 
 		Required = true; 
 		Class = "User";
-		ANY_RANK = true;
+		ANY_RANK = true; -- can be used on anybody -> ignores rank checks
 
 	};
 	

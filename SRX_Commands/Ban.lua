@@ -40,7 +40,7 @@ module.Parameters = {
 		Description = "Target of the command";
 		Required = true; 
 		Class = "User";
-		RequireLowerRank = true;
+		RequireLowerRank = true; -- target user's rank must explicitly be lower than the executor's rank
 
 	};
 	["REASON"] = {
