@@ -493,6 +493,8 @@ function setupPanel()
 				local cmdSearch = mainselection:WaitForChild("Commands"):WaitForChild("MainCMDS"):WaitForChild("CMDSearch"):WaitForChild("SearchBox")
 				local ccCommandInput = mainselection:WaitForChild("Commands"):WaitForChild("CommandConsole"):WaitForChild("InputAreas"):WaitForChild("CommandName")
 				local ccParameterHint = mainselection:WaitForChild("Commands"):WaitForChild("CommandConsole"):WaitForChild("ParameterHint")
+				local ccParamsInput = mainselection:WaitForChild("Commands"):WaitForChild("CommandConsole"):WaitForChild("InputAreas"):WaitForChild("Parameters")
+				local ccCommandActivate = mainselection:WaitForChild("Commands"):WaitForChild("CommandConsole"):WaitForChild("Activate")
 				local ccCMDNameDropdown = mainselection:WaitForChild('Commands'):WaitForChild('CommandConsole'):WaitForChild("CMDNameDropdown")
 
 				local cmdTemplate = cmdList:WaitForChild("Template")
@@ -647,6 +649,31 @@ function setupPanel()
 						ccInputChanged = true
 						filterConsoleCMDList(ccCommandInput.Text)
 						ccInputChanged = false
+					end)
+					
+					ccCommandActivate.Activated:Connect(function()
+						if onCMDCooldown then return end
+						onCMDCooldown = true
+
+						local dParams = {}
+						dParams["D_CMD"] = ccCommandInput.Text
+						local paramString = string.split(ccParameterHint.Text," ")
+						table.remove(paramString,1)
+						table.remove(paramString,1)
+						local paramInputString = string.split(ccParamsInput.Text," ")
+						local pInputIndex = 1
+						for _,v in pairs(paramString) do
+							local cc_pName = string.sub(v,2,string.len(v)-1)
+
+
+							local cc_pInput = paramInputString[pInputIndex]
+							dParams[tostring(cc_pName)] = tostring(cc_pInput)
+
+							pInputIndex += 1
+
+						end
+						csc_event:FireServer("CMDACTIVATION",dParams)
+						task.defer(commandCooldown)
 					end)
 
 
@@ -914,15 +941,15 @@ function setupPanel()
 								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
 								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
 								userLookupMainFrame:WaitForChild("InfoFrame"):WaitForChild("ServerID").Text = "SERVER ID: "..tostring(info["ServerID"])
-								
+
 								if diffServer and info["ServerID"] then
 									local tpButton = userLookupMainFrame:WaitForChild("ActionsList"):WaitForChild("Teleport")
 									tpButton.Visible = true
-									
+
 									tpButton.Activated:Connect(function()
 										csc_event:FireServer("SWITCH_SERVERS",info["UserID"],info["ServerID"])
 									end)
-									
+
 								end
 
 								userLookupMainFrame.Visible = true
@@ -1060,7 +1087,7 @@ function setupPanel()
 
 	local function setupButtons()
 		for _,v in pairs(buttons:GetChildren()) do
-			if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
+			if v:IsA("Frame") and string.lower(v.Name) ~= "template" and string.lower(v.Name) ~= "close" then
 				v:Destroy()
 			end
 		end
@@ -1297,7 +1324,7 @@ function setupPanel()
 
 	panelcsc_event.OnClientEvent:Connect(function(act,p1,p2,p3,p4,p5)
 		act = string.lower(tostring(act))
-		print(act,p1,p2,p3,p4,p5)
+		--print(act,p1,p2,p3,p4,p5)
 		if act == "updatepanel" or act == "updatepaneltheme" then
 			if act == "updatepaneltheme" then
 				panelTheme.Image = p1
