@@ -32,7 +32,10 @@ module.Parameters = {
 	[PARAMETER_NAME] = { -- name of the parameter
 		Description = ""; -- description of the parameter
 		Required = true; -- whether or not if the user is required to input this parameter in order to execute the command
-		Class = "classType" -- to make it easier to identify parameters || NOT REQUIRED TO INCLUDE THIS IN EACH PARAMETER
+		Class = "classType" -- to make it easier to identify parameters || NOT REQUIRED TO INCLUDE THIS IN EACH PARAMETER || THIS IS REQUIRED IF YOU HAVE A "PLAYER" PARAMETER, WHERE Class = "User"
+		LayoutOrder = 0; -- for where this parameter appears on the list of parameters that get shown || NOT REQUIRED TO INCLUDE THIS
+		AnyRank = true; -- can be used on anybody -> ignores rank checks || OPTIONAL PARAMETER
+		RequiresLowerRank = true; -- target user's rank must explicitly be lower than the executor's rank || OPTIONAL PARAMETER
 	}
 	
 	]]

@@ -38,7 +38,7 @@ module.Parameters = {
 		Description = "Target of the command";
 		Required = true;
 		Class = "User";
-		ANY_RANK = true; -- can be used on anybody -> ignores rank checks
+		AnyRank = true; -- can be used on anybody -> ignores rank checks
 	}
 }
 

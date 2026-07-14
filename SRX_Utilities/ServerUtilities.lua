@@ -273,7 +273,7 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 				for paramName,paramInfo in pairs(commandInfo.Parameters) do
 					if string.lower(tostring(paramInfo.Class)) == "user" then
-						if paramInfo.ANY_RANK == true then
+						if paramInfo.AnyRank == true then
 							continue
 						end
 
