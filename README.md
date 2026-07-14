@@ -10,32 +10,12 @@ Affiliated With: [SR Studios](https://discord.gg/neTcS23xh7)
 
 ### [Testing Place](https://www.roblox.com/games/92025455885161/SRX-Admin-System)
 --------------------------------------------------------
-Version 2.0.0 Progress:
-- Added in a check to support games owned by groups - admin system did not previously support automatic owner rank for games under groups
-- Added in a Server Statistics Section, Quick Actions Section, and Update Log Section (optional) to the Home Page of the Admin Panel
-- Added in FPS/Ping indicator on the panel
-- Moved Help Requests and AI Chat to the right side of the admin panel on V2's UI
-- Added in ServerID and "Teleport to Server" buttons when looking up a user V2's UI
-- Removed deprecated functions and replaced them with currently supported ones
-- Fixed a logic error for the player command counter + introduced API support to retrieve top X amount of commands used by a player
-- Fixed a logic error that would not remove the topbar access button for the panel whenever a staff member get's de-ranked
-- Added in cross-server command use
-- Fixed logic errors involving saving player settings
-- Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
-- Globalized the target rank check so you yourself no longer have to manually check for it
-- Added in an "AnyRank" field to the target parameter, which skips rank checks for the target if it exists and is set to true
-- Ban command now works on users regardless of whether they're in the server or not 
-- The "TARGET" parameter now features 2 new fields: "AnyRank = (boolean)" & "RequireLowerRank = (boolean)" -> these are both optional and do not have to be included in the TARGET parameter for the commands that require a target, but in the event that you wish to include it, you can
-- All parameters now have a "LayoutOrder" parameter option
-- V1 UI backend code was updated to ensure that it doesn't bug out with the updated features added in V2 - the ui for V1 will no longer receive updates past V2.0.0
-- and more stuff that Im too lazy to include on here
---------------------------------------------------------
 
 Modular, configurable, and clean admin system for ROBLOX
 
 Created to replace the old SR Admin System
 
-Features (Version 1.0.7):
+Features (Version 2.0.0):
 - Clean, organized, and unobfuscated code
 - The standard pre-made commands
 - Modular system that can easily be utilized by other systems if required
@@ -49,6 +29,8 @@ Features (Version 1.0.7):
 - Optional feature to include webhook-logging via Discord
 - Optional feature to include a console-like page to directly type commands into instead of using the default ROBLOX chat
 - Option to switch between having a button at the top or using a tool to open up the admin panel
+- Option to allow commands to be used across servers
+- Includes the option to use either V1 or V2 of the UI
 - and more stuff that I forgot about
 --------------------------------------------------------
 
