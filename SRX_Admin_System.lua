@@ -87,6 +87,7 @@ local SSC_Event = events:WaitForChild("SSC_Event") -- server-server bindable eve
 local MS = game:GetService("MessagingService")
 local HTTP = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 
 ----------------------------------------------------------------
 task.defer(serverUtilities.RegisterTextChatCommands)
@@ -103,25 +104,25 @@ local awaitingRequests = {
 	 
 	}
 	]]
-	
+
 }
 ----------------------------------------------------------------
 MS:SubscribeAsync("SRX_GLOBALANNOUNCEMENTS",function(info)
 	local data = HTTP:JSONDecode(info.Data)
-	
+
 	local staffID = data["STAFF_ID"]
 	local msg = data["MESSAGE"]
-	
+
 	CSC_Event:FireAllClients("announcement",staffID,msg)
-	
+
 end)
 
 MS:SubscribeAsync("SRX_CHECKFORPLAYER",function(req)
 	local data = HTTP:JSONDecode(req.Data)
-	
+
 	local reqID = data.RequestID
 	local playerID = data.PlayerID
-	
+
 	if tonumber(tostring(playerID)) ~= nil then
 		local plr = game.Players:GetPlayerByUserId(playerID)
 		if plr ~= nil then
@@ -140,7 +141,7 @@ MS:SubscribeAsync("SRX_CHECKFORPLAYER",function(req)
 					["DisplayName"] = plr.DisplayName;
 					["Username"] = plr.Name;
 				};
-				
+
 			}
 			MS:PublishAsync("SRX_RECEIVEREQUEST",HTTP:JSONEncode(returnData))
 		end
@@ -150,18 +151,18 @@ end)
 
 MS:SubscribeAsync("SRX_RECEIVEREQUEST",function(req)
 	local data = HTTP:JSONDecode(req.Data)
-	
+
 	local reqID = data.RequestID
 	local reqParams = data.Parameters
-	
+
 	if awaitingRequests[reqID] then
 		local reqClone = table.clone(awaitingRequests[reqID])
 		awaitingRequests[reqID] = nil
-		
+
 		for paramName,paramValue in pairs(reqParams or {}) do
 			reqClone["Parameters"][paramName] = paramValue
 		end
-		
+
 		if reqClone["Function"] ~= nil then
 			reqClone["Function"](reqClone["Parameters"])
 		end
@@ -172,7 +173,7 @@ end)
 CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5) -- param1 = action
 	if plr then
 		param1 = string.lower(tostring(param1))
-		
+
 		if param1 == "chattagstatus" then
 			return adminSettings.ChatTags or adminSettings.DecorativeSettings.ChatTags
 		elseif param1 == "chatslashcmdstatus" then
@@ -186,40 +187,40 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			return sID
 		elseif param1 == "canuseai" then
 			local minAIRankID = adminSettings["AI_Services"].MinRank
-			
+
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
-			
+
 			if tonumber(tostring(rID)) == nil or tonumber(tostring(minAIRankID)) == nil then return false end
-			
+
 			if adminSettings["AI_Services"]["Enabled"] ~= true then return false end
 			return tonumber(tostring(rID)) >= tonumber(tostring(minAIRankID))
 		elseif param1 == "getplayercmds" then
 			return serverUtilities.GetAllPlayerUsableCommands(plr)
 		elseif param1 == "getcmdinfo" and param2 then
 			return serverUtilities.GetCommandInformation(param2)
-			
+
 		elseif param1 == "getplayerinfractions" and param2 then
 			param2 = tostring(param2)
 			local uid = tonumber(param2)
 			if tonumber(param2) == nil then
 				uid = game.Players:GetUserIdFromNameAsync(param2)
 			end
-			
+
 			local results = plrUtilities.GetPlayerInfractions(uid)
-			
+
 			return results
-			
+
 		elseif param1 == "getcmdlogs" then
 			local cmdLogs = serverUtilities.GetCommandLogs(plr)
 			return cmdLogs
-			
+
 		elseif param1 == "getmsglogs" then
 			local msgLogs = plrUtilities.GetChatLogs(plr)
 			return msgLogs
-			
+
 		elseif param1 == "getcmdcooldown" then
 			return adminSettings.CommandCooldown or adminSettings.CommandSettings.CommandCooldown
-			
+
 		elseif param1 == "getairesponse" and param2 then
 			local result = serverUtilities.GetAIResponse(plr,param2)
 			return result
@@ -276,7 +277,7 @@ CSC_Func.OnServerInvoke = function(plr:Player,param1,param2,param3,param4,param5
 			if not adminSettings.PanelSettings.UpdateLog.Enabled then return nil end
 			return adminSettings.PanelSettings.UpdateLog.Text
 		elseif param1 == "getmostusedcmds" and tonumber(tostring(param2)) then
-			
+
 			local res = plrUtilities.GetMostUsedCommands(plr,tonumber(tostring(param2)))
 			return res
 		elseif param1 == "getserveruptime" then
@@ -292,11 +293,11 @@ end
 CSC_Event.OnServerEvent:Connect(function(plr:Player,param1,param2,param3,param4,param5)
 	if plr then
 		param1 = string.lower(tostring(param1))
-		
+
 		if param1 == "getadminpanel" then
-			
+
 			local rID,rName,rClr = plrUtilities.GetPlayerRankInfo(plr.Name,plr.UserId)
-			
+
 			if rID and rName then
 				local tbl = adminSettings["Ranks"][rName]
 				if tbl then
@@ -411,8 +412,8 @@ SSC_Event.Event:Connect(function(action,param1,param2,param3,param4,param5)
 		local fn = param1["FunctionThread"]
 		if reqID and awaitingRequests[reqID] == nil and actionID then
 			awaitingRequests[reqID] = {
-			  ["Parameters"] = params;
-			  ["Function"] = fn
+				["Parameters"] = params;
+				["Function"] = fn
 			}
 			MS:PublishAsync(actionID,HTTP:JSONEncode(params))
 			local tmout = adminSettings.RequestTimeout or adminSettings.GeneralSettings.RequestTimeout
@@ -446,5 +447,20 @@ end)
 for _,v in pairs(game.Players:GetChildren()) do
 	task.spawn(plrUtilities.SetupPlayer,v)
 end
+
+game:BindToClose(function()
+	local savePromises = {}
+
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		table.insert(savePromises, task.spawn(function()
+			plrUtilities.PlayerLeft(plr)
+		end))
+	end
+
+
+	if not RunService:IsStudio() then
+		task.wait(5)
+	end
+end)
 
 ----------------------------------------------------------------
