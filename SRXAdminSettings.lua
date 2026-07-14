@@ -199,7 +199,7 @@ module.PanelSettings = {
 	
 	UpdateLog = { -- update log description area
 		Enabled = true; -- whether to show the update log inside of the admin panel
-		Text = "SRX Admin V2 Release Soon???????"; -- description for the update log - supports richtext
+		Text = "SRX Admin V2 Release 🔥"; -- description for the update log - supports richtext
 	};
 	
 	CommandConsoleSettings = { -- settings for the built-in command console

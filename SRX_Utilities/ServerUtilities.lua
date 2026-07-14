@@ -262,7 +262,11 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 			end
 
 			local function checkGlobalTargetRank(commandInfo,givenParameters)
-				if commandInfo == nil or givenParameters == nil then return true end
+				if commandInfo == nil then return true end
+				-- validate that givenParameters is a table (defensive: client may send an Instance accidentally)
+				if givenParameters == nil or type(givenParameters) ~= "table" then
+					return false,"INVALID PARAMETERS"
+				end
 				if commandUsesUserTarget(commandInfo) ~= true then return true end
 				local allowCrossServer = commandInfo.CrossServerUse == true
 
@@ -279,16 +283,22 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 						local targetValue = givenParameters[paramName]
 						if targetValue ~= nil and string.lower(tostring(targetValue)) ~= "all" then
-							local targetInfo,_,resolveError = resolveTargetInfo(targetValue,allowCrossServer)
+							local ok, targetInfo, _, resolveError = pcall(function()
+								return resolveTargetInfo(targetValue,allowCrossServer)
+							end)
+							if not ok then
+								return false,"TARGET RESOLUTION ERROR"
+							end
+
 							if resolveError then
 								return false,resolveError
 							end
 
-							if targetInfo == nil or targetInfo.RankID == nil then
+							if targetInfo == nil or type(targetInfo) ~= "table" or targetInfo.RankID == nil then
 								return false,"TARGET RANK COULD NOT BE RESOLVED"
 							end
 
-							local targetRankId = tonumber(tostring(targetInfo and targetInfo.RankID))
+							local targetRankId = tonumber(tostring(targetInfo.RankID))
 							if paramInfo.RequireLowerRank == true then
 								if targetRankId ~= nil and targetRankId >= executorRankId then
 									return false,"TARGET RANK IS TOO HIGH"

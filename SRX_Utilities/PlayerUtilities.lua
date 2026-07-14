@@ -1053,20 +1053,22 @@ module.IsPlayerBanned = function(userid:number)
 
 
 		userid = tonumber(userid)
-		local success, entries = pcall(function()
+		local success, pages = pcall(function()
 			return game.Players:GetBanHistoryAsync(userid)
 		end)
 
-		if not success or not entries then
+		if not success or not pages then
 			if SETTINGS.EnableDebugComments  or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("SRX | ERROR RETRIEVING BAN HISTORY")
 			end
 			return nil
 		end
 
-		local firstEntry = entries[1]
+		local currentPage = pages:GetCurrentPage()
 
-		if not firstEntry.Ban then return false end
+		local firstEntry = currentPage[1]
+
+		if firstEntry == nil or not firstEntry.Ban then return false end
 
 		local startTime = firstEntry.StartTime
 		local duration = firstEntry.Duration
