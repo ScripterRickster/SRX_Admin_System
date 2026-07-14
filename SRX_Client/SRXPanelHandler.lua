@@ -238,14 +238,22 @@ local validKeyCodes = {
 local cmdCooldown,onCMDCooldown = math.huge,false
 
 -------------------------------------------------------------------------------------
+-- NEW: debounce locks to prevent duplicate populate races
+local settingUpGeneralInfo = false
+local loadingUserCommands = false
+local loadingLogs = false
+-------------------------------------------------------------------------------------
 
 function setupGeneralInfo()
+	if settingUpGeneralInfo then return end
+	settingUpGeneralInfo = true
+
 	local rID,rName,rClr = csc_func:InvokeServer("GETRANKINFO")
 	local adminV = csc_func:InvokeServer("GETADMINVERSION")
 	local sID = csc_func:InvokeServer("GETSERVERID")
 	local canUseAI = csc_func:InvokeServer("CANUSEAI")
 	local canViewHelpReq = csc_func:InvokeServer("CANVIEWHELPREQ")
-	local currUserTheme = csc_func:InvokeServer("GETPLAYERTHEME")
+	local currUserTheme,currThemeTransparency = csc_func:InvokeServer("GETPLAYERTHEME")
 	local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
 	local allHelpRequests = csc_func:InvokeServer("GETALLHELPREQUESTS")
 	local canUseCommandConsole = csc_func:InvokeServer("CANUSECOMMANDCONSOLE")
@@ -292,6 +300,13 @@ function setupGeneralInfo()
 	end
 	
 	panelTheme.Image = currUserTheme
+	
+	currThemeTransparency = tonumber(tostring(currThemeTransparency))
+	if currThemeTransparency ~= nil then
+		currThemeTransparency = math.min(math.max(0,currThemeTransparency),1)
+		panelTheme.ImageTransparency = currThemeTransparency
+	end
+	
 	PrefixButton.Text = currUserPrefix
 	
 	userPFPDisplay.Image = game.Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
@@ -320,6 +335,8 @@ function setupGeneralInfo()
 	
 	task.defer(loadUserCommands)
 	task.defer(loadLogs)
+
+	settingUpGeneralInfo = false
 end
 
 function loadCMDPanel(cmd,cmdParams)
@@ -335,6 +352,8 @@ function loadCMDPanel(cmd,cmdParams)
 			
 			local placeholderTxt = v["Description"]
 			
+			local lo = v["LayoutOrder"] or idx
+			
 			if placeholderTxt == nil or placeholderTxt == "" then placeholderTxt = "Input......" end
 			newParamTemplate:WaitForChild("Input").PlaceholderText = placeholderTxt
 			
@@ -347,7 +366,7 @@ function loadCMDPanel(cmd,cmdParams)
 			newParamTemplate.Name = pName
 			
 			newParamTemplate.Parent = cmdParameterList
-			newParamTemplate.LayoutOrder = idx
+			newParamTemplate.LayoutOrder = lo
 			newParamTemplate.Visible = true
 			
 			idx += 1
@@ -361,6 +380,9 @@ function loadCMDPanel(cmd,cmdParams)
 end
 
 function loadUserCommands()
+	if loadingUserCommands then return end
+	loadingUserCommands = true
+
 	for _,v in pairs(cmdList:GetChildren()) do
 		if v:IsA("Frame") and string.lower(v.Name) ~= "template" then
 			v:Destroy()
@@ -412,6 +434,8 @@ function loadUserCommands()
 			ccCMDNameDropdown.Visible = false
 		end)
 	end
+
+	loadingUserCommands = false
 end
 
 function loadUserInfractions(targUID)
@@ -503,6 +527,9 @@ function loadUserInfractions(targUID)
 end
 
 function loadLogs()
+	if loadingLogs then return end
+	loadingLogs = true
+
 	local msgLogs = csc_func:InvokeServer("GETMSGLOGS")
 	local cmdLogs = csc_func:InvokeServer("GETCMDLOGS")
 	
@@ -534,11 +561,12 @@ function loadLogs()
 			end)
 		end
 	end
+
+	loadingLogs = false
 end
 
 function loadUserInformation(inquiredUser:string)
 	userLookupMainFrame.Visible = false
-
 	if inquiredUser == "" or inquiredUser == nil then
 		userLookupGeneralMessage.Text = "COULD NOT FIND USER"
 		userLookupGeneralMessage.Visible = true
@@ -553,7 +581,6 @@ function loadUserInformation(inquiredUser:string)
 			if info["UserID"] ~= nil then
 				userLookupGeneralMessage.Visible = false
 				local accAge = info["AccountAge"]
-				local diffServer = info["IsInDifferentServer"]
 				if accAge == nil or accAge == "" then accAge = "COULD NOT RETRIEVE" end
 				
 				userLookupMainFrame:WaitForChild("PFP").Image = game.Players:GetUserThumbnailAsync(tonumber(info["UserID"]),Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size420x420)
@@ -563,6 +590,7 @@ function loadUserInformation(inquiredUser:string)
 				userLookupMainFrame:WaitForChild("BanStatus").Text = "IS BANNED: "..tostring(info["IsBanned"])
 				userLookupMainFrame:WaitForChild("JoinCount").Text = "JOIN COUNT: "..tostring(info["JoinCount"]).." Joins"
 				userLookupMainFrame:WaitForChild("AccountAge").Text = "ACCOUNT AGE: "..tostring(accAge)
+				
 				userLookupMainFrame.Visible = true
 			else
 				userLookupGeneralMessage.Text = "COULD NOT FIND USER"
@@ -1111,6 +1139,11 @@ panelcsc_event.OnClientEvent:Connect(function(param1,param2,param3,param4,param5
 		elseif param1 == "updatepaneltheme" and param2 then
 			panelTheme.Image = param2
 			
+			param3 = tonumber(tostring(param3))
+			if param3 ~= nil then
+				param3 = math.min(math.max(param3,0),1)
+				panelTheme.ImageTransparency = param3
+			end
 		elseif param1 == "createhelpreq" and param2 then
 			if param2:IsA("Player") then 
 				task.defer(function()
@@ -1190,5 +1223,3 @@ UIS.InputChanged:Connect(function(input)
 		end
 	end
 end)
-
-

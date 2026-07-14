@@ -23,9 +23,11 @@ Version 2.0.0 Progress:
 - Fixed logic errors involving saving player settings
 - Reformatted the AdminSettings module - V2 will still support V1 features, but V1 will no longer receive any UI updates or anything extra
 - Globalized the target rank check so you yourself no longer have to manually check for it
-- Added in an "ANY_RANK" field to the target parameter, which skips rank checks for the target if it exists and is set to true
+- Added in an "AnyRank" field to the target parameter, which skips rank checks for the target if it exists and is set to true
 - Ban command now works on users regardless of whether they're in the server or not 
-- The "TARGET" parameter now features 2 new fields: "ANY_RANK = (boolean)" & "RequireLowerRank = (boolean)" -> these are both optional and do not have to be included in the TARGET parameter for the commands that require a target, but in the event that you wish to include it, you can
+- The "TARGET" parameter now features 2 new fields: "AnyRank = (boolean)" & "RequireLowerRank = (boolean)" -> these are both optional and do not have to be included in the TARGET parameter for the commands that require a target, but in the event that you wish to include it, you can
+- All parameters now have a "LayoutOrder" parameter option
+- V1 UI backend code was updated to ensure that it doesn't bug out with the updated features added in V2 - the ui for V1 will no longer receive updates past V2.0.0
 - and more stuff that Im too lazy to include on here
 --------------------------------------------------------
 

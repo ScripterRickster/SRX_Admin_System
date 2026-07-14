@@ -242,6 +242,7 @@ function setupPanel()
 				local newParamTemplate = cmdParameterTemplate:Clone()
 
 				local placeholderTxt = v["Description"]
+				local lo = v["LayoutOrder"] or idx
 
 				if placeholderTxt == nil or placeholderTxt == "" then placeholderTxt = "Input......" end
 				newParamTemplate:WaitForChild("Input").PlaceholderText = placeholderTxt
@@ -255,7 +256,7 @@ function setupPanel()
 				newParamTemplate.Name = pName
 
 				newParamTemplate.Parent = cmdParameterList
-				newParamTemplate.LayoutOrder = idx
+				newParamTemplate.LayoutOrder = lo
 				newParamTemplate.Visible = true
 
 				idx += 1
