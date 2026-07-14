@@ -976,6 +976,19 @@ function setupPanel()
 
 		["settings"] = {
 			Update = function()
+				local currUserTheme,currThemeTransparency = csc_func:InvokeServer("GETPLAYERTHEME")
+				local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
+
+				local PrefixButton = mainselection:WaitForChild("Settings"):WaitForChild("MainFrame"):WaitForChild("SettingsList"):WaitForChild("Prefix"):WaitForChild("PrefixButton")
+				PrefixButton.Text = currUserPrefix
+
+				panelTheme.Image = currUserTheme
+				currThemeTransparency = tonumber(tostring(currThemeTransparency))
+				if currThemeTransparency ~= nil then
+					currThemeTransparency = math.min(math.max(0,currThemeTransparency),1)
+					panelTheme.ImageTransparency = currThemeTransparency
+				end
+
 				local allThemes = csc_func:InvokeServer("GETALLTHEMES")
 				local ThemeList = mainselection:WaitForChild('Settings'):WaitForChild("MainFrame"):WaitForChild("SettingsList"):WaitForChild("Theme"):WaitForChild("ThemesList")
 
@@ -1016,6 +1029,16 @@ function setupPanel()
 
 				local currUserTheme,currThemeTransparency = csc_func:InvokeServer("GETPLAYERTHEME")
 				local currUserPrefix = csc_func:InvokeServer("GETPLAYERPREFIX")
+
+				-- NEW: actually apply the fetched values
+				PrefixButton.Text = currUserPrefix
+
+				panelTheme.Image = currUserTheme
+				currThemeTransparency = tonumber(tostring(currThemeTransparency))
+				if currThemeTransparency ~= nil then
+					currThemeTransparency = math.min(math.max(0,currThemeTransparency),1)
+					panelTheme.ImageTransparency = currThemeTransparency
+				end
 
 				local allThemes = csc_func:InvokeServer("GETALLTHEMES")
 

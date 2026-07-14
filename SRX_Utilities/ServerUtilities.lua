@@ -63,7 +63,7 @@ end
 module.ConvertToDHMS = function(seconds:number) -- DHMS = Days Hours Minutes Seconds
 	seconds = tonumber(tostring(seconds))
 	if seconds == nil then return end
-	
+
 	local days = math.floor(seconds/86400)
 	local hours = math.floor((seconds%86400)/3600)
 	local minutes = math.floor((seconds%3600)/60)
@@ -74,16 +74,16 @@ end
 
 module.FilterMessage = function(plr:Player,msg:string,forClient:boolean)
 	if msg == nil or msg == "" then return msg end
-	
+
 	local filteredRes = TS:FilterStringAsync(msg,plr.UserId)
-	
+
 	if not forClient then
 		return filteredRes:GetNonChatStringForBroadcastAsync()
 	else
 		return filteredRes:GetNonChatStringForUserAsync(plr.UserId)
 	end
-	
-	
+
+
 end
 
 ----------------------------------------------------------------
@@ -96,7 +96,7 @@ module.RegisterTextChatCommands = function()
 	if SETTINGS.IncludeChatSlashCommands or SETTINGS.CommandSettings.IncludeChatSlashCommands then
 		if customTCCRegistered then return end
 		customTCCRegistered = true
-		
+
 		local function createTextChatCommand(cmd:ModuleScript)
 			local cmdInfo = require(cmd)
 
@@ -139,18 +139,18 @@ end
 
 module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boolean)
 	if plr and params then
-		
+
 		local cmd,cmd_Module = nil,nil
-		
+
 		local newParameters = {}
 		newParameters["EXECUTOR"] = plr;
-		
+
 		local applyToAllUsers,userParams = false,{}
 
 		if fromPanel ~= true then
 			local totalParams = #params
 			if totalParams == 0 then return end
-			
+
 			local s_idx = 2
 
 			if module.IsAlpha(string.sub(params[1],1,1)) then
@@ -161,10 +161,10 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 			cmd_Module = module.FindCommand(cmd)
 			if cmd_Module then
-				
+
 				local c_cmd = require(cmd_Module)
 				local c_params = c_cmd.Parameters
-				
+
 				local function countParameters()
 					local counter = 0
 					for _,v in pairs(c_params) do
@@ -201,23 +201,23 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 					newParameters[lastParam] = endString
 				end
-				
+
 			end
 		else
 			cmd = params["D_CMD"]
-			
+
 			cmd_Module = module.FindCommand(cmd)
 
-			
+
 			if cmd_Module then
 
 				local c_cmd = require(cmd_Module)
 				local c_params = c_cmd.Parameters
-				
+
 				for par,k in pairs(c_params) do
 					newParameters[par] = params[par]
-					
-					
+
+
 					if string.lower(tostring(k["Class"]))  == "user" and string.lower(tostring(params[par])) == "all" then
 						applyToAllUsers = true
 
@@ -225,9 +225,9 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					end
 				end
 			end
-			
+
 		end
-		
+
 		if cmd and cmd_Module then
 			local c_cmd = require(cmd_Module)
 			local cmd_notif_created = false
@@ -302,11 +302,11 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 
 				return true
 			end
-			
+
 			local function sendNotif(cmdSuccess)
 				if cmd_notif_created then return end
 				cmd_notif_created = true
-				
+
 				if cmdSuccess == true then
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS","SUCCESS")
 					if c_cmd.SendLog then
@@ -324,8 +324,8 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					CSC_Event:FireClient(plr,"NOTIFICATION","COMMAND STATUS",errorMsg)
 				end
 			end
-			
-			
+
+
 			local execSuccess = false
 			local rankCheckSuccess,rankCheckResult = checkGlobalTargetRank(c_cmd,newParameters)
 			if rankCheckSuccess ~= true then
@@ -339,49 +339,49 @@ module.HandleCommandExecution = function(plr:Player,params:table,fromPanel:boole
 					for _,newP in pairs(userParams) do
 						paramClone[newP] = p
 					end
-					
-					
+
+
 
 					task.defer(function()
 						execSuccess = c_cmd.Execute(paramClone)
-						
+
 						if c_cmd.SendLog and execSuccess then
 							task.defer(function() -- notifies the server to log this command being run
 								module.LogCommand(cmd_Module,paramClone)
 							end)
 						end
-						
+
 						task.defer(function()
 							sendNotif(execSuccess)
 						end)
 
 					end)
-					
-					
+
+
 				end
 			else
 				task.defer(function()
 					execSuccess = c_cmd.Execute(newParameters)
-					
+
 					if c_cmd.SendLog and execSuccess then
-						
+
 						task.defer(function() -- notifies the server to log this command being run
 							module.LogCommand(cmd_Module,newParameters)
 						end)
 					end
-					
+
 					task.defer(function()
 						sendNotif(execSuccess)
 					end)
-					
+
 
 				end)
 			end
-			
-			
-			
-			
-			
+
+
+
+
+
 		end
 	end
 end
@@ -399,11 +399,11 @@ end
 
 module.FindCommand = function(cmd)
 	if cmd == nil or tostring(cmd) == "" then return nil end
-	
+
 	cmd = string.lower(tostring(cmd))
-	
+
 	if allCMDS[cmd] ~= nil then return allCMDS[cmd] end
-	
+
 	for n,c in pairs(allCMDS) do
 		local tempC = require(c)
 		if string.match(n,cmd,1) then
@@ -418,7 +418,7 @@ module.FindCommand = function(cmd)
 			end
 		end
 	end
-	
+
 	return nil
 end
 
@@ -426,7 +426,7 @@ module.GetCommandInformation = function(cmd)
 	local targCMD = module.FindCommand(cmd)
 	if targCMD then
 		local rCMD = require(targCMD)
-		
+
 		return rCMD.CommandDescription,rCMD.Parameters,rCMD.CrossServerUse
 	else 
 		return nil
@@ -455,8 +455,8 @@ module.PlayerCanUseCommand = function(plr:Player,cmd)
 	elseif cmd:IsA("ModuleScript") then
 		cmdInfo = require(cmd)
 	end
-	
-	
+
+
 	if cmdInfo.ExecutableCommand ~= false and cmdInfo.ExecutionLevel ~= nil then
 		if cmdInfo.LockToRank then
 			if rankId == cmdInfo.ExecutionLevel then
@@ -468,7 +468,7 @@ module.PlayerCanUseCommand = function(plr:Player,cmd)
 			end
 		end
 	end
-	
+
 	return false
 end
 
@@ -519,7 +519,7 @@ module.FindRank = function(rank_id,rank_name)
 	local rankName,rankId,rankColour,canUsePanel,isstaffrank = nil,nil,nil,nil,false
 	rank_id = tonumber(tostring(rank_id))
 	if rank_id then
-		
+
 		for n,r in pairs(SETTINGS.Ranks) do
 			if rank_id == r.RankId then
 				rankId = r.RankId
@@ -532,7 +532,7 @@ module.FindRank = function(rank_id,rank_name)
 		end
 	end
 	if rank_name then
-	
+
 		for n,r in pairs(SETTINGS.Ranks) do
 			if string.lower(n) == string.lower(tostring(rank_name)) then
 				rankId = r.RankId
@@ -543,7 +543,7 @@ module.FindRank = function(rank_id,rank_name)
 				break
 			end
 		end
-		
+
 	end
 
 	return rankName,rankId,rankColour,canUsePanel,isstaffrank
@@ -561,7 +561,7 @@ module.GetDataFromDDS = function(key,datastore:DataStore)
 			if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("FAILED TO RETRIEVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).." | RETRYING.....")
 			end
-			
+
 		else
 			result = res
 			break
@@ -588,7 +588,7 @@ module.SaveDataToDDS = function(key,datastore:DataStore,data)
 			if SETTINGS.EnableDebugComments  or SETTINGS.GeneralSettings.EnableDebugComments then
 				warn("FAILED TO SAVE DATA FOR THE KEY: "..tostring(key).." TO: "..tostring(datastore).."| RETRYING.....")
 			end
-			
+
 		else
 			success = true
 			if SETTINGS.EnableDebugComments or SETTINGS.GeneralSettings.EnableDebugComments then
@@ -613,14 +613,14 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 	if OpenCloudAPI_Key == nil or OpenCloudAPI_Key == "" or AI_Model == nil or AI_Model == "" or tonumber(tostring(AI_Max_Tokens)) == nil then return nil end
 	if plr:GetAttribute("SRX_RANKID") < SETTINGS["AI_Services"]["MinRank"] then return nil end
 
-	
+
 	local headers: headers = {
 		["Content-Type"] = "application/json",
 		["Authorization"] = `Bearer {OpenCloudAPI_Key}`
 	}
-	
 
-	
+
+
 	local body: body = {
 		["model"] = tostring(AI_Model),
 		["messages"] = {
@@ -632,7 +632,7 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 		["frequency_penalty"] = 0.5,
 		["presence_penalty"] = 0.0
 	}
-	
+
 
 
 	local succ,response = pcall(function()
@@ -645,31 +645,31 @@ module.GetAIResponse = function(plr:Player,prompt:string)
 	end)
 
 	if succ then
-		
+
 		if response["Success"] then
 			local data = HTTP:JSONDecode(response["Body"])
-			
+
 			local aiResponse = data.choices[1].message.content
-			
+
 			if AI_Filter_Messages then
 				aiResponse = module.FilterMessage(plr,aiResponse,true)
 			end
-			
+
 			return aiResponse
 		end
 	end
-	
-	
+
+
 	return nil
 
-	
+
 end
 -----------------------------------------------------------------------------------
 
 module.FindTool = function(toolName:string,forcedLocation)
 	local toolObject,fullToolName = nil,nil
 	if toolName == nil or toolName == "" then return toolObject,fullToolName end
-	
+
 	if forcedLocation == nil then
 		for _,l in pairs(toolLocations) do
 			for _,t in pairs(l:GetDescendants()) do
@@ -687,14 +687,14 @@ module.FindTool = function(toolName:string,forcedLocation)
 			end
 		end
 	end
-	
+
 	return toolObject,fullToolName
 end
 
 module.FindTheme = function(themeID,themeName)
-	
+
 	local CThemeTable = SETTINGS.ClientThemes
-	
+
 	if CThemeTable == nil and SETTINGS.PanelSettings and SETTINGS.PanelSettings.ClientThemes then
 		CThemeTable = SETTINGS.PanelSettings.ClientThemes
 	end
@@ -708,7 +708,7 @@ module.FindTheme = function(themeID,themeName)
 			return themeInfo
 		end
 	end
-	
+
 	return nil
 end
 -----------------------------------------------------------------------------------
@@ -733,30 +733,30 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 			if notes == nil or notes == "" then
 				notes = "N/A"
 			end
-			
+
 			if evidence == nil or evidence == "" then
 				evidence = "N/A"
 			end
-			
+
 			target = tostring(target)
-			
+
 			local succ,uid = pcall(function()
 				return game.Players:GetUserIdFromNameAsync(target)
 			end)
 			if succ == false then return nil end
 			local targetUID = uid
-			
+
 			local succ2,targPlrObj = pcall(function()
 				return game.Players:GetPlayerByUserId(targetUID)
 			end)
-			
-			
+
+
 			if targetUID then
 				ticketCooldownTracker[plr.UserId] = true
 				task.delay(helpTicketSettings.Cooldown,function()
 					ticketCooldownTracker[plr.UserId] = false
 				end)
-				
+
 				if succ2 then
 					SSC_Event:Fire("CREATEHELPREQ",targPlrObj)
 				end
@@ -769,8 +769,8 @@ module.SubmitHelpTicket = function(plr:Player,target:string,reason:string,eviden
 					end
 				end)
 			end
-			
-			
+
+
 		end
 	end
 end
@@ -782,14 +782,14 @@ end
 module.GenerateRequest = function(actionName:string,parameters:table,functionThread)
 	if actionName and parameters and typeof(parameters) == 'table' then
 		local newReqID = ""
-		
+
 		while true do
 			task.wait(1)
 			newReqID = module.GenerateRequestID()
 			local idExists = SSC_Func:Invoke("CHECKIFREQIDEXISTS",newReqID)
 			if not idExists then break end
 		end
-		
+
 		local reqBody = {
 			["RequestID"] = newReqID;
 			["Parameters"] = parameters;
@@ -797,7 +797,7 @@ module.GenerateRequest = function(actionName:string,parameters:table,functionThr
 			["ActionID"] = actionName;
 		}
 		SSC_Event:Fire("createreq",reqBody)
-		
+
 	end
 end
 ----------------------------------------------------------------

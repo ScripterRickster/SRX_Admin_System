@@ -495,6 +495,10 @@ module.SetupPlayer = function(plr:Player)
 		end
 
 		loadPlayerSettings()
+		
+		task.defer(function()
+			PanelCSC_Event:FireClient(plr,"updatepanel")
+		end)
 
 
 
